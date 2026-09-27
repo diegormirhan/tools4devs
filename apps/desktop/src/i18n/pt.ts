@@ -29,8 +29,8 @@ export const portuguese: Record<string, string> = {
   "What do you want to do?": "O que você quer fazer?",
   "Pick a tool below. You can also drop a file onto this window, or choose one first.":
     "Escolha uma ferramenta abaixo. Você também pode arrastar um arquivo para esta janela, ou escolher um antes.",
-  "Open ToolHaven on Windows to pick local files.":
-    "Abra o ToolHaven no Windows para escolher arquivos locais.",
+  "Open tools4devs on Windows to pick local files.":
+    "Abra o tools4devs no Windows para escolher arquivos locais.",
   "Drop the file here": "Solte o arquivo aqui",
   "Drop a file, or choose one": "Arraste um arquivo, ou escolha um",
   "Now open a tool below": "Agora abra uma ferramenta abaixo",
@@ -795,8 +795,8 @@ export const portuguese: Record<string, string> = {
   "Not signed in": "Sem login",
   "Only the address you paste is sent; the picture is never uploaded by this app.": "Só o endereço que você colar é enviado; a imagem nunca é enviada por este app.",
   "Open": "Abrir",
-  "Open the ToolHaven app to listen. This page is the interface preview only.": "Abra o app ToolHaven para ouvir. Esta página é só a prévia da interface.",
-  "Open the ToolHaven app to search. This page is the interface preview only.": "Abra o app ToolHaven para buscar. Esta página é só a prévia da interface.",
+  "Open the tools4devs app to listen. This page is the interface preview only.": "Abra o app tools4devs para ouvir. Esta página é só a prévia da interface.",
+  "Open the tools4devs app to search. This page is the interface preview only.": "Abra o app tools4devs para buscar. Esta página é só a prévia da interface.",
   "Open {name}": "Abrir {name}",
   "Opened in your browser.": "Aberto no seu navegador.",
   "Opening preview…": "Abrindo a prévia…",
@@ -859,8 +859,8 @@ export const portuguese: Record<string, string> = {
   "Tile width": "Largura de cada quadro",
   "TinEye": "TinEye",
   "Title": "Título",
-  "ToolHaven downloads and installs everything below on its own — {size} in total. You never leave the app, and you never install anything by hand.": "O ToolHaven baixa e instala tudo abaixo sozinho — {size} no total. Você não sai do app, e não instala nada à mão.",
-  "ToolHaven downloads and installs everything below on its own. You never leave the app, and you never install anything by hand.": "O ToolHaven baixa e instala tudo abaixo sozinho. Você não sai do app, e não instala nada à mão.",
+  "tools4devs downloads and installs everything below on its own — {size} in total. You never leave the app, and you never install anything by hand.": "O tools4devs baixa e instala tudo abaixo sozinho — {size} no total. Você não sai do app, e não instala nada à mão.",
+  "tools4devs downloads and installs everything below on its own. You never leave the app, and you never install anything by hand.": "O tools4devs baixa e instala tudo abaixo sozinho. Você não sai do app, e não instala nada à mão.",
   "Top": "Topo",
   "Try again": "Tentar de novo",
   "Turn": "Girar",

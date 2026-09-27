@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Sets ToolHaven up from a clean checkout: prerequisites, dependencies, the pinned
+    Sets tools4devs up from a clean checkout: prerequisites, dependencies, the pinned
     tool artifacts, the checks, and the Windows installer.
 
 .DESCRIPTION
@@ -119,7 +119,7 @@ function Get-VisualStudioBuildTools {
 }
 
 Write-Host ''
-Write-Host '  ToolHaven setup' -ForegroundColor White
+Write-Host '  tools4devs setup' -ForegroundColor White
 Write-Host '  Windows x64 - local tools, no cloud, no AI' -ForegroundColor DarkGray
 
 # ---------------------------------------------------------------- prerequisites
@@ -221,7 +221,7 @@ Write-Info 'The first Rust build takes a few minutes; later ones are incremental
 Invoke-Step -Command 'npm run tauri:build' -Description 'Tauri build'
 
 $release = 'apps\desktop\src-tauri\target\release'
-$executable = Join-Path $release 'toolhaven.exe'
+$executable = Join-Path $release 'tools4devs.exe'
 $installers = Get-ChildItem (Join-Path $release 'bundle\nsis\*.exe'), (Join-Path $release 'bundle\msi\*.msi') -ErrorAction SilentlyContinue
 
 Write-Host ''
@@ -234,7 +234,7 @@ Write-Host ("     took {0:mm\:ss}" -f ((Get-Date) - $script:Started)) -Foregroun
 
 if ($Start) {
     Write-Host ''
-    Write-Host '  Opening ToolHaven' -ForegroundColor Cyan
+    Write-Host '  Opening tools4devs' -ForegroundColor Cyan
     Start-Process -FilePath (Resolve-Path $executable)
 }
 else {

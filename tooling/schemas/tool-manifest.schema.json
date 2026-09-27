@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.invalid/schemas/tool-manifest.schema.json",
-  "title": "ToolHaven tool manifest",
+  "title": "tools4devs tool manifest",
   "type": "object",
   "additionalProperties": false,
   "required": [

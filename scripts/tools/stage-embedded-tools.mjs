@@ -157,10 +157,10 @@ async function main() {
   await writeFile(
     noticesPath,
     [
-      "ToolHaven - third-party components shipped inside the installer",
+      "tools4devs - third-party components shipped inside the installer",
       "",
       "Each program below is distributed as a standalone executable and invoked by",
-      "ToolHaven as a separate process. None of them is linked into ToolHaven's code.",
+      "tools4devs as a separate process. None of them is linked into tools4devs's code.",
       "Every project's own terms keep applying to its executable.",
       "",
       ...inventory.flatMap((entry) => [
@@ -173,6 +173,9 @@ async function main() {
       ]),
     ].join("\n"),
   );
+
+  await copyFile(noticesPath, path.join(stageDirectory, "THIRD-PARTY-NOTICES.txt"));
+  await copyFile(inventoryPath, path.join(stageDirectory, "inventory.json"));
 
   process.stdout.write(`
 ${inventory.length} executables staged in resources/tools.

@@ -77,7 +77,7 @@ export function minifyHtml(text: string): string {
     /<(pre|script|style|textarea)([^>]*)>([\s\S]*?)<\/\1>/gi,
     (whole) => {
       protectedBlocks.push(whole);
-      return `<!--toolhaven:${protectedBlocks.length - 1}-->`;
+      return `<!--tools4devs:${protectedBlocks.length - 1}-->`;
     },
   );
   result = result
@@ -91,7 +91,7 @@ export function minifyHtml(text: string): string {
     .replace(/\s+</g, "<")
     .trim();
   result = result.replace(
-    /<!--toolhaven:(\d+)-->/g,
+    /<!--tools4devs:(\d+)-->/g,
     (_, index: string) => protectedBlocks[Number(index)]!,
   );
   return result;

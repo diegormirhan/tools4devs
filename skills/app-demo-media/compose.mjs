@@ -108,7 +108,7 @@ mkdirSync(layer, { recursive: true });
 copyFileSync(path.join(here, "overlay.html"), path.join(layer, "overlay.html"));
 copyFileSync(path.join(out, "cover.png"), path.join(layer, "cover.png"));
 const landing = path.resolve(here, "../../../toolhaven-desktop-landing/assets");
-for (const file of ["fonts/inter-tight-400.woff2", "fonts/inter-tight-500.woff2", "fonts/inter-tight-600.woff2", "toolhaven-mark.svg"]) {
+for (const file of ["fonts/inter-tight-400.woff2", "fonts/inter-tight-500.woff2", "fonts/inter-tight-600.woff2", "tools4devs-mark.svg", "wordmark-dark.svg"]) {
   if (existsSync(path.join(landing, file))) copyFileSync(path.join(landing, file), path.join(layer, path.basename(file)));
 }
 // Each render gets its own profile: calls that share one are handed to the

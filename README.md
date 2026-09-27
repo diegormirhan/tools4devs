@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="apps/desktop/src-tauri/icons/128x128.png" alt="" width="96" height="96">
+<img src="apps/desktop/src-tauri/icons/tools4devs.svg" alt="" width="96" height="96">
 
-# ToolHaven
+# tools4devs
 
 [![Release](https://img.shields.io/github/v/tag/diegormirhan/toolhaven-desktop?label=release&color=88afff)](https://github.com/diegormirhan/toolhaven-desktop/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -14,9 +14,9 @@
 
 </div>
 
-![The ToolHaven catalog in its dark theme](docs/screenshots/catalog-dark.png)
+![The tools4devs catalog in its dark theme](docs/screenshots/catalog-dark.png)
 
-ToolHaven puts twenty-five open-source tools (FFmpeg, yt-dlp, qpdf, ImageMagick, Tesseract and others) in one window with one queue. Nine of them ship inside the installer. The app downloads, verifies and installs the rest on its own, and shows the download size before it starts.
+tools4devs puts twenty-five open-source tools (FFmpeg, yt-dlp, qpdf, ImageMagick, Tesseract and others) in one window with one queue. Nine of them ship inside the installer. The app downloads, verifies and installs the rest on its own, and shows the download size before it starts.
 
 It also has about ninety small tools built in: text, hashes, dates, calculators, colours, CSS generators, QR codes, test data and chat or post mockups. These run inside the app and need nothing installed.
 
@@ -39,9 +39,9 @@ Download the installer from the [latest release](https://github.com/diegormirhan
 
 | File | What it is |
 | --- | --- |
-| `ToolHaven_<version>_x64-setup.exe` | Installer (recommended) |
-| `ToolHaven_<version>_x64_en-US.msi` | MSI, for managed deployment |
-| `ToolHaven_<version>_x64-portable.zip` | Portable, unzip and run |
+| `tools4devs_<version>_x64-setup.exe` | Installer (recommended) |
+| `tools4devs_<version>_x64_en-US.msi` | MSI, for managed deployment |
+| `tools4devs_<version>_x64-portable.zip` | Portable, unzip and run |
 
 > [!NOTE]
 > The installer isn't code-signed yet, so SmartScreen shows a warning the first time you run it. Each release includes SHA-256 checksums. The portable build doesn't update itself.
@@ -113,6 +113,21 @@ Before a release, check that every pinned download still installs and runs (abou
 
 ```bash
 cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib -- --ignored --nocapture installs_and_runs_every_tool
+```
+
+## Upgrade compatibility
+
+The 3.4.0 release uses tools4devs for the executable, installers and release artifacts. It publishes tools4devs.json together with an identical latest.json for existing updaters. Internal installer identities, preference keys and component paths retain their legacy values to preserve existing installations and data. See [the Windows upgrade contract](apps/desktop/src-tauri/installer/README.md) before changing them.
+
+## Screenshots
+
+The README uses lossless PNG captures at 3840 × 2580 pixels, rendered at 3x rather than enlarged from older images. The landing page serves lossless WebP versions, including the original resolution and responsive sizes.
+
+With the development server running:
+
+```bash
+npm run screenshots
+npm run screenshots -- --lang pt
 ```
 
 ## Languages

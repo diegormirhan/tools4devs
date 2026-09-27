@@ -5,7 +5,7 @@
 <!-- The programmatic layer of the demo video: an intro card, a caption, and an
      outro card, picked by the query string. compose.mjs screenshots each one at
      1920x1080 (captions on a transparent background) and animates them in
-     ffmpeg. Expects beside it: cover.png, toolhaven-mark.svg and the Inter
+     ffmpeg. Expects beside it: cover.png, tools4devs-mark.svg, wordmark-dark.svg and the Inter
      Tight fonts, which compose.mjs copies in. -->
 <style>
   @font-face { font-family: "Inter Tight"; font-weight: 400; src: url("inter-tight-400.woff2") format("woff2"); }
@@ -29,7 +29,8 @@
     mask-image: linear-gradient(90deg, #000 0%, transparent 60%);
   }
   .brand { display: flex; align-items: center; gap: 20px; font-size: 44px; font-weight: 600; letter-spacing: -.02em; }
-  .brand img { width: 72px; height: 72px; border-radius: 16px; background: #111820; padding: 8px; border: 1px solid rgba(255,255,255,.12); }
+  .brand__mark { width: 72px; height: 72px; }
+  .brand__wordmark { width: 260px; height: auto; }
   .accent { color: #5bc0eb; }
 
   /* Intro: the cover's composition, without the play button. */
@@ -65,7 +66,7 @@
   <section class="card intro" data-mode="intro">
     <img class="shot" src="cover.png" alt="">
     <div class="copy">
-      <div class="brand"><img src="toolhaven-mark.svg" alt="">ToolHaven</div>
+      <div class="brand"><img class="brand__mark" src="tools4devs-mark.svg" alt=""><img class="brand__wordmark" src="wordmark-dark.svg" alt="tools4devs"></div>
       <h1>Mais de 100 ferramentas.<br><span class="accent">Zero linha de comando.</span></h1>
     </div>
   </section>
@@ -73,7 +74,7 @@
   <section class="caption" data-mode="caption"><p id="caption"></p></section>
 
   <section class="card outro" data-mode="outro">
-    <div class="brand"><img src="toolhaven-mark.svg" alt="">ToolHaven</div>
+    <div class="brand"><img class="brand__mark" src="tools4devs-mark.svg" alt=""><img class="brand__wordmark" src="wordmark-dark.svg" alt="tools4devs"></div>
     <h2>Grátis e open source<br><span class="accent">para Windows.</span></h2>
     <p class="sub">Tudo roda no seu computador. Sem conta, sem nuvem.</p>
     <p class="link">github.com/diegormirhan/toolhaven-desktop</p>

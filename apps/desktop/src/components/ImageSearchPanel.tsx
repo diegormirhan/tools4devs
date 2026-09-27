@@ -101,7 +101,7 @@ export function ImageSearchPanel({
   function search() {
     if (!canSearch || busy) return;
     if (!isNativeHost()) {
-      setError(t("Open the ToolHaven app to search. This page is the interface preview only."));
+      setError(t("Open the tools4devs app to search. This page is the interface preview only."));
       return;
     }
     setBusy(true);

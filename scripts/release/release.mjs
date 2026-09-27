@@ -45,7 +45,7 @@ replaceIn("package.json", jsonVersion, (_, a, b) => `${a}${version}${b}`);
 replaceIn("package-lock.json", jsonVersion, (_, a, b) => `${a}${version}${b}`, 2);
 replaceIn("apps/desktop/src-tauri/tauri.conf.json", jsonVersion, (_, a, b) => `${a}${version}${b}`);
 replaceIn("apps/desktop/src-tauri/Cargo.toml", /^(version = ")[^"]+(")/m, (_, a, b) => `${a}${version}${b}`);
-replaceIn("apps/desktop/src-tauri/Cargo.lock", /(name = "toolhaven"\r?\nversion = ")[^"]+(")/, (_, a, b) => `${a}${version}${b}`);
+replaceIn("apps/desktop/src-tauri/Cargo.lock", /(name = "tools4devs"\r?\nversion = ")[^"]+(")/, (_, a, b) => `${a}${version}${b}`);
 
 // ── 2. Changelog ────────────────────────────────────────────────────────
 step("Changelog");
@@ -98,9 +98,9 @@ step(`Staging Releases/${version}`);
 const out = at("Releases", version);
 mkdirSync(out, { recursive: true });
 const target = at("apps/desktop/src-tauri/target/release");
-const setup = `ToolHaven_${version}_x64-setup.exe`;
-const msi = `ToolHaven_${version}_x64_en-US.msi`;
-const portable = `ToolHaven_${version}_x64-portable.zip`;
+const setup = `tools4devs_${version}_x64-setup.exe`;
+const msi = `tools4devs_${version}_x64_en-US.msi`;
+const portable = `tools4devs_${version}_x64-portable.zip`;
 for (const file of [setup, `${setup}.sig`]) copyFileSync(path.join(target, "bundle/nsis", file), path.join(out, file));
 for (const file of [msi, `${msi}.sig`]) copyFileSync(path.join(target, "bundle/msi", file), path.join(out, file));
 
@@ -108,11 +108,11 @@ for (const file of [msi, `${msi}.sig`]) copyFileSync(path.join(target, "bundle/m
 const staging = at("tmp", "portable");
 rmSync(staging, { recursive: true, force: true });
 mkdirSync(path.join(staging, "tools"), { recursive: true });
-copyFileSync(path.join(target, "toolhaven.exe"), path.join(staging, "toolhaven.exe"));
+copyFileSync(path.join(target, "tools4devs.exe"), path.join(staging, "tools4devs.exe"));
 copyFileSync(at("LICENSE"), path.join(staging, "LICENSE"));
 execFileSync("powershell.exe", [
   "-NoProfile", "-Command",
-  `Copy-Item '${at("apps/desktop/src-tauri/resources/tools")}\\*.exe' '${path.join(staging, "tools")}'; ` +
+  `Copy-Item '${at("apps/desktop/src-tauri/resources/tools")}\\*' '${path.join(staging, "tools")}'; ` +
     `Compress-Archive -Path '${staging}\\*' -DestinationPath '${path.join(out, portable)}' -Force`,
 ], { stdio: "inherit" });
 rmSync(staging, { recursive: true, force: true });
@@ -126,7 +126,7 @@ run(`node scripts/release/build-update-manifest.mjs "${out}"`);
 
 writeFileSync(
   path.join(out, "RELEASE-NOTES.md"),
-  `# ToolHaven ${version}
+  `# tools4devs ${version}
 
 ${notes}
 
@@ -137,11 +137,11 @@ ${notes}
 | \`${setup}\` | Installer (recommended) |
 | \`${msi}\` | MSI, for managed deployment |
 | \`${portable}\` | Portable, unzip and run |
-| \`latest.json\`, \`*.sig\` | Needed for automatic updates |
+| \`tools4devs.json\`, \`latest.json\`, \`*.sig\` | Needed for automatic updates |
 
 Windows x64 only. SHA-256 checksums are in \`checksums.txt\`. The portable build doesn't update itself. SmartScreen warns on first run because the installer isn't code-signed.
 
-If you're on 2.1.0 or later, just open the app and it will update itself.
+If you are on ToolHaven 2.1.0 or later, open the app and use the Restart button after the signed update has downloaded. The update keeps your preferences, history and installed tools.
 `,
 );
 

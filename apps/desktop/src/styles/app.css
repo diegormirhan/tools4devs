@@ -37,12 +37,6 @@
   --shadow-overlay: 0 30px 80px rgba(0, 0, 0, 0.48);
   --shadow-surface: 0 18px 50px rgba(0, 0, 0, 0.22);
 
-  /* Brand marks match the installed icon and never follow the theme. */
-  --brand-ground: #15171c;
-  --brand-edge: #303643;
-  --brand-arch: #88afff;
-  --brand-base: #d8a64f;
-
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   /* Spacing. Everything that separates things quotes one of these, so a
      change to the rhythm is one edit rather than a search for numbers. */
@@ -167,10 +161,10 @@ code { font-family: ui-monospace, "Cascadia Mono", monospace; }
   backdrop-filter: blur(22px) saturate(130%);
 }
 .app-mark { display: flex; align-items: center; gap: 11px; min-height: 48px; padding: 0 8px 18px; }
-.app-mark__symbol { display: grid; place-items: center; width: 34px; height: 34px; background: var(--brand-ground); border: 1px solid var(--brand-edge); border-radius: 10px; }
-.app-mark__logo { width: 25px; height: 25px; }
+.app-mark__symbol { display: grid; place-items: center; flex-shrink: 0; width: 48px; height: 48px; }
+.app-mark__logo { width: 48px; height: 48px; }
+.app-mark__wordmark { width: 118px; height: 27px; object-fit: contain; }
 .app-mark span:last-child, .sidebar__status span:last-child { display: flex; flex-direction: column; gap: 1px; }
-.app-mark strong { font-size: 0.94rem; letter-spacing: -0.015em; }
 .app-mark small, .sidebar__status small { color: var(--text-quiet); font-size: 0.68rem; }
 .sidebar nav { display: grid; gap: 4px; }
 .nav-item {

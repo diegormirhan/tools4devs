@@ -1,6 +1,6 @@
 ---
 name: app-demo-media
-description: Record a short product demo video of the ToolHaven app (headless, smooth 60 fps cursor, intro and outro cards, a caption per chapter, transitions) and render a matching cover thumbnail, for LinkedIn or a release post. Use when asked for a demo video, a screen recording, a walkthrough clip, or a video cover/thumbnail of the app.
+description: Record a short product demo video of the tools4devs app (headless, smooth 60 fps cursor, intro and outro cards, a caption per chapter, transitions) and render a matching cover thumbnail, for LinkedIn or a release post. Use when asked for a demo video, a screen recording, a walkthrough clip, or a video cover/thumbnail of the app.
 ---
 
 # App demo video and cover
@@ -31,7 +31,7 @@ The finished video runs:
 
 All commands run from the repo root. Chrome and ffmpeg must be installed. On this machine ffmpeg is not on PATH, so point the `FFMPEG` variable at it.
 
-1. **Start the web front.** Use the `toolhaven-web` config in `.claude/launch.json`, which runs vite on 5180 with `--strictPort`.
+1. **Start the web front.** Use the `tools4devs-web` config in `.claude/launch.json`, which runs vite on 5180 with `--strictPort`.
 
 2. **Record** into an output folder:
 
@@ -65,10 +65,10 @@ All commands run from the repo root. Chrome and ffmpeg must be installed. On thi
 
    ```bash
    cp skills/app-demo-media/thumb.html demo-out/
-   cp "../toolhaven-desktop-landing/assets/fonts/"inter-tight-*.woff2 "../toolhaven-desktop-landing/assets/toolhaven-mark.svg" demo-out/
+   cp "../toolhaven-desktop-landing/assets/fonts/"inter-tight-*.woff2 "../toolhaven-desktop-landing/assets/tools4devs-mark.svg" "../toolhaven-desktop-landing/assets/wordmark-dark.svg" demo-out/
    chrome --headless=new --disable-gpu --hide-scrollbars --allow-file-access-from-files \
      --force-device-scale-factor=1 --window-size=1920,1080 --virtual-time-budget=3000 \
-     --screenshot="$(pwd)/demo-out/toolhaven-thumb.png" "file:///$(pwd)/demo-out/thumb.html"
+     --screenshot="$(pwd)/demo-out/tools4devs-thumb.png" "file:///$(pwd)/demo-out/thumb.html"
    ```
 
 ## Writing a scenario

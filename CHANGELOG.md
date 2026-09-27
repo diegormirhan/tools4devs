@@ -1,6 +1,20 @@
 # Changelog
 
-All notable changes to ToolHaven. Versions follow [semantic versioning](https://semver.org/).
+All notable changes to tools4devs. Versions follow [semantic versioning](https://semver.org/).
+
+## 3.4.0 (2026-09-27)
+
+### Changed
+
+- Rename ToolHaven to tools4devs across the app, installer, documentation and website, while retaining the original app icon.
+- Add a scalable wordmark for light and dark themes and refresh the Windows and website branding.
+- Regenerate all six screenshots at 3840 × 2580 pixels. The website serves lossless WebP with responsive sizes and the full-resolution source.
+
+### Fixed
+
+- Preserve the original updater signing key, endpoint, manifest format and Windows installer identities across the rename, so existing ToolHaven installations can upgrade in place.
+- Keep existing language, theme, job history, settings and downloaded components when upgrading.
+- Include third-party licence, source, version and hash notices in the installed and portable tools folders.
 
 ## 3.3.0 (2026-09-23)
 

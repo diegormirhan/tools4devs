@@ -1,5 +1,5 @@
 //! Component store: downloads, verifies, extracts and activates the tools that do not
-//! ship inside the installer. The user never leaves ToolHaven to install anything.
+//! ship inside the installer. The user never leaves tools4devs to install anything.
 //!
 //! Everything here is keyed by the artifact's SHA-256, so two tools that share an
 //! archive — ffmpeg and ffprobe come from the same build — are installed once.
@@ -93,6 +93,7 @@ pub fn tool(tool_id: &str) -> Option<&'static ManifestTool> {
 
 /// Where installed components live. Under the user's local app data, never in Program
 /// Files, so installing a component never needs elevation.
+// Keep the legacy directory so upgrades reuse verified, already installed tools.
 fn store_root() -> Result<PathBuf, String> {
     let base =
         std::env::var_os("LOCALAPPDATA").ok_or("Could not locate the application data folder.")?;
@@ -609,6 +610,12 @@ fn extract_zip(bytes: &[u8], destination: &Path) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn rename_preserves_the_existing_component_store() {
+        let base = std::env::var_os("LOCALAPPDATA").unwrap();
+        assert_eq!(super::store_root().unwrap(), std::path::PathBuf::from(base).join("ToolHaven").join("components"));
+    }
+
     use super::*;
 
     #[test]
@@ -684,7 +691,7 @@ mod tests {
     #[test]
     #[ignore = "downloads every component from the internet"]
     fn installs_and_runs_every_tool() {
-        let store = std::env::temp_dir().join("toolhaven-fresh-machine");
+        let store = std::env::temp_dir().join("tools4devs-fresh-machine");
         let _ = std::fs::remove_dir_all(&store);
         std::fs::create_dir_all(&store).unwrap();
         std::env::set_var("LOCALAPPDATA", &store);
@@ -743,16 +750,16 @@ mod tests {
     /// which is what this proves is fixed. It writes 114 MB and takes a few
     /// seconds; it is ignored because it needs a real installer on disk.
     ///
-    /// `TOOLHAVEN_INSTALLER=C:\path\to\setup.exe cargo test -- --ignored --nocapture runs_an_installer_without_elevation`
+    /// `TOOLS4DEVS_INSTALLER=C:\path\to\setup.exe cargo test -- --ignored --nocapture runs_an_installer_without_elevation`
     #[test]
-    #[ignore = "runs the installer named by TOOLHAVEN_INSTALLER"]
+    #[ignore = "runs the installer named by TOOLS4DEVS_INSTALLER"]
     fn runs_an_installer_without_elevation() {
-        let Some(source) = std::env::var_os("TOOLHAVEN_INSTALLER") else {
-            println!("set TOOLHAVEN_INSTALLER to an installer path");
+        let Some(source) = std::env::var_os("TOOLS4DEVS_INSTALLER") else {
+            println!("set TOOLS4DEVS_INSTALLER to an installer path");
             return;
         };
         let bytes = std::fs::read(&source).expect("the installer should be readable");
-        let staging = std::env::temp_dir().join("toolhaven-install-test");
+        let staging = std::env::temp_dir().join("tools4devs-install-test");
         let _ = std::fs::remove_dir_all(&staging);
         std::fs::create_dir_all(&staging).expect("the staging directory should be creatable");
 
@@ -778,16 +785,16 @@ mod tests {
     /// and `rename` when pinning a new tool. Uses the installer's own extractor,
     /// so what it prints is what the app would see.
     ///
-    /// `TOOLHAVEN_PROBE=C:\path\to\archive.7z cargo test -- --ignored --nocapture probes_an_archive`
+    /// `TOOLS4DEVS_PROBE=C:\path\to\archive.7z cargo test -- --ignored --nocapture probes_an_archive`
     #[test]
-    #[ignore = "reads an archive named by TOOLHAVEN_PROBE"]
+    #[ignore = "reads an archive named by TOOLS4DEVS_PROBE"]
     fn probes_an_archive() {
-        let Some(source) = std::env::var_os("TOOLHAVEN_PROBE") else {
-            println!("set TOOLHAVEN_PROBE to an archive path");
+        let Some(source) = std::env::var_os("TOOLS4DEVS_PROBE") else {
+            println!("set TOOLS4DEVS_PROBE to an archive path");
             return;
         };
         let bytes = std::fs::read(&source).expect("the archive should be readable");
-        let destination = std::env::temp_dir().join("toolhaven-probe");
+        let destination = std::env::temp_dir().join("tools4devs-probe");
         let _ = std::fs::remove_dir_all(&destination);
         let offset = seven_zip_offset(&bytes).unwrap_or(0);
         sevenz_rust2::decompress(std::io::Cursor::new(&bytes[offset..]), &destination)

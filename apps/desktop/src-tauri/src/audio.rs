@@ -504,7 +504,7 @@ mod tests {
 
     #[test]
     fn writes_a_wav_a_reader_can_open_again() {
-        let directory = std::env::temp_dir().join("toolhaven-audio-test");
+        let directory = std::env::temp_dir().join("tools4devs-audio-test");
         let _ = std::fs::create_dir_all(&directory);
         let path = directory.join("clip.wav");
         let samples: Vec<f32> = (0..SAMPLE_RATE * CHANNELS)
@@ -584,7 +584,7 @@ mod tests {
 
         // A moment for the render stream to actually start before recording.
         std::thread::sleep(std::time::Duration::from_millis(400));
-        let path = std::env::temp_dir().join("toolhaven-loopback-test.wav");
+        let path = std::env::temp_dir().join("tools4devs-loopback-test.wav");
         let reports = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
         let loudest = std::sync::Arc::new(std::sync::Mutex::new(0.0_f32));
         let counted = reports.clone();
@@ -643,13 +643,13 @@ mod tests {
     /// Plays a WAV into one device, for measuring how long a match takes
     /// without anything being audible in the room.
     ///
-    /// `TOOLHAVEN_PLAY=C:\clip.wav cargo test -- --ignored --nocapture plays_a_file_into_a_device`
+    /// `TOOLS4DEVS_PLAY=C:\clip.wav cargo test -- --ignored --nocapture plays_a_file_into_a_device`
     #[test]
-    #[ignore = "plays a file named by TOOLHAVEN_PLAY"]
+    #[ignore = "plays a file named by TOOLS4DEVS_PLAY"]
     #[cfg(windows)]
     fn plays_a_file_into_a_device() {
-        let Some(path) = std::env::var_os("TOOLHAVEN_PLAY") else {
-            println!("set TOOLHAVEN_PLAY to a wav");
+        let Some(path) = std::env::var_os("TOOLS4DEVS_PLAY") else {
+            println!("set TOOLS4DEVS_PLAY to a wav");
             return;
         };
         let mut reader = hound::WavReader::open(&path).expect("a readable wav");
@@ -814,7 +814,7 @@ mod tests {
 
     #[test]
     fn refuses_a_clip_with_nothing_in_it() {
-        let path = std::env::temp_dir().join("toolhaven-silent-test.wav");
+        let path = std::env::temp_dir().join("tools4devs-silent-test.wav");
         // Silence and an empty recording are the same problem to whoever has
         // to fix it, so they get the same sentence.
         assert_eq!(write_clip(&[], 44100, 2, &path).unwrap_err(), NOTHING_HEARD);
@@ -828,7 +828,7 @@ mod tests {
 
     #[test]
     fn clips_rather_than_wrapping_a_sample_above_full_scale() {
-        let directory = std::env::temp_dir().join("toolhaven-audio-test");
+        let directory = std::env::temp_dir().join("tools4devs-audio-test");
         let _ = std::fs::create_dir_all(&directory);
         let path = directory.join("hot.wav");
         write_wav_at(&[2.0, -2.0], SAMPLE_RATE as u32, CHANNELS as u16, &path).expect("the clip should be written");

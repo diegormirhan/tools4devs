@@ -131,7 +131,7 @@ fn boundary() -> String {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|elapsed| elapsed.subsec_nanos())
         .unwrap_or(0);
-    format!("----ToolHavenBoundary{nanos:08x}{:08x}", std::process::id())
+    format!("----tools4devsBoundary{nanos:08x}{:08x}", std::process::id())
 }
 
 /// Uploads a local picture to Google Lens and returns where to read the results.

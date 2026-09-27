@@ -120,11 +120,11 @@ it('selects a directory for project searches', async () => {
   await userEvent.click(screen.getByRole('button', { name: /choose the project folder/i }));
   expect(open).toHaveBeenCalledWith({ directory: true, multiple: false });
 
-  await userEvent.type(screen.getByLabelText('Text or regex'), 'ToolHaven');
+  await userEvent.type(screen.getByLabelText('Text or regex'), 'tools4devs');
   await userEvent.click(screen.getByRole('button', { name: 'Run' }));
 
   expect(onRun).toHaveBeenCalledWith(expect.objectContaining({
-    request: expect.objectContaining({ inputPaths: ['C:\\fixtures'], options: { query: 'ToolHaven' } }),
+    request: expect.objectContaining({ inputPaths: ['C:\\fixtures'], options: { query: 'tools4devs' } }),
   }));
 });
 

@@ -1,6 +1,6 @@
 {
-  "name": "toolhaven-desktop",
-  "version": "3.3.0",
+  "name": "tools4devs-desktop",
+  "version": "3.4.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -12,7 +12,7 @@
     "preview": "vite preview --config apps/desktop/vite.config.ts",
     "test": "npm run test:domain && npm run test:ui",
     "test:domain": "node --test \"tests/**/*.test.mjs\"",
-    "test:ui": "vitest run --config apps/desktop/vitest.config.ts",
+    "test:ui": "vitest run --config apps/desktop/vitest.config.ts --maxWorkers 2",
     "test:coverage": "node --test --experimental-test-coverage \"tests/**/*.test.mjs\"",
     "validate:tools": "node scripts/tool-manifest/validate-file.mjs tooling/tools.json",
     "audit:capabilities": "node scripts/tool-manifest/audit-capabilities.mjs",

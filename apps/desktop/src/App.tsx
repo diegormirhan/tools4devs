@@ -44,22 +44,6 @@ import "./styles/app.css";
 
 type NavigationId = "catalog" | "queue" | "history" | "settings";
 
-/** Same geometry as the installed app icon, so the sidebar and the taskbar agree. */
-function ToolHavenMark() {
-  return (
-    <svg className="app-mark__logo" viewBox="0 0 64 64" role="img" aria-label="ToolHaven">
-      <path
-        d="M20 43 L20 26 A12 12 0 0 1 44 26 L44 43"
-        fill="none"
-        stroke="var(--brand-arch)"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="5.25"
-      />
-      <path d="M15.6 49.5 H48.4" fill="none" stroke="var(--brand-base)" strokeLinecap="round" strokeWidth="2.75" />
-    </svg>
-  );
-}
 
 const navigationItems: Array<{ id: NavigationId; label: string; icon: typeof Grid2X2 }> = [
   { id: "catalog", label: "Tools", icon: Grid2X2 },
@@ -241,10 +225,10 @@ function Shell() {
       <aside className="sidebar" aria-hidden={sidebarCollapsed ? undefined : undefined}>
         <div className="app-mark">
           <span className="app-mark__symbol" aria-hidden="true">
-            <ToolHavenMark />
+            <img className="app-mark__logo" src="/brand/tools4devs-mark.svg" alt="" width="48" height="48" />
           </span>
           <span>
-            <strong>ToolHaven</strong>
+            <img className="app-mark__wordmark" src={`/brand/wordmark-${theme.resolvedTheme}.svg`} alt="tools4devs" width="118" height="27" />
             <small>{t("Local tools")}</small>
           </span>
         </div>
@@ -341,7 +325,7 @@ function Shell() {
                 data-dragging={fileDrop.isDraggingOver ? "true" : undefined}
                 onClick={async () => {
                   if (!isNativeHost()) {
-                    setFileMessage(t("Open ToolHaven on Windows to pick local files."));
+                    setFileMessage(t("Open tools4devs on Windows to pick local files."));
                     return;
                   }
                   try {
@@ -770,7 +754,7 @@ function SettingsView({
           {answer && <p>{answer}</p>}
         </div>
         <div className="settings-card__control">
-          <span className="settings-card__path">{version ? `ToolHaven ${version}` : "—"}</span>
+          <span className="settings-card__path">{version ? `tools4devs ${version}` : "—"}</span>
           <button
             className="button button--light"
             type="button"

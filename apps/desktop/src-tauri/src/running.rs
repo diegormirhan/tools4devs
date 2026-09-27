@@ -6,7 +6,7 @@
 //! writing to the file nobody is waiting for any more.
 //!
 //! The same object is what makes the app's children die with the app. The job
-//! is created with `KILL_ON_JOB_CLOSE`, so a ToolHaven that crashes does not
+//! is created with `KILL_ON_JOB_CLOSE`, so a tools4devs that crashes does not
 //! leave a transcode running until the machine is restarted.
 
 use std::collections::HashMap;

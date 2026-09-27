@@ -98,7 +98,7 @@ fn create_pdf(path: &Path) {
 #[ignore = "Runs the catalog against the real Windows CLIs; skips tools that are not installed"]
 fn every_catalog_operation_executes_on_generated_fixtures() {
     let root = std::env::temp_dir().join(format!(
-        "toolhaven-smoke-{}",
+        "tools4devs-smoke-{}",
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
@@ -107,13 +107,13 @@ fn every_catalog_operation_executes_on_generated_fixtures() {
     std::fs::create_dir(&root).unwrap();
     println!("Fixtures: {}", root.display());
     let json = root.join("sample.json");
-    std::fs::write(&json, r#"{"name":"ToolHaven","count":2}"#).unwrap();
+    std::fs::write(&json, r#"{"name":"tools4devs","count":2}"#).unwrap();
     let yaml = root.join("sample.yaml");
-    std::fs::write(&yaml, "name: ToolHaven\ncount: 2\n").unwrap();
+    std::fs::write(&yaml, "name: tools4devs\ncount: 2\n").unwrap();
     for (tool, input) in [("jq", json.clone()), ("yq", yaml)] {
         assert!(run(request(tool, "format", &[input.clone()], None, &[]))
             .stdout
-            .contains("ToolHaven"));
+            .contains("tools4devs"));
         assert!(
             run(request(
                 tool,
@@ -132,7 +132,7 @@ fn every_catalog_operation_executes_on_generated_fixtures() {
         "search",
         &[root.clone()],
         None,
-        &[("query", "ToolHaven")]
+        &[("query", "tools4devs")]
     ))
     .stdout
     .contains("sample.json"));
@@ -187,7 +187,7 @@ fn every_catalog_operation_executes_on_generated_fixtures() {
     ));
     assert!(overwrite.unwrap_err().contains("already exists"));
     let markdown = root.join("sample.md");
-    std::fs::write(&markdown, "# ToolHaven\n\nFixture document.\n").unwrap();
+    std::fs::write(&markdown, "# tools4devs\n\nFixture document.\n").unwrap();
     let html = root.join("sample.html");
     run(request(
         "pandoc",
@@ -340,11 +340,11 @@ fn every_catalog_operation_executes_on_generated_fixtures() {
             "set-title",
             &[photo],
             Some(titled.clone()),
-            &[("title", "Fixture ToolHaven")],
+            &[("title", "Fixture tools4devs")],
         ));
         assert!(
             cli("exiftool.exe", &["-s3", "-Title", titled.to_str().unwrap()])
-                .contains("Fixture ToolHaven")
+                .contains("Fixture tools4devs")
         );
         println!("PASS exiftool/inspect + strip + set-title");
     } else {
@@ -461,13 +461,13 @@ fn every_catalog_operation_executes_on_generated_fixtures() {
         std::fs::write(
             &csv,
             "name,count
-ToolHaven,2
+tools4devs,2
 Fixture,5
 ",
         )
         .unwrap();
         let as_json = run(request("miller", "to-json", &[csv.clone()], None, &[])).stdout;
-        assert!(as_json.contains("\"name\": \"ToolHaven\""), "{as_json}");
+        assert!(as_json.contains("\"name\": \"tools4devs\""), "{as_json}");
         let json = root.join("table.json");
         std::fs::write(&json, &as_json).unwrap();
         assert!(run(request("miller", "to-csv", &[json], None, &[]))

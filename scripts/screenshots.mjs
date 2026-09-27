@@ -23,10 +23,10 @@ const url = args.find((arg) => arg.startsWith("http")) ?? "http://127.0.0.1:5173
 const outputDirectory = fileURLToPath(
   new URL(language === "en" ? "../docs/screenshots/" : `../docs/screenshots/${language}/`, import.meta.url),
 );
-const profileDirectory = path.join(os.tmpdir(), `toolhaven-shots-${process.pid}`);
+const profileDirectory = path.join(os.tmpdir(), `tools4devs-shots-${process.pid}`);
 const port = 9333;
 
-const viewport = { width: 1280, height: 860, deviceScaleFactor: 2 };
+const viewport = { width: 1280, height: 860, deviceScaleFactor: 3 };
 const shots = [
   { file: "catalog-dark.png", theme: "dark" },
   { file: "catalog-light.png", theme: "light" },
@@ -140,6 +140,8 @@ async function main() {
       await client.send("Page.navigate", { url }, sessionId);
       // Vite serves instantly; the wait is for fonts and the entry animations to settle.
       await new Promise((resolve) => setTimeout(resolve, 2500));
+
+      await client.send("Runtime.evaluate", { expression: "document.fonts.ready", awaitPromise: true }, sessionId);
 
       if (shot.prepare) {
         await client.send("Runtime.evaluate", { expression: shot.prepare }, sessionId);

@@ -309,7 +309,7 @@ fn recognize_music_inner(
     if device.is_empty() {
         return Err("Choose what to listen to first.".into());
     }
-    let workspace = std::env::temp_dir().join("toolhaven-recognise");
+    let workspace = std::env::temp_dir().join("tools4devs-recognise");
     std::fs::create_dir_all(&workspace)
         .map_err(|error| format!("Could not make room for the clip: {error}"))?;
     let clip = workspace.join(format!(
@@ -1246,7 +1246,7 @@ fn ffmpeg_base(input: &str) -> Vec<String> {
     ]
 }
 
-/// Video encoding for the build ToolHaven actually ships.
+/// Video encoding for the build tools4devs actually ships.
 ///
 /// That build is BtbN's **LGPL** FFmpeg, which carries no libx264 and no
 /// libx265 — both are GPL. It does carry Cisco's `libopenh264`, so real H.264
@@ -2188,7 +2188,7 @@ mod tests {
 
     #[test]
     fn a_gallery_may_reuse_a_folder_that_an_archive_may_not() {
-        let folder = std::env::temp_dir().join("toolhaven-gallery-target");
+        let folder = std::env::temp_dir().join("tools4devs-gallery-target");
         std::fs::create_dir_all(&folder).unwrap();
         std::fs::write(folder.join("existing.jpg"), b"x").unwrap();
         let path = folder.to_string_lossy().to_string();
@@ -2241,7 +2241,7 @@ mod tests {
 
     #[test]
     fn a_cookie_file_is_passed_through_and_checked_for_existence() {
-        let file = std::env::temp_dir().join("toolhaven-cookies-test.txt");
+        let file = std::env::temp_dir().join("tools4devs-cookies-test.txt");
         std::fs::write(
             &file,
             "# Netscape HTTP Cookie File
@@ -2455,7 +2455,7 @@ mod tests {
             input_paths: vec![std::env::temp_dir().to_string_lossy().into_owned()],
             output_path: Some(
                 std::env::temp_dir()
-                    .join("toolhaven-invalid-upscale.png")
+                    .join("tools4devs-invalid-upscale.png")
                     .to_string_lossy()
                     .into_owned(),
             ),
@@ -2482,7 +2482,7 @@ mod tests {
 
     #[test]
     fn refuses_to_overwrite_unless_that_is_what_was_asked_for() {
-        let directory = std::env::temp_dir().join("toolhaven-overwrite-test");
+        let directory = std::env::temp_dir().join("tools4devs-overwrite-test");
         let _ = std::fs::remove_dir_all(&directory);
         std::fs::create_dir_all(&directory).unwrap();
         let taken = directory.join("photo.png");
@@ -2505,7 +2505,7 @@ mod tests {
 
     #[test]
     fn numbers_a_name_that_is_already_taken() {
-        let directory = std::env::temp_dir().join("toolhaven-conflict-test");
+        let directory = std::env::temp_dir().join("tools4devs-conflict-test");
         let _ = std::fs::remove_dir_all(&directory);
         std::fs::create_dir_all(&directory).unwrap();
 

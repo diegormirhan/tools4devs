@@ -60,11 +60,11 @@ export function InstallDialog({
           {canInstall
             ? total > 0
               ? t(
-                  "ToolHaven downloads and installs everything below on its own — {size} in total. You never leave the app, and you never install anything by hand.",
+                  "tools4devs downloads and installs everything below on its own — {size} in total. You never leave the app, and you never install anything by hand.",
                   { size: formatBytes(total) },
                 )
               : t(
-                  "ToolHaven downloads and installs everything below on its own. You never leave the app, and you never install anything by hand.",
+                  "tools4devs downloads and installs everything below on its own. You never leave the app, and you never install anything by hand.",
                 )
             : t(
                 "This component has no pinned artifact and hash yet, so the app cannot install it. It only works if this Windows already has it.",

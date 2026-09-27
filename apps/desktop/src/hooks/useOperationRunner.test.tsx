@@ -37,7 +37,7 @@ it('refuses to claim success in the browser preview and records the failure', as
   await waitFor(() => expect(result.current.finishedJobs).toHaveLength(1));
   expect(invoke).not.toHaveBeenCalled();
   expect(result.current.finishedJobs[0]).toMatchObject({ status: 'failed' });
-  expect(result.current.finishedJobs[0]!.message).toMatch(/open the toolhaven app/i);
+  expect(result.current.finishedJobs[0]!.message).toMatch(/open the tools4devs app/i);
 });
 
 it('settles a native operation with the message and output path the host returned', async () => {

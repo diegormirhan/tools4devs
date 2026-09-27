@@ -26,10 +26,10 @@ if (!existsSync(directory)) {
   console.error("Usage: node scripts/release/build-update-manifest.mjs [release directory]");
   process.exit(1);
 }
-const installer = `ToolHaven_${version}_x64-setup.exe`;
+const installer = `tools4devs_${version}_x64-setup.exe`;
 const signaturePath = path.join(directory, `${installer}.sig`);
 
-if (!existsSync(signaturePath)) {
+if (!existsSync(path.join(directory, installer)) || !existsSync(signaturePath)) {
   console.error(
     `No signature beside ${installer}.\n` +
       "Build with TAURI_SIGNING_PRIVATE_KEY set, or the update will be refused by every client.",
@@ -52,6 +52,8 @@ const manifest = {
 };
 
 const output = path.join(directory, "latest.json");
-writeFileSync(output, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+const document = `${JSON.stringify(manifest, null, 2)}\n`;
+writeFileSync(output, document, "utf8");
+writeFileSync(path.join(directory, "tools4devs.json"), document, "utf8");
 console.log(`latest.json written for ${version}`);
 console.log(`  url: ${manifest.platforms["windows-x86_64"].url}`);

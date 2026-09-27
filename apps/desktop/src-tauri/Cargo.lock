@@ -4531,11 +4531,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d56353a2a665ad0f41a421187180aab746c8c325620617ad883a99a1cbe66d2"
 
 [[package]]
-name = "toolhaven"
-version = "3.3.0"
+name = "tools4devs"
+version = "3.4.0"
 dependencies = [
+ "base64 0.22.1",
  "hound",
  "log",
+ "minisign-verify",
  "serde",
  "serde_json",
  "sevenz-rust2",

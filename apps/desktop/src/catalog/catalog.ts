@@ -58,7 +58,7 @@ const utilityPresentations: Record<string, ToolPresentation> = Object.fromEntrie
         description: utility.description,
       })),
       keywords: group.keywords,
-      builtIn: { integrationName: "ToolHaven", capabilities: [] },
+      builtIn: { integrationName: "tools4devs", capabilities: [] },
     },
   ]),
 );

@@ -1,0 +1,14 @@
+{
+  "identifier": "com.toolhaven.desktop",
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/diegormirhan/toolhaven-desktop/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkxNUIzNDgzMDg4RUNCNzkKUldSNXk0NElnelJia1pvYjcvbDJLUXlFVFlHaE82ZzNFR0U3S1U5WnkycGIvemxSVGJ4SC8wY3UK",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

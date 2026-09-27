@@ -6,6 +6,20 @@ import { ToolPanel } from "./components/ToolPanel";
 import { createCatalogRows } from "./catalog/catalog";
 
 describe("desktop catalog", () => {
+  it("preserves ToolHaven language and theme preferences after the rename", () => {
+    localStorage.setItem("toolhaven.language", "pt");
+    localStorage.setItem("toolhaven.theme-preference", "light");
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "O que você quer fazer?" })).toBeVisible();
+    expect(document.documentElement.dataset.theme).toBe("light");
+  });
+
+  it("shows the tools4devs name in the sidebar", () => {
+    render(<App />);
+
+    expect(within(screen.getByRole("complementary")).getByRole("img", { name: "tools4devs" })).toBeVisible();
+  });
+
   it("offers to install a pinned component without leaving the app", async () => {
     render(<App />);
     const user = userEvent.setup();
