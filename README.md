@@ -117,7 +117,7 @@ cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib -- --ignored 
 
 ## Upgrade compatibility
 
-The 3.4.0 release uses tools4devs for the executable, installers and release artifacts. It publishes tools4devs.json together with an identical latest.json for existing updaters. Internal installer identities, preference keys and component paths retain their legacy values to preserve existing installations and data. See [the Windows upgrade contract](apps/desktop/src-tauri/installer/README.md) before changing them.
+The 3.4.0 release uses tools4devs for the executable, installers and release artifacts. Existing updaters read latest.json and stop at the signed 3.4.0 bridge. The bridge and newer clients read tools4devs.json to find the current release. Both manifests must accompany every release; after 3.4.0 they deliberately advertise different versions. See [the Windows upgrade contract](apps/desktop/src-tauri/installer/README.md) before changing the channels or data identities.
 
 ## Screenshots
 

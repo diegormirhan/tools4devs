@@ -17,6 +17,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { releaseManifests } from "./update-channels.mjs";
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
 const { version } = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
@@ -39,21 +40,12 @@ if (!existsSync(path.join(directory, installer)) || !existsSync(signaturePath)) 
 
 // Windows updates through the NSIS installer: it is the artifact Tauri signs
 // for the updater, and the one that can replace a running installation.
-const manifest = {
-  version,
-  notes: `See the release notes for ${version}.`,
-  pub_date: new Date().toISOString(),
-  platforms: {
-    "windows-x86_64": {
-      signature: readFileSync(signaturePath, "utf8").trim(),
-      url: `https://github.com/diegormirhan/tools4devs/releases/download/v${version}/${installer}`,
-    },
-  },
-};
-
-const output = path.join(directory, "latest.json");
-const document = `${JSON.stringify(manifest, null, 2)}\n`;
-writeFileSync(output, document, "utf8");
-writeFileSync(path.join(directory, "tools4devs.json"), document, "utf8");
-console.log(`latest.json written for ${version}`);
-console.log(`  url: ${manifest.platforms["windows-x86_64"].url}`);
+const bridgePath = path.join(root, "scripts/release/bridge-3.4.0.json");
+const bridge = version === "3.4.0" ? undefined : JSON.parse(readFileSync(bridgePath, "utf8"));
+const manifests = releaseManifests(version, readFileSync(signaturePath, "utf8").trim(), new Date().toISOString(), bridge);
+const serialize = (manifest) => `${JSON.stringify(manifest, null, 2)}\n`;
+writeFileSync(path.join(directory, "latest.json"), serialize(manifests.legacy), "utf8");
+writeFileSync(path.join(directory, "tools4devs.json"), serialize(manifests.current), "utf8");
+if (version === "3.4.0") writeFileSync(bridgePath, serialize(manifests.current), "utf8");
+console.log(`tools4devs.json: ${manifests.current.version}; latest.json: ${manifests.legacy.version}`);
+console.log(`  url: ${manifests.current.platforms["windows-x86_64"].url}`);

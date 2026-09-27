@@ -12,7 +12,8 @@ All notable changes to tools4devs. Versions follow [semantic versioning](https:/
 
 ### Fixed
 
-- Preserve the original updater signing key, endpoint, manifest format and Windows installer identities across the rename, so existing ToolHaven installations can upgrade in place.
+- Preserve the original updater signing key, manifest format and Windows installer identities across the rename, so existing ToolHaven installations can upgrade in place.
+- Move 3.4.0 to the tools4devs.json update channel. Keep the legacy latest.json channel pinned to this bridge when newer releases are published.
 - Keep existing language, theme, job history, settings and downloaded components when upgrading.
 - Include third-party licence, source, version and hash notices in the installed and portable tools folders.
 
