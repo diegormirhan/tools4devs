@@ -46,7 +46,7 @@ const manifest = {
   platforms: {
     "windows-x86_64": {
       signature: readFileSync(signaturePath, "utf8").trim(),
-      url: `https://github.com/diegormirhan/toolhaven-desktop/releases/download/v${version}/${installer}`,
+      url: `https://github.com/diegormirhan/tools4devs/releases/download/v${version}/${installer}`,
     },
   },
 };

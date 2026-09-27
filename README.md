@@ -4,7 +4,7 @@
 
 # tools4devs
 
-[![Release](https://img.shields.io/github/v/tag/diegormirhan/toolhaven-desktop?label=release&color=88afff)](https://github.com/diegormirhan/toolhaven-desktop/releases)
+[![Release](https://img.shields.io/github/v/tag/diegormirhan/toolhaven-desktop?label=release&color=88afff)](https://github.com/diegormirhan/tools4devs/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Windows](https://img.shields.io/badge/Windows-x64-0078D4?logo=windows&logoColor=white)](#install)
 [![Tauri](https://img.shields.io/badge/Tauri-2-24C8DB?logo=tauri&logoColor=white)](apps/desktop/src-tauri/)
@@ -35,7 +35,7 @@ You don't need a browser, a package manager or PATH changes. Everything runs on 
 
 ## Install
 
-Download the installer from the [latest release](https://github.com/diegormirhan/toolhaven-desktop/releases/latest) and run it. Requires Windows 10 or 11, 64-bit.
+Download the installer from the [latest release](https://github.com/diegormirhan/tools4devs/releases/latest) and run it. Requires Windows 10 or 11, 64-bit.
 
 | File | What it is |
 | --- | --- |
