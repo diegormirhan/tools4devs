@@ -9,7 +9,8 @@ mkdirSync(join(here, "png"), { recursive: true });
 const b = await chromium.launch({ executablePath: process.env.CHROMIUM ?? "/opt/pw-browsers/chromium", args: ["--no-sandbox", "--allow-file-access-from-files"] });
 const pg = await b.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 for (const f of readdirSync(join(here, "html")).filter((n) => n.endsWith(".html"))) {
-  await pg.goto("file://" + join(here, "html", f));
+  await pg.setViewportSize(f.includes("narrow") ? { width: 800, height: 600 } : { width: 1440, height: 900 });
+  await pg.goto("file://" + join(here, "html", f) + "?still");
   await pg.evaluate(() => document.fonts.ready);
   await pg.waitForTimeout(150);
   await pg.screenshot({ path: join(here, "png", f.replace(".html", ".png")) });
