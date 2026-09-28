@@ -1,7 +1,6 @@
 # Redesign do tools4devs: mockups e vídeos definitivos
 
 Material de referência para a reestruturação do app (sidebar em árvore, cards com preview no hover, shadcn/ui). Nada aqui é importado pelo app: são imagens, vídeos e os scripts que os geram.
-As rodadas de exploração (outras direções e variações) ficam em [`../mockups/`](../mockups/).
 
 ## Direção escolhida
 
