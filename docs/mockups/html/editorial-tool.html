@@ -1,0 +1,611 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>B · Editorial and warm · tool</title><style>
+@font-face{font-family:"Inter Variable";src:url(../fonts/inter.woff2) format("woff2");font-weight:100 900}
+@font-face{font-family:"Fraunces Variable";src:url(../fonts/fraunces.woff2) format("woff2");font-weight:100 900}
+@font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-latin-400-normal.woff2) format("woff2");font-weight:400}
+@font-face{font-family:"JBM";src:url(../fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2");font-weight:500}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--font:"Inter Variable", system-ui, sans-serif;--bg:#f7f3ec;--sb:#efe9de;--card:#fffdf8;--card2:#f8f3e9;--bd:#ded6c6;--fg:#1f1b16;--mut:#6f6759;--acc:#b4532a;--accbg:rgba(180,83,42,.12);--acc2:#3f6b5a;--onacc:#fff8f0;--r:6px;--sbw:292px;--rowh:31px;--hf:"Fraunces Variable", Georgia, serif;--hw:600;--hs:34px;--tile:#efe8da;}
+html,body{width:1440px;height:900px;overflow:hidden;background:var(--bg)}
+body{font-family:var(--font);color:var(--fg);-webkit-font-smoothing:antialiased;font-size:14px}
+.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{display:grid;grid-template-columns:var(--sbw) 1fr;height:900px}
+.sb{background:var(--sb);border-right:1px solid var(--bd);display:flex;flex-direction:column;min-height:0;padding:14px 10px}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 14px}
+.brand img{width:34px;height:34px;border-radius:9px}
+.brand b{display:block;font-family:var(--hf);font-size:19px;font-weight:600;letter-spacing:-.01em}
+.brand small{color:var(--mut);font-size:11.5px}
+.search{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border:1px solid var(--bd);border-radius:var(--r);background:var(--card);color:var(--mut);font-size:13px;margin-bottom:10px}
+.search span{flex:1}.search kbd{font:11px "JBM",monospace;border:1px solid var(--bd);border-radius:4px;padding:1px 5px}
+.tree{flex:1;min-height:0;overflow:hidden}
+.sec{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);padding:12px 10px 6px;}
+.row{display:flex;align-items:center;gap:9px;height:var(--rowh);padding:0 10px;border-radius:calc(var(--r) - 2px);color:var(--fg);font-size:14px;white-space:nowrap}
+.row .ico{display:grid;place-items:center;color:var(--mut)}.row .lbl{flex:1;overflow:hidden;text-overflow:ellipsis}
+.row .cnt{font-size:12px;color:var(--mut)}.row.grp{font-weight:550}
+.row.grp .chev{width:14px;height:14px;color:var(--mut);margin-left:-4px}.row.grp.open{background:rgba(0,0,0,.04)}
+.kids{margin:2px 0 6px 18px;padding-left:8px;border-left:1px solid var(--bd)}
+.row.tool.trail{font-weight:600}.row.tool .chev{width:14px;height:14px;color:var(--mut)}
+.subs{margin:2px 0 6px 14px;padding-left:8px;border-left:1px solid var(--bd)}
+.row.sub{height:calc(var(--rowh) - 3px);font-size:13px;color:var(--mut)}
+.row.sub.active{background:var(--accbg);color:var(--acc);font-weight:600}
+.row.sub.more{font-style:italic}
+.star{width:14px;height:14px;color:var(--acc2)}.star.on{fill:var(--acc2)}
+.foot{border-top:1px solid var(--bd);padding-top:8px;margin-top:8px}
+.badge{background:var(--acc);color:var(--onacc);font-size:11px;font-weight:700;border-radius:99px;padding:1px 7px}
+.status{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:11.5px;padding:10px 10px 2px}.status i{width:7px;height:7px;border-radius:50%;background:var(--acc)}
+main{padding:30px 40px;overflow:hidden;position:relative}
+.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px;gap:20px}
+h1{font-family:var(--hf);font-size:var(--hs);font-weight:var(--hw);letter-spacing:-.02em;line-height:1.1}
+.top p{color:var(--mut);margin-top:8px;font-size:14.5px}
+.btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:calc(var(--r) - 2px);background:var(--acc);color:var(--onacc);border:1px solid transparent;font:600 13.5px var(--font)}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--bd)}.btn.sm{height:30px;font-size:12.5px}.btn.block{width:100%;justify-content:center;height:40px;margin-top:10px}
+.shead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--bd);padding-bottom:9px;margin-bottom:16px}
+.shead h2{font-family:var(--hf);font-size:20px;font-weight:600}.shead span{color:var(--mut);font-size:12.5px}
+section{margin-bottom:28px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.cell{position:relative}.cell.dim .card{opacity:.5}.cell.hot .card{opacity:.25}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;height:204px}
+.cbody{padding:16px;display:flex;flex-direction:column;flex:1}
+.ctop{display:flex;gap:12px;align-items:center}.ctitle{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ctitle h3{font-family:var(--hf);font-size:18px;font-weight:600;letter-spacing:-.005em}
+.eng{font:500 10.5px "JBM",monospace;letter-spacing:.05em;color:var(--mut)}
+.tile{width:40px;height:40px;border-radius:6px;background:var(--tile);display:grid;place-items:center;color:var(--acc);flex:none}
+.tile .ic{width:20px;height:20px}.tile.big{width:48px;height:48px}
+.card p{color:var(--mut);font-size:13px;line-height:1.45;margin-top:10px;}
+.cfoot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;padding-top:10px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mut);border:1px solid var(--bd);border-radius:99px;padding:3px 9px}.pill .ic{width:13px;height:13px}
+.pill.ok{color:var(--acc);border-color:var(--accbg);background:var(--accbg)}.opsn{font-size:11.5px;color:var(--mut)}
+.art{height:72px;display:flex;align-items:flex-end;justify-content:space-between;padding:14px 16px}.art .big{width:40px;height:40px;stroke-width:1.6}.art .eng{font-weight:500}
+.pop{position:absolute;left:-18px;top:-14px;width:calc(100% + 36px);z-index:10;background:var(--card2);border:1px solid var(--bd);border-radius:calc(var(--r) + 4px);overflow:hidden;box-shadow:0 30px 70px -10px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.03)}
+.vid{position:relative;height:214px;align-content:start;padding-top:16px;background:#2a241d;display:grid;place-items:center;overflow:hidden}
+.win{width:78%;background:#f7f3ec;border:1px solid #cfc6b4;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.4);position:relative;overflow:hidden}
+.wbar{display:flex;gap:5px;align-items:center;padding:7px 9px;border-bottom:1px solid var(--bd);font-size:10px;color:var(--mut)}.wbar i{width:7px;height:7px;border-radius:50%;background:var(--bd)}.wbar span{margin-left:6px}
+.wbody{padding:10px;display:grid;gap:8px}.file{display:flex;gap:8px;align-items:center;border:1px solid var(--bd);border-radius:6px;padding:6px 8px}.file .ic{color:var(--acc)}.file b{font-size:11px;display:block}.file small{font-size:9.5px;color:var(--mut)}
+.fld small{font-size:9.5px;color:var(--mut);display:block;margin-bottom:3px}.sel{display:flex;justify-content:space-between;align-items:center;gap:6px;border:1px solid var(--bd);border-radius:6px;padding:0 9px;height:32px;font-size:13px;background:var(--card)}
+.wbody .sel{height:24px;font-size:11px}.sel .ic,.sel span{color:var(--mut)}.sel span{display:flex}
+.slider{position:relative;height:4px;background:var(--bd);border-radius:9px;margin:9px 2px}.slider i{position:absolute;left:0;top:0;bottom:0;background:var(--acc);border-radius:9px}.slider b{position:absolute;top:-5px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#fff;border:2px solid var(--acc)}
+.run{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--mut)}.prog{flex:1;height:5px;background:var(--bd);border-radius:9px;overflow:hidden}.prog i{display:block;height:100%;background:var(--acc)}
+.cursor{position:absolute;width:20px;height:20px;right:30%;top:58%}
+.tc{position:absolute;right:10px;bottom:8px;font:500 10.5px "JBM",monospace;background:rgba(0,0,0,.6);color:#fff;padding:2px 6px;border-radius:4px}
+.loop{position:absolute;left:10px;bottom:8px;font-size:10.5px;background:rgba(0,0,0,.6);color:#fff;padding:2px 8px 2px 6px;border-radius:99px;display:flex;align-items:center;gap:5px}.loop .ic{width:10px;height:10px;fill:#fff}
+.pbody{padding:16px}.ptop{display:flex;gap:12px;align-items:center}.ptop>div{flex:1}.ptop h3{font-family:var(--hf);font-size:19px;font-weight:600}
+.pbody p{color:var(--mut);font-size:13px;margin:12px 0 14px;line-height:1.5}.what{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{font-size:12px;border:1px solid var(--bd);border-radius:99px;padding:3px 10px;background:var(--card)}.chip.more{color:var(--acc);border-color:var(--accbg)}
+.bc{display:flex;align-items:center;gap:6px;color:var(--mut);font-size:12.5px;margin-bottom:12px}.bc .ic{width:13px;height:13px}.bc b{color:var(--fg);font-weight:600}
+.toolpage{display:grid;grid-template-columns:1fr 340px;gap:20px}.col{display:grid;gap:16px;align-content:start}
+.drop{display:flex;align-items:center;gap:14px;border:1.5px dashed var(--bd);border-radius:var(--r);padding:18px;background:var(--card)}.drop>div{flex:1}.drop b{display:block;font-size:14.5px}.drop small{color:var(--mut);font-size:12.5px}
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px}.panel h4{font-family:var(--hf);font-size:14px;margin-bottom:14px}
+.f2{margin-bottom:16px}.f2 label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut);margin-bottom:7px}.f2 label em{font-style:normal;color:var(--fg)}
+.f2.sw{display:flex;justify-content:space-between;align-items:center}.f2.sw label{margin:0;color:var(--fg);font-size:13.5px}
+.switch{width:38px;height:22px;border-radius:99px;background:var(--bd);position:relative}.switch.on{background:var(--acc)}.switch i{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff}.switch.on i{left:19px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:9px 14px;font-size:13px}dt{color:var(--mut)}dd{text-align:right}
+.side .panel{position:sticky;top:0}
+</style></head>
+<body><div class="app"><aside class="sb" aria-label="Sidebar">
+    <div class="brand"><img src="../../../apps/desktop/public/brand/tools4devs-mark.svg" alt=""><div><b>tools4devs</b><small>Local tools</small></div></div>
+    <a class="search"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" />
+</svg><span>Search tools</span><kbd>Ctrl K</kbd></a>
+    <nav class="tree"><div class="sec">All tools</div><a class="row grp open"><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m12.296 3.464 3.02 3.956" />
+  <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z" />
+  <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+  <path d="m6.18 5.276 3.1 3.899" />
+</svg></span><span class="lbl">Video and audio</span><span class="cnt">4</span></a><div class="kids"><a class="row tool trail"><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m12.296 3.464 3.02 3.956" />
+  <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z" />
+  <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+  <path d="m6.18 5.276 3.1 3.899" />
+</svg></span><span class="lbl">Convert media</span><svg class="ic chev r"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg></a><div class="subs"><a class="row sub "><span class="lbl">Convert format</span></a><a class="row sub "><span class="lbl">Compress media</span></a><a class="row sub "><span class="lbl">Trim a section</span></a><a class="row sub active"><span class="lbl">Extract audio</span></a><a class="row sub "><span class="lbl">Make a GIF</span></a><a class="row sub more"><span class="lbl">9 more…</span></a></div><a class="row tool "><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+  <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+  <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+  <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+  <circle cx="12" cy="12" r="3" />
+  <path d="m16 16-1.9-1.9" />
+</svg></span><span class="lbl">Inspect media</span></a><a class="row tool "><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M9 18V5l12-2v13" />
+  <circle cx="6" cy="18" r="3" />
+  <circle cx="18" cy="16" r="3" />
+</svg></span><span class="lbl">Name the music</span></a><a class="row tool "><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" />
+  <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" />
+  <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />
+</svg></span><span class="lbl">Package Matroska</span></a></div><a class="row grp "><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 15V3" />
+  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+  <path d="m7 10 5 5 5-5" />
+</svg></span><span class="lbl">Downloads</span><span class="cnt">2</span></a><a class="row grp "><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+  <circle cx="9" cy="9" r="2" />
+  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+</svg></span><span class="lbl">Images</span><span class="cnt">5</span></a><a class="row grp "><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="M10 9H8" />
+  <path d="M16 13H8" />
+  <path d="M16 17H8" />
+</svg></span><span class="lbl">PDFs and documents</span><span class="cnt">4</span></a><a class="row grp "><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1" />
+  <path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1" />
+</svg></span><span class="lbl">Text and data</span><span class="cnt">6</span></a><a class="row grp "><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+  <path d="M20 2v4" />
+  <path d="M22 4h-4" />
+  <circle cx="4" cy="20" r="2" />
+</svg></span><span class="lbl">Quick tools</span><span class="cnt">6</span></a><a class="row grp "><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="16" height="20" x="4" y="2" rx="2" />
+  <line x1="8" x2="16" y1="6" y2="6" />
+  <line x1="16" x2="16" y1="14" y2="18" />
+  <path d="M16 10h.01" />
+  <path d="M12 10h.01" />
+  <path d="M8 10h.01" />
+  <path d="M12 14h.01" />
+  <path d="M8 14h.01" />
+  <path d="M12 18h.01" />
+  <path d="M8 18h.01" />
+</svg></span><span class="lbl">Calculators</span><span class="cnt">6</span></a><a class="row grp "><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="20" height="5" x="2" y="3" rx="1" />
+  <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" />
+  <path d="M10 12h4" />
+</svg></span><span class="lbl">Files and disk</span><span class="cnt">4</span></a><a class="row grp "><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="18" height="7" x="3" y="3" rx="1" />
+  <rect width="9" height="7" x="3" y="14" rx="1" />
+  <rect width="5" height="7" x="16" y="14" rx="1" />
+</svg></span><span class="lbl">Mockups</span><span class="cnt">2</span></a></nav>
+    <div class="foot">
+      <a class="row"><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M13 5h8" />
+  <path d="M13 12h8" />
+  <path d="M13 19h8" />
+  <path d="m3 17 2 2 4-4" />
+  <path d="m3 7 2 2 4-4" />
+</svg></span><span class="lbl">Queue</span><span class="badge">2</span></a>
+      <a class="row"><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+  <path d="M3 3v5h5" />
+  <path d="M12 7v5l4 2" />
+</svg></span><span class="lbl">History</span></a>
+      <a class="row"><span class="ico"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+  <circle cx="12" cy="12" r="3" />
+</svg></span><span class="lbl">Settings</span></a>
+      <div class="status"><i></i>Windows x64 · runs on this machine</div>
+    </div></aside><main><header class="top crumb"><div>
+    <div class="bc">Video and audio <svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg> Convert media <svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg> <b>Extract audio</b></div>
+    <h1>Extract audio</h1><p>Write an audio file from the video.</p></div>
+    <span class="pill ok"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="m16 9-5.5 5.5L8 12" />
+</svg> FFmpeg 7.1 ready</span></header>
+  <div class="toolpage">
+    <div class="col">
+      <div class="drop"><span class="tile big"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z" />
+</svg></span>
+        <div><b>holiday-2025.mov</b><small>4K · 1.2 GB · 03:42 · AAC stereo</small></div><button class="btn ghost sm">Change file</button></div>
+      <div class="panel"><h4>Options</h4>
+        <div class="f2"><label>Output format</label><div class="sel">MP3 <span><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg></span></div></div>
+        <div class="f2"><label>Quality <em>192 kbps</em></label><div class="slider"><i style="width:58%"></i><b style="left:58%"></b></div></div>
+        <div class="f2 sw"><label>Keep title and artist tags</label><div class="switch on"><i></i></div></div>
+        <div class="f2"><label>Save to</label><div class="sel">C:\Users\you\Music <svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg></div></div>
+      </div>
+    </div>
+    <div class="col side">
+      <div class="panel"><h4>Summary</h4>
+        <dl><dt>From</dt><dd>holiday-2025.mov</dd><dt>To</dt><dd>holiday-2025.mp3</dd><dt>Estimated size</dt><dd>≈ 5.1 MB</dd><dt>Runs</dt><dd>On your machine, no upload</dd></dl>
+        <button class="btn block"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M2 10v3" />
+  <path d="M6 6v11" />
+  <path d="M10 3v18" />
+  <path d="M14 8v7" />
+  <path d="M18 5v13" />
+  <path d="M22 10v3" />
+</svg> Extract audio</button>
+        <button class="btn ghost block">Add to queue</button></div>
+    </div>
+  </div></main></div></body></html>
