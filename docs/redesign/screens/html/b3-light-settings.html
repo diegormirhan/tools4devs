@@ -1,0 +1,635 @@
+<!doctype html><html lang="en" class="light"><head><meta charset="utf-8"><title>B3 · Mist azul, sidebar inset, ícone colorido por grupo · light · settings</title><style>
+@font-face{font-family:"Inter Variable";src:url(../../fonts/inter.woff2) format("woff2");font-weight:100 900}
+@font-face{font-family:"Fraunces Variable";src:url(../../fonts/fraunces.woff2) format("woff2");font-weight:100 900}
+@font-face{font-family:"JBM";src:url(../../fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2");font-weight:500}
+*{box-sizing:border-box;margin:0;padding:0;border-color:var(--border)}
+:root{color-scheme:light;--radius:0.625rem;--rm:calc(var(--radius)*.8);--rl:var(--radius);--rxl:calc(var(--radius)*1.4);--font-sans:"Inter Variable",system-ui,sans-serif;--font-heading:"Fraunces Variable",Georgia,serif;--background:oklch(1 0 0);--foreground:oklch(0.148 0.004 228.8);--card:oklch(1 0 0);--card-foreground:oklch(0.148 0.004 228.8);--popover:oklch(1 0 0);--popover-foreground:oklch(0.148 0.004 228.8);--primary:oklch(0.52 0.19 258);--primary-foreground:oklch(0.985 0.002 197.1);--secondary:oklch(0.958 0.006 245);--secondary-foreground:oklch(0.218 0.008 223.9);--muted:oklch(0.958 0.006 245);--muted-foreground:oklch(0.56 0.021 213.5);--accent:oklch(0.945 0.009 245);--accent-foreground:oklch(0.218 0.008 223.9);--destructive:oklch(0.577 0.245 27.325);--border:oklch(0.915 0.008 245);--input:oklch(0.915 0.008 245);--ring:oklch(0.62 0.16 258);--chart-1:oklch(0.872 0.007 219.6);--chart-2:oklch(0.56 0.021 213.5);--chart-3:oklch(0.45 0.017 213.2);--chart-4:oklch(0.378 0.015 216);--chart-5:oklch(0.275 0.011 216.9);--radius:0.625rem;--sidebar:oklch(0.962 0.008 245);--sidebar-foreground:oklch(0.148 0.004 228.8);--sidebar-primary:oklch(0.52 0.19 258);--sidebar-primary-foreground:oklch(0.987 0.002 197.1);--sidebar-accent:oklch(0.925 0.013 245);--sidebar-accent-foreground:oklch(0.218 0.008 223.9);--sidebar-border:oklch(0.905 0.01 245);--sidebar-ring:oklch(0.62 0.16 258);}
+html,body{width:1440px;height:900px;overflow:hidden}
+body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);font-size:14px;-webkit-font-smoothing:antialiased}
+.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.xl{width:36px;height:36px;stroke-width:1.6}
+.app{display:flex;height:900px;background:var(--sidebar);}
+.sidebar{width:256px;flex:none;display:flex;flex-direction:column;background:var(--sidebar);color:var(--sidebar-foreground);}
+.shead{padding:8px;display:flex;flex-direction:column;gap:8px}
+.mbtn,.sbtn{display:flex;align-items:center;gap:8px;width:100%;border-radius:var(--rm);text-align:left;white-space:nowrap;overflow:hidden}
+.mbtn{height:32px;padding:8px;font-size:14px}.mbtn.lg{height:48px}
+.mbtn>span:not(.logo):not(.two):not(.gico),.sbtn>span{flex:1;overflow:hidden;text-overflow:ellipsis}
+.mbtn .cnt{font-style:normal;font-size:12px;color:color-mix(in oklab,var(--sidebar-foreground) 55%,transparent)}
+.mbtn .chev,.sbtn .chev{opacity:.6;width:16px;transition:none}.mbtn.open .chev,.sbtn.open .chev{transform:rotate(90deg)}
+.mbtn.lg .logo{width:32px;height:32px;border-radius:var(--rl);overflow:hidden;background:var(--sidebar-primary);display:grid;place-items:center;flex:none}.logo img{width:32px;height:32px}
+.two{display:grid;line-height:1.15;text-align:left}.two b{font-size:14px;font-weight:600;font-family:var(--font-heading)}.two small{font-size:12px;opacity:.7}
+.sinput{display:flex;align-items:center;gap:8px;height:32px;padding:0 8px;border-radius:var(--rm);border:1px solid var(--input);background:var(--background);font-size:14px;color:var(--muted-foreground)}.sinput span{flex:1}.sinput .ic{opacity:.6}
+kbd{font:500 11px "JBM",monospace;border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--muted-foreground)}
+.scontent{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px}
+.sgroup{padding:8px}.glabel{height:32px;display:flex;align-items:center;padding:0 8px;font-size:12px;font-weight:500;color:color-mix(in oklab,var(--sidebar-foreground) 70%,transparent)}
+.menu,.sub{list-style:none;display:flex;flex-direction:column;gap:4px}
+.sub{margin:0 14px;padding:2px 10px;border-left:1px solid var(--sidebar-border)}
+.sbtn{height:28px;padding:0 8px;font-size:14px}.sbtn.muted{color:color-mix(in oklab,var(--sidebar-foreground) 60%,transparent);font-style:italic}
+.sbtn.active{background:var(--sidebar-accent);color:var(--sidebar-accent-foreground);font-weight:500}
+.sbtn.open{font-weight:500}.mbtn.open{background:color-mix(in oklab,var(--sidebar-accent) 55%,transparent)}
+.star{width:14px;height:14px;fill:var(--primary);color:var(--primary)}
+.gico{display:grid;place-items:center;color:oklch(0.48 0.12 var(--th))}
+.mbadge{min-width:20px;height:20px;border-radius:var(--rm);padding:0 4px;display:grid;place-items:center;font-size:12px;font-weight:500;background:var(--sidebar-primary);color:var(--sidebar-primary-foreground)}
+.sfoot{padding:8px;border-top:1px solid var(--sidebar-border)}
+.wrap{flex:1;min-width:0;display:flex;padding:8px 8px 8px 0;}
+.inset{flex:1;min-width:0;background:var(--background);overflow:hidden;position:relative;border-radius:var(--rxl);box-shadow:0 1px 2px 0 rgb(0 0 0/.06),0 0 0 1px var(--border);}
+.hdr{height:64px;display:flex;align-items:center;gap:8px;padding:0 16px}.iconbtn{width:28px;height:28px;border-radius:var(--rm);display:grid;place-items:center;background:none;border:0;color:var(--foreground)}
+.sep{width:1px;height:16px;background:var(--border);margin:0 4px}
+.bc{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted-foreground)}.bc .ic{width:14px;height:14px}.bc .cur{color:var(--foreground)}
+.page{padding:0 24px 24px}
+.ptitle{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}
+h1{font-family:var(--font-heading);font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+.ptitle p{color:var(--muted-foreground);margin-top:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 16px;border-radius:var(--rm);font:500 14px var(--font-sans);background:var(--primary);color:var(--primary-foreground);border:1px solid transparent;flex:none}
+.btn .ic{width:16px;height:16px}
+.btn.outline{background:var(--background);color:var(--foreground);border-color:var(--input);box-shadow:0 1px 2px 0 rgb(0 0 0/.05)}
+.btn.sm{height:32px;padding:0 12px}.btn.block{width:100%}
+.badge{display:inline-flex;align-items:center;gap:4px;border:1px solid transparent;border-radius:9999px;padding:2px 8px;font-size:12px;font-weight:500;white-space:nowrap}.badge .ic{width:12px;height:12px}
+.badge.sec{background:var(--secondary);color:var(--secondary-foreground)}.badge.out{border-color:var(--border);color:var(--foreground)}.badge.out.ok{color:var(--primary)}
+.shd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}.shd h2{font-family:var(--font-heading);font-size:20px;font-weight:600;letter-spacing:-.01em}.shd span{color:var(--muted-foreground);font-size:14px}
+section{margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.cell{position:relative}.cell.dim .card{opacity:.45}
+.card{display:flex;flex-direction:column;gap:24px;border:1px solid var(--border);border-radius:var(--rxl);background:var(--card);color:var(--card-foreground);padding:24px 0;box-shadow:0 1px 2px 0 rgb(0 0 0/.05)}
+.card>*{padding:0 24px}
+.ch{display:flex;align-items:flex-start;gap:12px}.ct{flex:1;min-width:0;display:grid;gap:4px}
+.ct h3,.hb h3,.sb h3,.ch2 h3{font-family:var(--font-heading);font-size:17px;font-weight:600;line-height:1.1;letter-spacing:-.005em}
+.eng{font:500 11px "JBM",monospace;letter-spacing:.05em;color:var(--muted-foreground)}
+.tile{width:40px;height:40px;border-radius:var(--rl);background:var(--muted);color:var(--primary);display:grid;place-items:center;flex:none}.tile .ic{width:20px;height:20px}.tile.lg{width:44px;height:44px}
+.tile.tone{background:oklch(0.93 0.045 var(--th));color:oklch(0.45 0.12 var(--th))}
+.cc{font-size:14px;line-height:1.5;color:var(--muted-foreground)}
+.cf{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:auto}.cf.col{flex-direction:column;align-items:stretch}
+.card.h{flex-direction:row;gap:16px;padding:16px}.card.h>*{padding:0}.card.h .hb{flex:1;display:grid;gap:8px;min-width:0}.row2{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.card.h .cc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card.strip{padding:0;gap:0;overflow:hidden}.card.strip>*{padding:0}
+.card.strip .art{height:76px;padding:12px 20px;display:flex;justify-content:space-between;align-items:flex-end;background:oklch(0.93 0.032 var(--th));color:oklch(0.45 0.12 var(--th))}.card.strip .eng{color:inherit;opacity:.85}
+.card.strip .sb{padding:20px;display:grid;gap:8px}
+.pop{position:absolute;left:-20px;top:-16px;width:calc(100% + 40px);z-index:10;background:var(--popover);color:var(--popover-foreground);border:1px solid var(--border);border-radius:var(--rxl);overflow:hidden;box-shadow:0 10px 15px -3px rgb(0 0 0/.25),0 4px 6px -4px rgb(0 0 0/.2)}
+.vid{position:relative;aspect-ratio:16/9;background:var(--muted);display:grid;place-items:center;overflow:hidden}
+.win{width:74%;background:var(--background);border:1px solid var(--border);border-radius:var(--rl);box-shadow:0 10px 25px -5px rgb(0 0 0/.3);position:relative;overflow:hidden}
+.wbar{display:flex;gap:5px;align-items:center;padding:7px 9px;border-bottom:1px solid var(--border);font-size:10px;color:var(--muted-foreground)}.wbar i{width:7px;height:7px;border-radius:50%;background:var(--border)}.wbar span{margin-left:6px}
+.wbody{padding:10px;display:grid;gap:8px}.file{display:flex;gap:8px;align-items:center;border:1px solid var(--border);border-radius:var(--rm);padding:6px 8px}.file .ic{color:var(--primary)}.file b{font-size:11px;font-weight:500;display:block}.file small{font-size:9.5px;color:var(--muted-foreground)}
+.run{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted-foreground)}.prog{flex:1;height:6px;background:var(--muted);border-radius:9px;overflow:hidden}.prog i{display:block;height:100%;background:var(--primary)}
+.cursor{position:absolute;width:20px;height:20px;right:28%;top:52%}
+.tag{position:absolute;bottom:8px;font-size:10.5px;background:rgb(0 0 0/.6);color:#fff;border-radius:9999px;padding:2px 8px;display:flex;align-items:center;gap:5px}.vid.real video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.tag{z-index:2}.tag.l{left:10px}.tag.r{right:10px;border-radius:5px;font-family:"JBM",monospace}.tag .ic{width:10px;height:10px;fill:#fff}
+.pb{padding:16px;display:grid;gap:12px}.ph{display:flex;gap:12px;align-items:center}.ph .ct{flex:1}
+.what{font-size:12px;font-weight:500;color:var(--muted-foreground);margin-bottom:-4px}.chips{display:flex;flex-wrap:wrap;gap:6px}
+.tgrid{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}.stack{display:grid;gap:16px}
+.drop{display:flex;align-items:center;gap:16px;padding:16px;border:1px dashed var(--input);border-radius:var(--rxl);background:var(--card)}.drop>div{flex:1}.drop b{display:block;font-weight:500}.drop small{color:var(--muted-foreground);font-size:13px}
+.ch2{display:grid;gap:6px}.ch2 p{color:var(--muted-foreground);font-size:14px}
+.cb{display:grid;gap:20px}.field label{display:flex;justify-content:space-between;font-size:14px;font-weight:500;margin-bottom:8px}.field label em{font-style:normal;font-weight:400;color:var(--muted-foreground)}
+.sel{display:flex;align-items:center;justify-content:space-between;height:36px;padding:0 12px;border:1px solid var(--input);border-radius:var(--rm);box-shadow:0 1px 2px 0 rgb(0 0 0/.05);font-size:14px;}.sel .ic{opacity:.5}.sel.sm{height:24px;font-size:11px;padding:0 8px}.sel.sm .ic{width:12px;height:12px}
+.slider{position:relative;height:6px;background:var(--muted);border-radius:9999px;margin:14px 8px 8px 0}.slider i{position:absolute;inset:0 auto 0 0;background:var(--primary);border-radius:9999px}.slider b{position:absolute;top:-5px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#fff;border:1px solid var(--primary);box-shadow:0 1px 2px rgb(0 0 0/.15)}
+.swr{display:flex;justify-content:space-between;align-items:center}.swr label{margin:0}
+.switch{width:32px;height:18px;border-radius:9999px;background:var(--input);position:relative}.switch.on{background:var(--primary)}.switch i{position:absolute;top:1px;left:1px;width:16px;height:16px;border-radius:50%;background:var(--background)}.switch.on i{left:15px;background:var(--primary-foreground)}
+dl.cb{grid-template-columns:auto 1fr;gap:12px 16px;font-size:14px}dt{color:var(--muted-foreground)}dd{text-align:right;font-weight:500}
+
+.mbtn.active{background:var(--sidebar-accent);color:var(--sidebar-accent-foreground);font-weight:500}
+.btn.ghost{background:transparent;color:var(--foreground);border-color:transparent}.btn.bad{background:var(--destructive);color:#fff}
+.badge.pri{background:color-mix(in oklab,var(--primary) 14%,transparent);color:var(--primary)}.badge.bad{background:color-mix(in oklab,var(--destructive) 14%,transparent);color:var(--destructive)}
+.jobs{display:grid;gap:12px;max-width:940px}.job{display:flex;align-items:center;gap:16px;padding:16px 20px;border:1px solid var(--border);border-radius:var(--rxl);background:var(--card);box-shadow:0 1px 2px 0 rgb(0 0 0/.05)}
+.jid{flex:1;min-width:0;display:grid;gap:3px}.jid b{font-weight:600}.jid small{font-size:13px;color:var(--muted-foreground)}.jid small.err{color:var(--destructive)}.jact{display:flex;gap:4px;margin:6px 0 0 -12px}
+.jst{display:flex;align-items:center;gap:12px}.prog.w{width:140px;flex:none}
+.sgrid{display:grid;grid-template-columns:1fr;gap:12px;max-width:760px}.card.sc{flex-direction:row;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px}.card.sc>*{padding:0}
+.sct h3{font-family:var(--font-heading);font-size:16px;font-weight:600}.sct p{color:var(--muted-foreground);font-size:13px;margin-top:4px}.scc{display:flex;gap:8px;align-items:center;flex:none}
+.mono{font:500 13px "JBM",monospace;color:var(--muted-foreground)}.w200{width:180px}.w260{width:250px;font-size:13px}.w70{width:76px}.grow{flex:1}
+.tg{display:inline-flex;border:1px solid var(--input);border-radius:var(--rm);overflow:hidden;box-shadow:0 1px 2px 0 rgb(0 0 0/.05)}.tg>span{height:34px;padding:0 12px;display:flex;align-items:center;gap:6px;font-size:14px;border-right:1px solid var(--input)}.tg>span:last-child{border-right:0}.tg>span.on{background:var(--accent);font-weight:500}.tg.mini>span{height:30px;padding:0 10px;font-size:13px}
+.scrim{position:absolute;inset:0;background:rgb(0 0 0/.5);z-index:50}.modal{position:absolute;left:50%;transform:translateX(-50%);z-index:60;background:var(--popover);color:var(--popover-foreground);border:1px solid var(--border);box-shadow:0 20px 25px -5px rgb(0 0 0/.3),0 8px 10px -6px rgb(0 0 0/.2)}
+.cmd{top:130px;width:580px;border-radius:var(--rxl);overflow:hidden}.cin{display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border-bottom:1px solid var(--border);font-size:15px}.cin .ic{opacity:.5}.caret{display:inline-block;width:1px;height:18px;background:var(--foreground);vertical-align:middle;margin-left:1px}
+.clist{padding:6px}.cgh{font-size:12px;font-weight:500;color:var(--muted-foreground);padding:8px 8px 4px}.ci{display:flex;align-items:center;gap:12px;padding:8px;border-radius:var(--rm)}.ci.sel-on{background:var(--accent)}.ci div{flex:1}.ci b{font-weight:500;display:block;font-size:14px}.ci small{font-size:12px;color:var(--muted-foreground)}.ci em{font-style:normal;font-size:12px;color:var(--muted-foreground)}
+.tile.sm{width:32px;height:32px}.tile.sm .ic{width:16px;height:16px}
+.cfoot2{display:flex;gap:16px;padding:10px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--muted-foreground)}.cfoot2 kbd{margin-right:3px}
+.dlg{top:120px;width:520px;border-radius:var(--rl);padding:24px;display:grid;gap:16px}.dlg.sm2{top:300px;width:460px}
+.dtile{width:48px;height:48px;border-radius:var(--rl);background:color-mix(in oklab,var(--primary) 14%,transparent);color:var(--primary);display:grid;place-items:center}.dtile .ic{width:24px;height:24px}
+.dlg h2{font-family:var(--font-heading);font-size:20px;font-weight:600;letter-spacing:-.01em}.dsub{color:var(--muted-foreground);font-size:14px;line-height:1.55}
+.plan{border:1px solid var(--border);border-radius:var(--rm);overflow:hidden}.step{display:flex;align-items:center;gap:14px;padding:12px 14px;border-bottom:1px solid var(--border)}.step:last-child{border:0}.step>div:not(.prog){flex:1}.step b{display:block;font-weight:500}.step small{color:var(--muted-foreground);font-size:12px}.idx{font:500 12px "JBM",monospace;color:var(--muted-foreground)}
+.assure{display:grid;gap:8px;font-size:13px;color:var(--muted-foreground)}.assure span{display:flex;gap:8px;align-items:center}.assure .ic{color:var(--primary)}
+.dfoot{display:flex;justify-content:flex-end;gap:8px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}.two-col.tight{gap:12px}
+.ta{gap:12px;padding:16px 0}.tah{display:flex;justify-content:space-between;align-items:center}.tah b{font-weight:500}.tbox{min-height:140px;border:1px solid var(--input);border-radius:var(--rm);padding:12px;font:14px/1.6 "JBM",monospace;background:transparent}
+.hint{margin-top:16px;display:flex;align-items:center;gap:8px;color:var(--muted-foreground);font-size:14px}
+.mrow{display:flex;align-items:center;gap:8px}.iconbtn .ic{width:16px;height:16px}
+.phone{border:1px solid var(--border);border-radius:28px;background:var(--card);overflow:hidden;box-shadow:0 10px 15px -3px rgb(0 0 0/.15);height:520px;display:flex;flex-direction:column}
+.phh{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--border)}.phh small{margin-left:auto;color:var(--muted-foreground)}.av{width:32px;height:32px;border-radius:50%;background:color-mix(in oklab,var(--primary) 18%,transparent);color:var(--primary);display:grid;place-items:center;font-weight:600}
+.chat{flex:1;padding:16px;display:flex;flex-direction:column;gap:8px;background:var(--muted)}.bub{max-width:80%;padding:8px 12px;border-radius:14px;font-size:14px;display:grid;gap:2px}.bub small{font-size:10.5px;opacity:.65;justify-self:end}
+.bub.them{background:var(--card);align-self:flex-start;border-bottom-left-radius:4px}.bub.me{background:var(--primary);color:var(--primary-foreground);align-self:flex-end;border-bottom-right-radius:4px}
+.phf{padding:14px 16px;border-top:1px solid var(--border);color:var(--muted-foreground);font-size:14px}
+.grid.two{grid-template-columns:1fr 1fr}
+.sidebar.rail{width:56px}.rail .shead{padding:8px}.rail .mbtn{justify-content:center;padding:0;width:40px;margin:0 auto;height:40px}.rail .mbtn.lg{height:44px}.rail .mbtn.active{background:var(--sidebar-accent)}.rail .sfoot{padding:8px 0}.rail .scontent{padding-top:8px}.rail .menu{align-items:center}
+</style></head>
+<body><div class="app"><aside class="sidebar">
+    <div class="shead"><a class="mbtn lg"><span class="logo"><img src="../../../../apps/desktop/public/brand/tools4devs-mark.svg" alt=""></span><span class="two"><b>tools4devs</b><small>Local tools</small></span></a>
+      <div class="sinput"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" />
+</svg><span>Search tools…</span><kbd>Ctrl K</kbd></div></div>
+    <div class="scontent"><div class="sgroup"><div class="glabel">Pinned</div><ul class="menu">
+      <li><a class="mbtn"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m12.296 3.464 3.02 3.956" />
+  <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z" />
+  <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+  <path d="m6.18 5.276 3.1 3.899" />
+</svg><span>Convert media</span><svg class="ic star"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
+</svg></a></li>
+      <li><a class="mbtn"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 4v16" />
+  <path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2" />
+  <path d="M9 20h6" />
+</svg><span>Work on text</span><svg class="ic star"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
+</svg></a></li></ul></div><div class="sgroup"><div class="glabel">All tools</div><ul class="menu"><li><a class="mbtn "><span class="gico" style="--th:255"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m12.296 3.464 3.02 3.956" />
+  <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z" />
+  <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+  <path d="m6.18 5.276 3.1 3.899" />
+</svg></span><span>Video and audio</span><em class="cnt">4</em><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg></a></li><li><a class="mbtn "><span class="gico" style="--th:165"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 15V3" />
+  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+  <path d="m7 10 5 5 5-5" />
+</svg></span><span>Downloads</span><em class="cnt">2</em><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg></a></li><li><a class="mbtn "><span class="gico" style="--th:78"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+  <circle cx="9" cy="9" r="2" />
+  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+</svg></span><span>Images</span><em class="cnt">5</em><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg></a></li><li><a class="mbtn "><span class="gico" style="--th:285"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="M10 9H8" />
+  <path d="M16 13H8" />
+  <path d="M16 17H8" />
+</svg></span><span>PDFs and documents</span><em class="cnt">4</em><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg></a></li><li><a class="mbtn "><span class="gico" style="--th:322"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1" />
+  <path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1" />
+</svg></span><span>Text and data</span><em class="cnt">6</em><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg></a></li><li><a class="mbtn "><span class="gico" style="--th:215"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+  <path d="M20 2v4" />
+  <path d="M22 4h-4" />
+  <circle cx="4" cy="20" r="2" />
+</svg></span><span>Quick tools</span><em class="cnt">6</em><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg></a></li><li><a class="mbtn "><span class="gico" style="--th:12"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="16" height="20" x="4" y="2" rx="2" />
+  <line x1="8" x2="16" y1="6" y2="6" />
+  <line x1="16" x2="16" y1="14" y2="18" />
+  <path d="M16 10h.01" />
+  <path d="M12 10h.01" />
+  <path d="M8 10h.01" />
+  <path d="M12 14h.01" />
+  <path d="M8 14h.01" />
+  <path d="M12 18h.01" />
+  <path d="M8 18h.01" />
+</svg></span><span>Calculators</span><em class="cnt">6</em><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg></a></li><li><a class="mbtn "><span class="gico" style="--th:195"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="20" height="5" x="2" y="3" rx="1" />
+  <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" />
+  <path d="M10 12h4" />
+</svg></span><span>Files and disk</span><em class="cnt">4</em><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg></a></li><li><a class="mbtn "><span class="gico" style="--th:135"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="18" height="7" x="3" y="3" rx="1" />
+  <rect width="9" height="7" x="3" y="14" rx="1" />
+  <rect width="5" height="7" x="16" y="14" rx="1" />
+</svg></span><span>Mockups</span><em class="cnt">2</em><svg class="ic chev"
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m9 18 6-6-6-6" />
+</svg></a></li></ul></div></div>
+    <div class="sfoot"><ul class="menu"><li><a class="mbtn "><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M13 5h8" />
+  <path d="M13 12h8" />
+  <path d="M13 19h8" />
+  <path d="m3 17 2 2 4-4" />
+  <path d="m3 7 2 2 4-4" />
+</svg><span>Queue</span><b class="mbadge">2</b></a></li><li><a class="mbtn "><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+  <path d="M3 3v5h5" />
+  <path d="M12 7v5l4 2" />
+</svg><span>History</span></a></li><li><a class="mbtn active"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+  <circle cx="12" cy="12" r="3" />
+</svg><span>Settings</span></a></li></ul></div>
+  </aside><div class="wrap"><main class="inset"><header class="hdr"><button class="iconbtn"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="18" height="18" x="3" y="3" rx="2" />
+  <path d="M9 3v18" />
+</svg></button><i class="sep"></i>
+  <nav class="bc"><span class="cur">Settings</span></nav></header><div class="page"><div class="ptitle"><div><h1>Settings</h1><p>Everything stays on this computer.</p></div></div>
+  <div class="sgrid">
+  <article class="card sc"><div class="sct"><h3>Version</h3><p>This is the newest version.</p></div><div class="scc"><span class="mono">4.0.0</span><button class="btn outline sm"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+  <path d="M21 3v5h-5" />
+  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+  <path d="M8 16H3v5" />
+</svg> Check for updates</button></div></article>
+  <article class="card sc"><div class="sct"><h3>Language</h3><p>Tools, options and errors are all translated.</p></div><div class="scc"><div class="sel w200">English<svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg></div></div></article>
+  <article class="card sc"><div class="sct"><h3>Theme</h3><p>Follow Windows, or pick one.</p></div><div class="scc"><div class="tg"><span><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="20" height="14" x="2" y="3" rx="2" />
+  <line x1="8" x2="16" y1="21" y2="21" />
+  <line x1="12" x2="12" y1="17" y2="21" />
+</svg> System</span><span><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="4" />
+  <path d="M12 2v2" />
+  <path d="M12 20v2" />
+  <path d="m4.93 4.93 1.41 1.41" />
+  <path d="m17.66 17.66 1.41 1.41" />
+  <path d="M2 12h2" />
+  <path d="M20 12h2" />
+  <path d="m6.34 17.66-1.41 1.41" />
+  <path d="m19.07 4.93-1.41 1.41" />
+</svg> Light</span><span class="on"><svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" />
+</svg> Dark</span></div></div></article>
+  <article class="card sc"><div class="sct"><h3>Sidebar</h3><p>Keep the tool tree open when the window is wide.</p></div><div class="scc"><div class="switch on"><i></i></div></div></article>
+  <article class="card sc"><div class="sct"><h3>Default destination</h3><p>C:\Users\you\Documents\tools4devs</p></div><div class="scc"><button class="btn outline sm">Choose</button><button class="btn ghost sm">Clear</button></div></article>
+  <article class="card sc"><div class="sct"><h3>History</h3><p>5 results kept across restarts.</p></div><div class="scc"><button class="btn outline sm">Clear</button></div></article>
+  <article class="card sc"><div class="sct"><h3>How many at once</h3><p>Anything beyond this waits in the queue.</p></div><div class="scc"><div class="sel w200">2 operations<svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg></div></div></article>
+  <article class="card sc"><div class="sct"><h3>When the file already exists</h3><p>Choose what happens to the old file.</p></div><div class="scc"><div class="sel w260">Keep both — number the new one<svg class="ic "
+ 
+  xmlns="http://www.w3.org/2000/svg"
+ 
+ 
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg></div></div></article>
+  </div></div></main></div></div></body></html>
