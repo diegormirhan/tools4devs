@@ -67,8 +67,8 @@ await send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceSc
 await send("Page.enable"); await send("DOM.enable"); await send("Runtime.enable");
 // Language and theme before the app reads them.
 await send("Page.addScriptToEvaluateOnNewDocument", { source: `
-  localStorage.setItem("toolhaven.language", "pt");
-  localStorage.setItem("toolhaven.theme-preference", "dark");` });
+  localStorage.setItem("tools4devs.language", "pt");
+  localStorage.setItem("tools4devs.theme-preference", "dark");` });
 // A click on a file input opens a chooser; answer it with the sample file.
 await send("Page.setInterceptFileChooserDialog", { enabled: true });
 listeners.push(async (m) => {

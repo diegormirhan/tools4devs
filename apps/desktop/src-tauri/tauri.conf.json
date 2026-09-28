@@ -1,8 +1,8 @@
 {
   "$schema": "../../../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "tools4devs",
-  "version": "3.4.0",
-  "identifier": "com.toolhaven.desktop",
+  "version": "4.0.0",
+  "identifier": "com.tools4devs.desktop",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://127.0.0.1:5173",
@@ -42,14 +42,14 @@
       "resources/tools/*": "tools/"
     },
     "createUpdaterArtifacts": true,
-    "publisher": "toolhaven",
+    "publisher": "tools4devs",
     "windows": {
       "wix": {
         "upgradeCode": "aa358e58-31a5-54d8-975a-f12ee846eb55"
       },
       "nsis": {
         "template": "installer/upgrade-compatible.nsi",
-        "installerHooks": "installer/rename-shortcuts.nsh"
+        "installerHooks": "installer/migrate-installation.nsh"
       }
     }
   },

@@ -131,8 +131,8 @@ async function main() {
         "Page.addScriptToEvaluateOnNewDocument",
         {
           source:
-            `localStorage.setItem("toolhaven.theme-preference", ${JSON.stringify(shot.theme)});` +
-            `localStorage.setItem("toolhaven.language", ${JSON.stringify(language)});`,
+            `localStorage.setItem("tools4devs.theme-preference", ${JSON.stringify(shot.theme)});` +
+            `localStorage.setItem("tools4devs.language", ${JSON.stringify(language)});`,
         },
         sessionId,
       );

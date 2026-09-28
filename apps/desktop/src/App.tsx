@@ -75,15 +75,15 @@ function Shell() {
   const installations = useInstallationState();
   const fileDrop = useFileDrop();
   const theme = useTheme();
-  const [concurrency, setConcurrency] = useState(() => readNumberSetting("toolhaven.concurrency", 2));
+  const [concurrency, setConcurrency] = useState(() => readNumberSetting("tools4devs.concurrency", 2));
   const [conflictPolicy, setConflictPolicy] = useState(
-    () => readSetting("toolhaven.conflict") || "keep-both",
+    () => readSetting("tools4devs.conflict") || "keep-both",
   );
   const runner = useOperationRunner({ concurrency, conflictPolicy });
   const update = useUpdate();
 
-  useEffect(() => writeSetting("toolhaven.concurrency", String(concurrency)), [concurrency]);
-  useEffect(() => writeSetting("toolhaven.conflict", conflictPolicy), [conflictPolicy]);
+  useEffect(() => writeSetting("tools4devs.concurrency", String(concurrency)), [concurrency]);
+  useEffect(() => writeSetting("tools4devs.conflict", conflictPolicy), [conflictPolicy]);
   const searchRef = useRef<HTMLInputElement>(null);
   const toolTriggerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -94,7 +94,7 @@ function Shell() {
   // not want to collapse it again every launch.
   const [defaultFolder, setDefaultFolder] = useState(() => {
     try {
-      return localStorage.getItem('toolhaven.destination') ?? '';
+      return localStorage.getItem('tools4devs.destination') ?? '';
     } catch {
       return '';
     }
@@ -102,7 +102,7 @@ function Shell() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('toolhaven.destination', defaultFolder);
+      localStorage.setItem('tools4devs.destination', defaultFolder);
     } catch {
       /* A blocked store is not worth failing a render over. */
     }
@@ -110,7 +110,7 @@ function Shell() {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
-      return localStorage.getItem("toolhaven.sidebar") === "collapsed";
+      return localStorage.getItem("tools4devs.sidebar") === "collapsed";
     } catch {
       return false;
     }
@@ -118,7 +118,7 @@ function Shell() {
 
   useEffect(() => {
     try {
-      localStorage.setItem("toolhaven.sidebar", sidebarCollapsed ? "collapsed" : "expanded");
+      localStorage.setItem("tools4devs.sidebar", sidebarCollapsed ? "collapsed" : "expanded");
     } catch {
       /* A blocked store is not worth failing a render over. */
     }

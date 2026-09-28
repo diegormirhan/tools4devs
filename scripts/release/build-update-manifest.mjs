@@ -1,5 +1,5 @@
 /**
- * Writes the `latest.json` the app checks on launch.
+ * Writes tools4devs.json for current clients and latest.json for legacy clients.
  *
  * The updater asks one address for a small document naming the newest version
  * and where to get it, and refuses anything whose signature does not match the
@@ -11,8 +11,8 @@
  * With no argument it writes into `Releases/<version>`, which is where every
  * version's artifacts are staged. A path can still be given to override it.
  *
- * The result belongs in the GitHub release beside the installers, because the
- * endpoint points at `/releases/latest/download/latest.json`.
+ * Both files belong in every GitHub release. From 4.0.0, latest.json is frozen
+ * at the signed 3.4.0 bridge while tools4devs.json names the current version.
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";

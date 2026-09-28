@@ -4,11 +4,13 @@ import { describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { ToolPanel } from "./components/ToolPanel";
 import { createCatalogRows } from "./catalog/catalog";
+import { migratePreferences } from "./domain/preference-migration";
 
 describe("desktop catalog", () => {
   it("preserves ToolHaven language and theme preferences after the rename", () => {
     localStorage.setItem("toolhaven.language", "pt");
     localStorage.setItem("toolhaven.theme-preference", "light");
+    migratePreferences(localStorage);
     render(<App />);
     expect(screen.getByRole("heading", { name: "O que você quer fazer?" })).toBeVisible();
     expect(document.documentElement.dataset.theme).toBe("light");
@@ -130,7 +132,7 @@ describe("desktop catalog", () => {
 
     await user.click(within(themes).getByRole("radio", { name: "Light theme" }));
     expect(document.documentElement.dataset.theme).toBe("light");
-    expect(window.localStorage.getItem("toolhaven.theme-preference")).toBe("light");
+    expect(window.localStorage.getItem("tools4devs.theme-preference")).toBe("light");
   });
 
   it("offers the same theme control in the settings view", async () => {

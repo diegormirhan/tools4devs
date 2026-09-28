@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 export type ThemePreference = "system" | "light" | "dark";
 export type ResolvedTheme = "light" | "dark";
 
-const storageKey = "toolhaven.theme-preference";
+const storageKey = "tools4devs.theme-preference";
 const darkQuery = "(prefers-color-scheme: dark)";
 
 export function useTheme() {

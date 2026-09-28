@@ -2,7 +2,23 @@
 
 All notable changes to tools4devs. Versions follow [semantic versioning](https://semver.org/).
 
+## 4.0.0 (2026-09-27)
+
+### Changed
+
+- Use tools4devs for the Windows application identity, publisher, installer registry keys, installation directory, component store and saved preference keys.
+- Migrate existing profiles, settings, history and downloaded tools automatically. Keep the previous profile as a recovery copy and preserve downloaded components in the new tools4devs directory; never overwrite an existing tools4devs profile. The previous component directory may be removed with the old installation.
+- Retarget existing shortcuts to the new installation and remove the previous app registration after the replacement installer has completed.
+- Keep the legacy update channel pinned to the signed 3.4.0 bridge. The tools4devs channel advertises 4.0.0 and future releases.
+
+### Fixed
+
+- Stop migration before opening the new profile if data cannot be copied safely. Existing data remains intact, and migration can be retried.
+- Preserve the original updater signing key and MSI upgrade family across the identity change.
+
 ## 3.4.0 (2026-09-27)
+
+This is the required automatic-update bridge. Older clients install 3.4.0 first; after restarting, 3.4.0 follows the tools4devs update channel to 4.0.0 and later releases. Keep the signed v3.4.0 assets available while supporting those clients.
 
 ### Changed
 

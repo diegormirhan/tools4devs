@@ -42,7 +42,7 @@ describe("the translator", () => {
 
     expect(screen.getByText("Voltar às ferramentas")).toBeInTheDocument();
     expect(screen.getByText("26 ferramentas")).toBeInTheDocument();
-    expect(localStorage.getItem("toolhaven.language")).toBe("pt");
+    expect(localStorage.getItem("tools4devs.language")).toBe("pt");
     expect(document.documentElement.lang).toBe("pt-BR");
   });
 

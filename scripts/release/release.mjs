@@ -11,7 +11,7 @@
  * 4. stages everything in Releases/<version>/: installer, MSI, signatures,
  *    portable zip, checksums.txt, latest.json and RELEASE-NOTES.md
  *
- * Signing reads TAURI_SIGNING_PRIVATE_KEY, or ~/.toolhaven/updater.key when unset.
+ * Signing reads TAURI_SIGNING_PRIVATE_KEY, or ~/.tools4devs/updater.key with a legacy fallback.
  * It does not commit, tag or publish.
  */
 import { execFileSync, execSync } from "node:child_process";
@@ -89,7 +89,8 @@ step("Tests");
 run("npm test");
 
 step("Signed build");
-process.env.TAURI_SIGNING_PRIVATE_KEY ??= path.join(homedir(), ".toolhaven", "updater.key");
+const signingKey = path.join(homedir(), ".tools4devs", "updater.key");
+process.env.TAURI_SIGNING_PRIVATE_KEY ??= existsSync(signingKey) ? signingKey : path.join(homedir(), ".toolhaven", "updater.key");
 process.env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD ??= "";
 run("npm run tauri:build");
 
@@ -142,6 +143,8 @@ ${notes}
 Windows x64 only. SHA-256 checksums are in \`checksums.txt\`. The portable build doesn't update itself. SmartScreen warns on first run because the installer isn't code-signed.
 
 If you are on ToolHaven 2.1.0 or later, open the app and use the Restart button after the signed update has downloaded. The update keeps your preferences, history and installed tools.
+
+${version === "3.4.0" ? "This is the required bridge to the new update channel. Older installed versions update to 3.4.0 first; after a restart, 3.4.0 checks tools4devs.json and can offer 4.0.0 or newer. The user restarts again to finish that update. Version 4.0.0 migrates the active identity and saved data. The old profile remains for recovery; downloaded components are copied to the new store, and the old component directory may be removed with the previous installation. Keep these exact signed v3.4.0 assets available." : "Older clients first install the signed 3.4.0 bridge, then check the tools4devs channel for this version. latest.json intentionally stays at 3.4.0; tools4devs.json advertises this release. Keep every v3.4.0 asset available and upload both manifests here."}
 `,
 );
 

@@ -9,6 +9,7 @@ import { catalogPortuguese } from "./catalog-pt";
  * dictionary has never heard of.
  */
 export const portuguese: Record<string, string> = {
+  "Could not migrate your saved settings. Your previous data is unchanged. Close the app and try again.": "Não foi possível migrar suas configurações. Seus dados anteriores estão intactos. Feche o app e tente novamente.",
   ...catalogPortuguese,
 
   // ── The shell

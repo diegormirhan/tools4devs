@@ -93,11 +93,10 @@ pub fn tool(tool_id: &str) -> Option<&'static ManifestTool> {
 
 /// Where installed components live. Under the user's local app data, never in Program
 /// Files, so installing a component never needs elevation.
-// Keep the legacy directory so upgrades reuse verified, already installed tools.
 fn store_root() -> Result<PathBuf, String> {
     let base =
         std::env::var_os("LOCALAPPDATA").ok_or("Could not locate the application data folder.")?;
-    Ok(PathBuf::from(base).join("ToolHaven").join("components"))
+    Ok(PathBuf::from(base).join("tools4devs").join("components"))
 }
 
 /// One directory per artifact digest: re-installing the same version is idempotent and
@@ -611,9 +610,9 @@ fn extract_zip(bytes: &[u8], destination: &Path) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn rename_preserves_the_existing_component_store() {
+    fn uses_the_migrated_component_store() {
         let base = std::env::var_os("LOCALAPPDATA").unwrap();
-        assert_eq!(super::store_root().unwrap(), std::path::PathBuf::from(base).join("ToolHaven").join("components"));
+        assert_eq!(super::store_root().unwrap(), std::path::PathBuf::from(base).join("tools4devs").join("components"));
     }
 
     use super::*;

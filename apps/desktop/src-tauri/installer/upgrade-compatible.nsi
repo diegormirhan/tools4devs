@@ -65,9 +65,11 @@ ${StrLoc}
 !define WEBVIEW2BOOTSTRAPPERPATH "{{webview2_bootstrapper_path}}"
 !define WEBVIEW2INSTALLERPATH "{{webview2_installer_path}}"
 !define MINIMUMWEBVIEW2VERSION "{{minimum_webview2_version}}"
-!define UNINSTKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\ToolHaven"
+!define UNINSTKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\tools4devs"
+!define LEGACYUNINSTKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\ToolHaven"
 !define MANUKEY "Software\${MANUFACTURER}"
-!define MANUPRODUCTKEY "Software\toolhaven\ToolHaven"
+!define MANUPRODUCTKEY "Software\tools4devs\tools4devs"
+!define LEGACYMANUPRODUCTKEY "Software\toolhaven\ToolHaven"
 !define UNINSTALLERSIGNCOMMAND "{{uninstaller_sign_cmd}}"
 !define ESTIMATEDSIZE "{{estimated_size}}"
 !define STARTMENUFOLDER "{{start_menu_folder}}"
@@ -77,6 +79,11 @@ Var UpdateMode
 Var NoShortcutMode
 Var WixMode
 Var OldMainBinaryName
+Var PreviousUninstallKey
+Var PreviousProductKey
+Var LegacyInstallDir
+Var LegacyUninstallString
+Var LegacyMainBinaryName
 
 Name "${PRODUCTNAME}"
 BrandingText "${COPYRIGHT}"
@@ -207,6 +214,7 @@ Function PageReinstall
     ReadRegStr $R0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$1" "DisplayName"
     ReadRegStr $R1 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$1" "Publisher"
     StrCmp "$R0$R1" "${PRODUCTNAME}${MANUFACTURER}" wix_identity_match
+    StrCmp "$R0$R1" "tools4devstoolhaven" wix_identity_match
     StrCmp "$R0$R1" "ToolHaventoolhaven" 0 wix_loop
   wix_identity_match:
     ReadRegStr $R0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$1" "UninstallString"
@@ -219,8 +227,8 @@ Function PageReinstall
   wix_loop_done:
 
   ; Check if there is an existing installation, if not, abort the reinstall page
-  ReadRegStr $R0 SHCTX "${UNINSTKEY}" ""
-  ReadRegStr $R1 SHCTX "${UNINSTKEY}" "UninstallString"
+  ReadRegStr $R0 SHCTX "$PreviousUninstallKey" ""
+  ReadRegStr $R1 SHCTX "$PreviousUninstallKey" "UninstallString"
   ${IfThen} "$R0$R1" == "" ${|} Abort ${|}
 
   ; Compare this installar version with the existing installation
@@ -230,7 +238,7 @@ Function PageReinstall
   ${If} $WixMode = 1
     ReadRegStr $R0 HKLM "$R6" "DisplayVersion"
   ${Else}
-    ReadRegStr $R0 SHCTX "${UNINSTKEY}" "DisplayVersion"
+    ReadRegStr $R0 SHCTX "$PreviousUninstallKey" "DisplayVersion"
   ${EndIf}
   ${IfThen} $R0 == "" ${|} StrCpy $R4 "$(unknown)" ${|}
 
@@ -356,8 +364,8 @@ Function PageLeaveReinstall
       ReadRegStr $R1 HKLM "$R6" "UninstallString"
       ExecWait '$R1' $0
     ${Else}
-      ReadRegStr $4 SHCTX "${MANUPRODUCTKEY}" ""
-      ReadRegStr $R1 SHCTX "${UNINSTKEY}" "UninstallString"
+      ReadRegStr $4 SHCTX "$PreviousProductKey" ""
+      ReadRegStr $R1 SHCTX "$PreviousUninstallKey" "UninstallString"
       ${IfThen} $UpdateMode = 1 ${|} StrCpy $R1 "$R1 /UPDATE" ${|} ; append /UPDATE
       ${IfThen} $PassiveMode = 1 ${|} StrCpy $R1 "$R1 /P" ${|} ; append /P
       StrCpy $R1 "$R1 _?=$4" ; append uninstall directory
@@ -499,6 +507,24 @@ Function .onInit
   !endif
 
   !insertmacro SetContext
+
+  StrCpy $PreviousUninstallKey "${UNINSTKEY}"
+  StrCpy $PreviousProductKey "${MANUPRODUCTKEY}"
+  ReadRegStr $LegacyUninstallString SHCTX "${LEGACYUNINSTKEY}" "UninstallString"
+  ${If} $LegacyUninstallString != ""
+    ReadRegStr $LegacyInstallDir SHCTX "${LEGACYMANUPRODUCTKEY}" ""
+    ReadRegStr $LegacyMainBinaryName SHCTX "${LEGACYUNINSTKEY}" "MainBinaryName"
+    ReadRegStr $0 SHCTX "${UNINSTKEY}" "UninstallString"
+    ${If} $0 == ""
+      StrCpy $PreviousUninstallKey "${LEGACYUNINSTKEY}"
+      StrCpy $PreviousProductKey "${LEGACYMANUPRODUCTKEY}"
+    ${EndIf}
+    ; Install the new identity first, then remove the previous installation safely.
+    StrCpy $UpdateMode 1
+    ${If} $INSTDIR == $LegacyInstallDir
+      StrCpy $INSTDIR "${PLACEHOLDER_INSTALL_DIR}"
+    ${EndIf}
+  ${EndIf}
 
   ${If} $INSTDIR == "${PLACEHOLDER_INSTALL_DIR}"
     ; Set default install location
@@ -692,7 +718,7 @@ Section Install
   !endif
 
   ; Remove old main binary if it doesn't match new main binary name
-  ReadRegStr $OldMainBinaryName SHCTX "${UNINSTKEY}" "MainBinaryName"
+  ReadRegStr $OldMainBinaryName SHCTX "$PreviousUninstallKey" "MainBinaryName"
   ${If} $OldMainBinaryName != ""
   ${AndIf} $OldMainBinaryName != "${MAINBINARYNAME}.exe"
     Delete "$INSTDIR\$OldMainBinaryName"

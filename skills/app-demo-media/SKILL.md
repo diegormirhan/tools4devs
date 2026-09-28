@@ -115,5 +115,5 @@ Keep it quiet so it doesn't look generated:
 - **Web mode.** There is no native host: downloadable tools show "Baixar", not "Pronto", and native-only features can't be shown.
 - **CSS specificity in `overlay.html`.** A class that sets `display` beats `[data-mode] { display: none }` when it comes later, and a full-screen card then covers every render. Only the script sets `display`.
 - **Separate Chrome renders.** Each render needs its own `--user-data-dir`. Otherwise Chrome hands every call to one browser, which renders them all as the last page it loaded.
-- **Language and theme.** Set them through `localStorage` (`toolhaven.language`, `toolhaven.theme-preference`) before navigating.
+- **Language and theme.** Set them through `localStorage` (`tools4devs.language`, `tools4devs.theme-preference`) before navigating.
 - **Address.** Use `localhost`, not `127.0.0.1`: vite listens on IPv6.

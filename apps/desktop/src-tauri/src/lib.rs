@@ -1,5 +1,6 @@
 mod audio;
 mod components;
+mod data_migration;
 mod recognize;
 mod running;
 mod search;
@@ -9,6 +10,13 @@ use tauri::{Emitter, Manager};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(windows)]
+    if let Err(error) = data_migration::migrate_current_user() {
+        use windows::{core::{w, PCWSTR}, Win32::UI::WindowsAndMessaging::{MessageBoxW, MB_ICONERROR, MB_OK}};
+        let message: Vec<u16> = format!("Could not migrate your saved data. Close the old app and try again. Your original data has been kept.\n\n{error}\0").encode_utf16().collect();
+        unsafe { MessageBoxW(None, PCWSTR(message.as_ptr()), w!("tools4devs"), MB_OK | MB_ICONERROR); }
+        return;
+    }
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
             if let Some(window) = app.get_webview_window("main") {

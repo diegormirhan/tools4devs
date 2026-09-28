@@ -44,7 +44,7 @@ export function isFinished(job: ToolJob): boolean {
   return job.status !== "running" && job.status !== "queued";
 }
 
-const STORAGE_KEY = "toolhaven.jobs";
+const STORAGE_KEY = "tools4devs.jobs";
 
 /**
  * How much history is kept.

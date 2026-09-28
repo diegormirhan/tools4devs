@@ -4,7 +4,7 @@ import { portuguese } from "./pt";
 
 export type Language = "en" | "pt";
 
-const STORAGE_KEY = "toolhaven.language";
+const STORAGE_KEY = "tools4devs.language";
 
 /**
  * Translations are keyed by the English sentence itself.
