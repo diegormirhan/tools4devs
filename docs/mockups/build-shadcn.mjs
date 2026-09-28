@@ -1,6 +1,6 @@
 // Round 2: variations of directions A (zinc) and B (stone), each in light and dark,
 // built from the official shadcn/ui tokens (./shadcn/*.json) and component classes.
-// LUCIDE=<path to lucide-static/icons> node build-shadcn.mjs && node render.mjs v2
+// LUCIDE=<path to lucide-static/icons> node build-shadcn.mjs [outDir=v2] [variant]  &&  node render.mjs <outDir>   (b3 = blue/cool B2, use: node build-shadcn.mjs v3 b3)
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,6 +17,7 @@ const icon = (name, cls = "") => readFileSync(join(lucide, `${name}.svg`), "utf8
 const bases = {
   zinc: JSON.parse(readFileSync(join(here, "shadcn/zinc.json"), "utf8")),
   stone: JSON.parse(readFileSync(join(here, "shadcn/stone.json"), "utf8")),
+  mist: JSON.parse(readFileSync(join(here, "shadcn/mist.json"), "utf8")),
 };
 // Only --primary (and what derives from it) and the warm B canvas are ours; everything else is the shadcn base colour.
 const overrides = {
@@ -30,7 +31,15 @@ const overrides = {
     dark: { primary: "oklch(0.7 0.15 45)", "primary-foreground": "oklch(0.216 0.006 56.043)", ring: "oklch(0.55 0.12 45)", "sidebar-primary": "oklch(0.7 0.15 45)", "sidebar-ring": "oklch(0.55 0.12 45)" },
   },
 };
+overrides.mist = {
+  // Cool blue-grey canvas and a blue primary; the inset panel stays white so it reads against the sidebar.
+  light: { primary: "oklch(0.52 0.19 258)", "primary-foreground": "oklch(0.985 0.002 197.1)", ring: "oklch(0.62 0.16 258)", "sidebar-primary": "oklch(0.52 0.19 258)", "sidebar-ring": "oklch(0.62 0.16 258)",
+    sidebar: "oklch(0.962 0.008 245)", "sidebar-accent": "oklch(0.925 0.013 245)", "sidebar-border": "oklch(0.905 0.01 245)", secondary: "oklch(0.958 0.006 245)", muted: "oklch(0.958 0.006 245)", accent: "oklch(0.945 0.009 245)", border: "oklch(0.915 0.008 245)", input: "oklch(0.915 0.008 245)" },
+  dark: { primary: "oklch(0.74 0.13 258)", "primary-foreground": "oklch(0.2 0.02 258)", ring: "oklch(0.55 0.13 258)", "sidebar-primary": "oklch(0.74 0.13 258)", "sidebar-ring": "oklch(0.55 0.13 258)",
+    background: "oklch(0.17 0.012 255)", card: "oklch(0.215 0.014 255)", popover: "oklch(0.215 0.014 255)", sidebar: "oklch(0.14 0.012 255)", "sidebar-accent": "oklch(0.27 0.02 255)", secondary: "oklch(0.27 0.016 255)", muted: "oklch(0.27 0.016 255)", accent: "oklch(0.3 0.02 255)" },
+};
 const variants = {
+  b3: { base: "mist", title: "B3 · Mist azul, sidebar inset, ícone colorido por grupo", shell: "inset", card: "tile", heading: true, hue: { clay: 255, sage: 165, ochre: 78, slate: 285, plum: 322, stone: 215, rose: 12, teal: 195, sand: 135 } },
   a1: { base: "zinc", title: "A1 · Zinc, sidebar padrão, cards verticais", shell: "sidebar", card: "vertical", heading: false },
   a2: { base: "zinc", title: "A2 · Zinc, sidebar inset, cards horizontais", shell: "inset", card: "horizontal", heading: false },
   b1: { base: "stone", title: "B1 · Stone, sidebar padrão, cards com faixa de cor", shell: "sidebar", card: "strip", heading: true },
@@ -44,7 +53,8 @@ const tokens = (v, theme) => {
 };
 
 /* ---------- Pieces (class names mirror the shadcn Tailwind utilities they stand for) ---------- */
-const toneStyle = (g) => `--th:${hue[g.tone]}`;
+let curHue = hue;
+const toneStyle = (g) => `--th:${curHue[g.tone]}`;
 
 const sidebar = (v, screen) => {
   const home = screen !== "tool";
@@ -231,14 +241,17 @@ dl.cb{grid-template-columns:auto 1fr;gap:12px 16px;font-size:14px}dt{color:var(-
 
 const page = (key, theme, screen) => {
   const v = variants[key];
+  curHue = v.hue ?? hue;
   const crumbs = screen === "tool" ? ["Video and audio", "Convert media", "Extract audio"] : ["Tools"];
   return `<!doctype html><html lang="en" class="${theme}"><head><meta charset="utf-8"><title>${v.title} · ${theme} · ${screen}</title><style>${css(v, theme)}</style></head>
 <body><div class="app">${sidebar(v, screen)}<div class="wrap"><main class="inset">${header(crumbs)}${screen === "tool" ? toolMain() : homeMain(v, screen === "hover")}</main></div></div></body></html>`;
 };
 
-mkdirSync(join(here, "v2/html"), { recursive: true });
+const outDir = process.argv[2] ?? "v2";
+const only = process.argv[3];
+mkdirSync(join(here, outDir, "html"), { recursive: true });
 let n = 0;
-for (const key of Object.keys(variants)) for (const theme of ["light", "dark"]) for (const screen of ["home", "hover", "tool"]) {
-  writeFileSync(join(here, "v2/html", `${key}-${theme}-${screen}.html`), page(key, theme, screen)); n++;
+for (const key of Object.keys(variants).filter((k) => (only ? k === only : k !== "b3"))) for (const theme of ["light", "dark"]) for (const screen of ["home", "hover", "tool"]) {
+  writeFileSync(join(here, outDir, "html", `${key}-${theme}-${screen}.html`), page(key, theme, screen)); n++;
 }
 console.log(`built ${n} pages`);
