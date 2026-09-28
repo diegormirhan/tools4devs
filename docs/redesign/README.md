@@ -1,5 +1,7 @@
 # Redesign do tools4devs: mockups e vídeos definitivos
 
+**Plano de implementação, casos de uso e especificação do design: [`PLANO.md`](PLANO.md).**
+
 Material de referência para a reestruturação do app (sidebar em árvore, cards com preview no hover, shadcn/ui). Nada aqui é importado pelo app: são imagens, vídeos e os scripts que os geram.
 
 ## Direção escolhida
