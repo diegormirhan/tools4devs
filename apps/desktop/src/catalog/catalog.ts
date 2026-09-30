@@ -1,3 +1,35 @@
+import {
+  Archive,
+  Binary,
+  Braces,
+  Calculator,
+  ChartColumn,
+  Clapperboard,
+  Download,
+  FileJson,
+  FileOutput,
+  FileText,
+  FileType,
+  FolderSearch,
+  GitCompare,
+  HardDrive,
+  Image,
+  Images,
+  Layers,
+  LayoutTemplate,
+  MessageSquare,
+  Minimize2,
+  Music,
+  ScanSearch,
+  ScanText,
+  Search,
+  Sparkles,
+  Table,
+  Tag,
+  TextSearch,
+  WandSparkles,
+  type LucideIcon,
+} from "lucide-react";
 import toolManifest from "../../../../tooling/tools.json";
 import { utilityGroups } from "../utilities/registry";
 import type { InstallationState } from "../../../../scripts/component-installation/installation-state.mjs";
@@ -21,12 +53,20 @@ export type CatalogTool = {
   capabilities: string[];
   operations: ToolOperation[];
   downloadLabel?: string;
+  icon: LucideIcon;
+  /** A muted loop shown on hover; paths are relative to the app's public folder. */
+  preview?: ToolPreview;
 };
+
+export type ToolPreview = { src: string; poster: string };
 
 export type CatalogRow = {
   id: string;
   title: string;
   description: string;
+  icon: LucideIcon;
+  /** OKLCH hue that tints the group's icons and cards. */
+  hue: number;
   tools: CatalogTool[];
 };
 
@@ -58,6 +98,8 @@ const utilityPresentations: Record<string, ToolPresentation> = Object.fromEntrie
         description: utility.description,
       })),
       keywords: group.keywords,
+      icon: group.icon,
+      preview: group.preview,
       builtIn: { integrationName: "tools4devs", capabilities: [] },
     },
   ]),
@@ -67,6 +109,8 @@ const presentationById: Record<string, ToolPresentation> = {
   ...utilityPresentations,
   qpdf: {
     id: "qpdf",
+    icon: FileText,
+    preview: { src: "/previews/qpdf.webm", poster: "/previews/qpdf.jpg" },
     title: "Organise PDFs",
     description: "Merge, split, rotate, protect and optimise documents.",
     category: "documents",
@@ -83,6 +127,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   poppler: {
     id: "poppler",
+    icon: FileOutput,
     title: "Extract from PDFs",
     description: "Pull the text out of a document, or turn a page into an image.",
     category: "documents",
@@ -97,6 +142,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   libvips: {
     id: "libvips",
+    icon: Image,
     title: "Adjust images",
     description: "Resize, crop, compress, convert — and enlarge with a model.",
     category: "images",
@@ -122,6 +168,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   "image-search": {
     id: "image-search",
+    icon: Search,
     title: "Find where a picture came from",
     description: "Search the web by picture: the original, bigger copies, and pages using it.",
     category: "images",
@@ -138,6 +185,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   "chat-mockup": {
     id: "chat-mockup",
+    icon: MessageSquare,
     title: "Chat mockup",
     description: "A made-up WhatsApp, iMessage or Instagram DM conversation, for a mockup or a test.",
     category: "utilities",
@@ -154,6 +202,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   "post-mockup": {
     id: "post-mockup",
+    icon: LayoutTemplate,
     title: "Post mockup",
     description: "A made-up tweet or Instagram post, for a mockup or a test.",
     category: "utilities",
@@ -170,6 +219,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   imagemagick: {
     id: "imagemagick",
+    icon: WandSparkles,
     title: "Image formats",
     description: "Convert between formats the other tools do not reach, and inspect the details.",
     category: "images",
@@ -185,6 +235,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   oxipng: {
     id: "oxipng",
+    icon: Minimize2,
     title: "Optimise PNG",
     description: "Make PNGs smaller without losing a pixel.",
     category: "images",
@@ -197,6 +248,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   exiftool: {
     id: "exiftool",
+    icon: Tag,
     title: "Metadata",
     description: "Read, strip or edit the metadata in photos, video and documents.",
     category: "files",
@@ -212,6 +264,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   "yt-dlp": {
     id: "yt-dlp",
+    icon: Download,
     title: "Download media",
     description: "Save video or audio from a supported URL.",
     category: "downloads",
@@ -231,6 +284,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   "gallery-dl": {
     id: "gallery-dl",
+    icon: Images,
     title: "Download galleries",
     description: "Save images and albums from a post, profile or gallery URL.",
     category: "downloads",
@@ -250,6 +304,8 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   ffmpeg: {
     id: "ffmpeg",
+    icon: Clapperboard,
+    preview: { src: "/previews/ffmpeg.webm", poster: "/previews/ffmpeg.jpg" },
     title: "Convert media",
     description: "Convert, compress, resize, trim, and fourteen other jobs on video and audio.",
     category: "downloads",
@@ -280,6 +336,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   songrec: {
     id: "songrec",
+    icon: Music,
     title: "Name the music",
     description: "Identify what is playing, from the speakers or the room.",
     category: "video",
@@ -296,6 +353,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   mkvtoolnix: {
     id: "mkvtoolnix",
+    icon: Layers,
     title: "Package Matroska",
     description: "Convert to MKV and inspect tracks without re-encoding.",
     category: "downloads",
@@ -310,6 +368,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   ffprobe: {
     id: "ffprobe",
+    icon: ScanSearch,
     title: "Inspect media",
     description: "See codecs, tracks, dimensions and technical metadata.",
     category: "downloads",
@@ -321,6 +380,8 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   jq: {
     id: "jq",
+    icon: Braces,
+    preview: { src: "/previews/jq.webm", poster: "/previews/jq.jpg" },
     title: "Format JSON",
     description: "Query, filter and format JSON without opening an editor.",
     category: "developer",
@@ -334,6 +395,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   yq: {
     id: "yq",
+    icon: FileJson,
     title: "Work with YAML",
     description: "Format, query and convert YAML and JSON.",
     category: "developer",
@@ -347,6 +409,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   miller: {
     id: "miller",
+    icon: Table,
     title: "Spreadsheets and CSV",
     description: "Convert between CSV, TSV and JSON, and summarise the columns.",
     category: "developer",
@@ -361,6 +424,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   difftastic: {
     id: "difftastic",
+    icon: GitCompare,
     title: "Compare files",
     description: "A structural diff: it compares the syntax, not just the lines.",
     category: "developer",
@@ -374,6 +438,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   ripgrep: {
     id: "ripgrep",
+    icon: TextSearch,
     title: "Search a project",
     description: "Find text and patterns across folders, fast.",
     category: "developer",
@@ -386,6 +451,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   fd: {
     id: "fd",
+    icon: FolderSearch,
     title: "Find files",
     description: "Locate files by name, extension or path.",
     category: "developer",
@@ -396,6 +462,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   tokei: {
     id: "tokei",
+    icon: ChartColumn,
     title: "Count code",
     description: "See lines, comments and files per language in a project.",
     category: "developer",
@@ -408,6 +475,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   hexyl: {
     id: "hexyl",
+    icon: Binary,
     title: "View bytes",
     description: "Inspect the start of a file in hexadecimal.",
     category: "developer",
@@ -418,6 +486,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   dust: {
     id: "dust",
+    icon: HardDrive,
     title: "Disk usage",
     description: "Find out which folders are taking the space.",
     category: "files",
@@ -428,6 +497,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   "7zip": {
     id: "7zip",
+    icon: Archive,
     title: "Compress files",
     description: "Create and extract 7z, zip, tar, gzip, bzip2 and xz archives.",
     category: "files",
@@ -441,6 +511,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   tesseract: {
     id: "tesseract",
+    icon: ScanText,
     title: "Read text from images",
     description: "Pull the words out of a scan or a photograph.",
     category: "documents",
@@ -455,6 +526,7 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   pandoc: {
     id: "pandoc",
+    icon: FileType,
     title: "Convert documents",
     description: "Convert Markdown and documents between open formats.",
     category: "documents",
@@ -472,54 +544,72 @@ const presentationById: Record<string, ToolPresentation> = {
 const rowDefinitions = [
   {
     id: "video",
+    icon: Clapperboard,
+    hue: 255,
     title: "Video and audio",
     description: "Convert, compress, trim, inspect — and name what is playing.",
     toolIds: ["ffmpeg", "ffprobe", "songrec", "mkvtoolnix"],
   },
   {
     id: "downloads",
+    icon: Download,
+    hue: 165,
     title: "Downloads",
     description: "Save video, audio and image galleries from a link.",
     toolIds: ["yt-dlp", "gallery-dl"],
   },
   {
     id: "images",
+    icon: Image,
+    hue: 78,
     title: "Images",
     description: "Resize, crop, convert, shrink, and read or strip metadata.",
     toolIds: ["libvips", "image-search", "imagemagick", "oxipng", "exiftool"],
   },
   {
     id: "documents",
+    icon: FileText,
+    hue: 285,
     title: "PDFs and documents",
     description: "Reorganise pages, pull out text, and move between formats.",
     toolIds: ["qpdf", "poppler", "tesseract", "pandoc"],
   },
   {
     id: "data",
+    icon: Braces,
+    hue: 322,
     title: "Text and data",
     description: "Query, reshape, search and compare structured text.",
     toolIds: ["jq", "yq", "miller", "ripgrep", "fd", "difftastic"],
   },
   {
     id: "utilities",
+    icon: Sparkles,
+    hue: 215,
     title: "Quick tools",
     description: "Text, codes and test data — done here, with nothing to install.",
     toolIds: ["text-tools", "codes-hashes", "test-data", "css-tools", "code-formatting", "qr-barcode"],
   },
   {
     id: "calculators",
+    icon: Calculator,
+    hue: 12,
     title: "Calculators",
     description: "Dates, money, health and colour — worked out on the spot.",
     toolIds: ["dates-time", "math-finance", "colors", "everyday", "network", "random-picks"],
   },
   {
     id: "files",
+    icon: Archive,
+    hue: 195,
     title: "Files and disk",
     description: "Archives, byte-level inspection, and where the space went.",
     toolIds: ["7zip", "dust", "tokei", "hexyl"],
   },
   {
     id: "mockups",
+    icon: LayoutTemplate,
+    hue: 135,
     title: "Mockups",
     description: "Made up on purpose — for a design or a test, never a real account.",
     toolIds: ["chat-mockup", "post-mockup"],
@@ -533,6 +623,8 @@ export function createCatalogRows(): CatalogRow[] {
     id: row.id,
     title: row.title,
     description: row.description,
+    icon: row.icon,
+    hue: row.hue,
     tools: row.toolIds.map((toolId) => {
       const manifestTool = manifestTools.get(toolId);
       const presentation = presentationById[toolId];

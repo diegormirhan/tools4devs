@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { Clapperboard } from "lucide-react";
 import { describe, expect, it, vi } from "vitest";
 import type { CatalogTool } from "../catalog/catalog";
 import { ToolCard } from "./ToolCard";
@@ -18,6 +19,7 @@ const tool: CatalogTool = {
   capabilities: [],
   operations: [],
   downloadLabel: "Download interno",
+  icon: Clapperboard,
 };
 
 describe("ToolCard error state", () => {

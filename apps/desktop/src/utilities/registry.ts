@@ -1,7 +1,23 @@
+import {
+  Calculator,
+  Calendar,
+  Code,
+  Dices,
+  FlaskConical,
+  Globe,
+  Hash,
+  Paintbrush,
+  Palette,
+  QrCode,
+  Sparkles,
+  Type,
+  type LucideIcon,
+} from "lucide-react";
 import * as text from "./text";
 import type { Options } from "./text";
 import type { Translate } from "../i18n/language";
 import type { Preview } from "./css";
+import type { ToolPreview } from "../catalog/catalog";
 import * as codes from "./codes";
 import * as dates from "./dates";
 import * as math from "./math";
@@ -97,6 +113,8 @@ export type UtilityGroup = {
   title: string;
   description: string;
   keywords: string[];
+  icon: LucideIcon;
+  preview?: ToolPreview;
   utilities: Utility[];
 };
 
@@ -134,6 +152,7 @@ const baseChoices = [
 export const utilityGroups: UtilityGroup[] = [
   {
     id: "text-tools",
+    icon: Type,
     title: "Work on text",
     description: "Case, order, duplicates, replacements and counts — as you type.",
     keywords: [
@@ -412,6 +431,7 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "codes-hashes",
+    icon: Hash,
     title: "Codes and hashes",
     description: "Base64, URL, hashes, JWT, UUID, passwords and number bases.",
     keywords: [
@@ -581,6 +601,7 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "dates-time",
+    icon: Calendar,
     title: "Dates and time",
     description: "Day counts, business days, age, zodiac, moon phase and more.",
     keywords: [
@@ -698,6 +719,7 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "math-finance",
+    icon: Calculator,
     title: "Math, finance and health",
     description: "Percentages, fractions, units, loans, BMI and pregnancy dates.",
     keywords: [
@@ -855,6 +877,7 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "test-data",
+    icon: FlaskConical,
     title: "Test data",
     description: "CPF, CNPJ, CEP, card numbers and UUIDs — sandbox-only, never real.",
     keywords: [
@@ -936,6 +959,7 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "colors",
+    icon: Palette,
     title: "Colour tools",
     description: "HEX, RGBA, shades and mixing two colours together.",
     keywords: ["color", "colour", "hex", "rgba", "rgb", "hsl", "shades", "mix", "palette"],
@@ -983,6 +1007,7 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "css-tools",
+    icon: Paintbrush,
     title: "CSS generators",
     description: "Copy the CSS, or just watch the preview change.",
     keywords: [
@@ -1240,6 +1265,7 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "network",
+    icon: Globe,
     title: "Network lookups",
     description: "Your IP, a domain's DNS records, and where an address is.",
     keywords: [
@@ -1288,6 +1314,7 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "code-formatting",
+    icon: Code,
     title: "Minify and format",
     description: "CSS and HTML, compacted for shipping or spread out to read.",
     keywords: [
@@ -1344,6 +1371,8 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "qr-barcode",
+    icon: QrCode,
+    preview: { src: "/previews/qr-barcode.webm", poster: "/previews/qr-barcode.jpg" },
     title: "QR codes and barcodes",
     description: "A link, text or Wi-Fi details as a code, or a barcode from a value.",
     keywords: [
@@ -1432,6 +1461,7 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "everyday",
+    icon: Sparkles,
     title: "Everyday calculators",
     description: "Fuel, a barbecue, and symbols worth copying.",
     keywords: [
@@ -1539,6 +1569,7 @@ export const utilityGroups: UtilityGroup[] = [
   },
   {
     id: "random-picks",
+    icon: Dices,
     title: "Random picks",
     description: "Dice, roulette, the lottery, a raffle, and plain random picks.",
     keywords: ["random", "dice", "roulette", "lottery", "raffle", "sorteio", "dado", "loteria"],

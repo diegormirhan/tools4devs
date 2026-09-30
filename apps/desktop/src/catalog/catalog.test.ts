@@ -1,3 +1,5 @@
+import { existsSync, statSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { createCatalogRows, filterCatalogRows } from "./catalog";
 
@@ -97,6 +99,46 @@ describe("tool catalog", () => {
     expect(songrec?.status).toBe("downloadable");
     expect(songrec?.availability).toBe("available");
     expect(songrec?.capabilities).toContain("audio.recognize");
+  });
+});
+
+describe("what the sidebar and the cards draw from", () => {
+  const rows = createCatalogRows();
+  const tools = rows.flatMap((row) => row.tools);
+
+  it("gives every tool an icon of its own, so no two cards look alike", () => {
+    for (const tool of tools) expect(tool.icon, tool.id).toBeTypeOf("object");
+    expect(new Set(tools.map((tool) => tool.icon)).size).toBe(tools.length);
+  });
+
+  it("gives every group an icon for the collapsed sidebar and a hue of its own", () => {
+    for (const row of rows) {
+      expect(row.icon, row.id).toBeTypeOf("object");
+      expect(row.hue, row.id).toBeGreaterThanOrEqual(0);
+      expect(row.hue, row.id).toBeLessThan(360);
+    }
+    expect(new Set(rows.map((row) => row.hue)).size).toBe(rows.length);
+  });
+
+  it("addresses every sub-tool by its id within the tool, without ambiguity", () => {
+    for (const tool of tools) {
+      const ids = tool.operations.map((operation) => operation.id);
+      expect(new Set(ids).size, tool.id).toBe(ids.length);
+      expect(ids.length, tool.id).toBeGreaterThan(0);
+    }
+  });
+
+  it("points every preview at a clip and a poster that ship with the app, within budget", () => {
+    const publicDirectory = path.resolve(import.meta.dirname, "../../public");
+    const previews = tools.flatMap((tool) => (tool.preview ? [[tool.id, tool.preview] as const] : []));
+    expect(previews.length).toBeGreaterThan(0);
+
+    for (const [id, preview] of previews) {
+      const clip = path.join(publicDirectory, preview.src);
+      expect(existsSync(clip), `${id}: ${preview.src}`).toBe(true);
+      expect(existsSync(path.join(publicDirectory, preview.poster)), `${id}: ${preview.poster}`).toBe(true);
+      expect(statSync(clip).size, `${id}: ${preview.src}`).toBeLessThan(200 * 1024);
+    }
   });
 });
 
