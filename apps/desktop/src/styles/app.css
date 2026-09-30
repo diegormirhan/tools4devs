@@ -1031,7 +1031,7 @@ code { font-family: ui-monospace, "Cascadia Mono", monospace; }
 .operation-options__file input { flex: 1; min-width: 0; }
 .utility-color-field { display: flex; gap: 8px; align-items: center; }
 .utility-color-field input[type="color"] { width: 38px; min-width: 38px; padding: 3px; cursor: pointer; }
-.utility-color-field__hex { flex: 1; min-width: 0; font-family: var(--font-mono, monospace); text-transform: lowercase; }
+.utility-color-field__hex { flex: 1; min-width: 0; font-family: monospace; text-transform: lowercase; }
 .operation-options__file .icon-button { flex: 0 0 auto; }
 .source-url__hint { color: var(--text-quiet); font-size: 0.66rem; line-height: 1.4; text-wrap: pretty; }
 .operation-options__hint { color: var(--text-quiet); font-size: 0.66rem; line-height: 1.4; text-wrap: pretty; }

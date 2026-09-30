@@ -40,6 +40,7 @@ import { useFileDrop } from "./hooks/useFileDrop";
 import { isNativeHost, useOperationRunner } from "./hooks/useOperationRunner";
 import { useInstallationState } from "./hooks/useInstallationState";
 import { useTheme, type ThemePreference } from "./hooks/useTheme";
+import "./styles/theme.css";
 import "./styles/app.css";
 
 type NavigationId = "catalog" | "queue" | "history" | "settings";

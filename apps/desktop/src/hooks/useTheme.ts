@@ -25,6 +25,7 @@ export function useTheme() {
     // frame. Suppress transitions for the swap itself and restore them right after.
     root.dataset.themeSwitching = "true";
     root.dataset.theme = resolvedTheme;
+    root.classList.toggle("dark", resolvedTheme === "dark");
     root.style.colorScheme = resolvedTheme;
     const frame = requestAnimationFrame(() =>
       requestAnimationFrame(() => delete root.dataset.themeSwitching),

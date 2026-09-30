@@ -162,6 +162,7 @@ async function main() {
       "Each program below is distributed as a standalone executable and invoked by",
       "tools4devs as a separate process. None of them is linked into tools4devs's code.",
       "Every project's own terms keep applying to its executable.",
+      "The libraries and fonts inside the interface are listed in FRONTEND-NOTICES.txt.",
       "",
       ...inventory.flatMap((entry) => [
         `${entry.name} ${entry.version}`,
