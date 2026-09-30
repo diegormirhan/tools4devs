@@ -15,7 +15,13 @@ test("does not load Tailwind's preflight while the legacy stylesheet still rende
   assert.doesNotMatch(theme, /tailwindcss\/preflight/);
 });
 
-test("defines every colour inside the light or the dark token block", () => {
+test("resets only the new interface, never a screen app.css still draws", () => {
+  // shadcn's components expect Tailwind's reset; the legacy screens inside the
+  // frame expect the browser defaults, so the reset stops at data-legacy.
+  assert.match(theme, /@scope \(\[data-slot\]\) to \(\[data-legacy\]\)/);
+});
+
+test("writes every literal colour inside the light or the dark token block", () => {
   const literals = [];
   let block = null;
   let depth = 0;
@@ -23,7 +29,8 @@ test("defines every colour inside the light or the dark token block", () => {
     const line = raw.trim();
     if (depth === 0 && /^(:root|\.dark)\s*\{/.test(line)) block = line;
     depth += (line.match(/\{/g) ?? []).length - (line.match(/\}/g) ?? []).length;
-    const colour = /#[0-9a-f]{3,8}\b|\b(oklch|oklab|rgba?|hsla?|lab|lch)\(/i.test(line);
+    // A formula over tokens, oklch(var(--l) var(--c) var(--hue)), is not a literal.
+    const colour = /#[0-9a-f]{3,8}\b|\b(oklch|oklab|rgba?|hsla?|lab|lch)\(\s*[\d.]/i.test(line);
     if (colour && !block && !line.startsWith("/*")) literals.push(line);
     if (depth === 0) block = null;
   }

@@ -1,7 +1,7 @@
 import { existsSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { createCatalogRows, filterCatalogRows } from "./catalog";
+import { createCatalogRows, searchCatalog } from "./catalog";
 
 describe("tool catalog", () => {
   it("does not present planned integrations as installed", () => {
@@ -14,19 +14,13 @@ describe("tool catalog", () => {
 
   it("finds tools by name, capability and file extension", () => {
     const rows = createCatalogRows();
+    const toolIds = (query: string) => searchCatalog(rows, query).tools.map((match) => match.tool.id);
 
-    expect(filterCatalogRows(rows, "youtube")[0]?.tools[0]?.id).toBe("yt-dlp");
-    expect(filterCatalogRows(rows, ".pdf")[0]?.tools[0]?.id).toBe("qpdf");
+    expect(toolIds("youtube")).toEqual(["yt-dlp"]);
+    expect(toolIds(".pdf")[0]).toBe("qpdf");
     // Cropping is no longer libvips alone: FFmpeg crops video now, so the
     // search has to surface both rather than pick a winner.
-    const cropping = filterCatalogRows(rows, "crop").flatMap((row) => row.tools.map((tool) => tool.id));
-    expect(cropping).toEqual(expect.arrayContaining(["ffmpeg", "libvips"]));
-  });
-
-  it("removes empty rows from search results", () => {
-    const rows = filterCatalogRows(createCatalogRows(), "youtube");
-    expect(rows).toHaveLength(1);
-    expect(rows[0]?.id).toBe("downloads");
+    expect(toolIds("crop")).toEqual(expect.arrayContaining(["ffmpeg", "libvips"]));
   });
 
   it("exposes concrete operations for each tool", () => {
@@ -102,6 +96,40 @@ describe("tool catalog", () => {
   });
 });
 
+describe("the command palette's search", () => {
+  const rows = createCatalogRows();
+
+  it("puts the action that does the job ahead of the tools that contain it", () => {
+    const result = searchCatalog(rows, "extract au");
+
+    expect(result.actions[0]).toMatchObject({ tool: { id: "ffmpeg" }, operation: { id: "extract-audio" }, row: { id: "video" } });
+    expect(result.tools.every((match) => match.row.tools.includes(match.tool))).toBe(true);
+  });
+
+  it("matches words in any order, whatever the case and the accents", () => {
+    const ids = (query: string) => searchCatalog(rows, query).actions.map((match) => `${match.tool.id}/${match.operation.id}`);
+
+    expect(ids("AUDIO extract")).toContain("ffmpeg/extract-audio");
+    expect(ids("extráct")).toContain("poppler/extract-text");
+  });
+
+  it("finds an action by the words on screen, in the language the person reads", () => {
+    const portuguese: Record<string, string> = { "Extract audio": "Extrair áudio" };
+    const translate = (text: string) => portuguese[text] ?? text;
+
+    const actions = searchCatalog(rows, "extrair audio", translate).actions;
+    // yt-dlp names its audio-only download "Extract audio" too; both are right.
+    expect(actions.map((match) => `${match.tool.id}/${match.operation.id}`)).toEqual(["ffmpeg/extract-audio", "yt-dlp/download-audio"]);
+  });
+
+  it("offers every tool, and no action, before anything is typed", () => {
+    const result = searchCatalog(rows, "  ");
+
+    expect(result.actions).toEqual([]);
+    expect(result.tools).toHaveLength(39);
+  });
+});
+
 describe("what the sidebar and the cards draw from", () => {
   const rows = createCatalogRows();
   const tools = rows.flatMap((row) => row.tools);
@@ -144,8 +172,7 @@ describe("what the sidebar and the cards draw from", () => {
 
 it('finds the right downloader by the name of the site', () => {
   const rows = createCatalogRows();
-  const idsFor = (query: string) =>
-    filterCatalogRows(rows, query).flatMap((row) => row.tools.map((tool) => tool.id));
+  const idsFor = (query: string) => searchCatalog(rows, query).tools.map((match) => match.tool.id);
 
   // Nobody is going to read a list of 1800 supported sites, so the platform
   // names are search keywords instead.

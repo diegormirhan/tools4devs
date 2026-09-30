@@ -16,12 +16,15 @@ import { useT } from "../i18n/language";
  */
 export function UtilityPanel({
   tool,
+  initialSubId,
   leaving = false,
   onClose,
   onExited,
   onDirtyChange,
 }: {
   tool: CatalogTool;
+  /** The utility to open on, as chosen in the sidebar or the palette. */
+  initialSubId?: string;
   leaving?: boolean;
   onClose: () => void;
   onExited?: () => void;
@@ -30,7 +33,9 @@ export function UtilityPanel({
   const t = useT();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const group = utilityGroup(tool.id);
-  const [utilityId, setUtilityId] = useState(group?.utilities[0]?.id ?? "");
+  const [utilityId, setUtilityId] = useState(
+    group?.utilities.find((utility) => utility.id === initialSubId)?.id ?? group?.utilities[0]?.id ?? "",
+  );
   const [input, setInput] = useState("");
   const [options, setOptions] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);

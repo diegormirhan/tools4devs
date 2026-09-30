@@ -20,11 +20,23 @@ export const portuguese: Record<string, string> = {
   History: "Histórico",
   Settings: "Configurações",
   "{name}, {count} running": "{name}, {count} em execução",
-  "Local execution enabled": "Execução local ativada",
   "Show the sidebar": "Mostrar a barra lateral",
   "Hide the sidebar": "Esconder a barra lateral",
   "Search an action, a format or a tool": "Busque uma ação, um formato ou uma ferramenta",
   "Search tools": "Buscar ferramentas",
+  "Search tools…": "Buscar ferramentas…",
+  "Where you are": "Onde você está",
+  "All tools": "Todas as ferramentas",
+  Pinned: "Fixadas",
+  "Pin {name}": "Fixar {name}",
+  "Unpin {name}": "Desafixar {name}",
+  "{count} more…": "mais {count}…",
+  Actions: "Ações",
+  "{count} action": "{count} ação",
+  "{count} actions": "{count} ações",
+  move: "mover",
+  open: "abrir",
+  close: "fechar",
 
   // ── The catalog screen
   "What do you want to do?": "O que você quer fazer?",
@@ -37,9 +49,6 @@ export const portuguese: Record<string, string> = {
   "Now open a tool below": "Agora abra uma ferramenta abaixo",
   "Processed on your own machine": "Processado na sua própria máquina",
   "No tool matches that": "Nenhuma ferramenta corresponde a isso",
-  "Try an action like “convert”, an extension like “.pdf”, or the name of the tool.":
-    "Tente uma ação como “converter”, uma extensão como “.pdf”, ou o nome da ferramenta.",
-  "Clear search": "Limpar a busca",
 
   // ── The queue and the history
   "Operation queue": "Fila de operações",

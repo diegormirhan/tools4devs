@@ -137,16 +137,19 @@
 
 html, body, #root { min-width: 320px; min-height: 100%; margin: 0; }
 body { min-height: 100vh; overflow: hidden; color: var(--text); background: var(--ground); }
-button, input, select { font: inherit; }
-input { caret-color: var(--action); }
-button { color: inherit; }
-button, label { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, input:focus-visible, select:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 3px;
+/* Only inside the screens this file still draws; the new frame styles its own controls. */
+@scope ([data-legacy]) {
+  button, input, select { font: inherit; }
+  input { caret-color: var(--action); }
+  button { color: inherit; }
+  button, label { -webkit-tap-highlight-color: transparent; }
+  button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+  code { font-family: ui-monospace, "Cascadia Mono", monospace; }
 }
 ::selection { color: var(--on-inverse); background: var(--focus); }
-code { font-family: ui-monospace, "Cascadia Mono", monospace; }
 
 .app-shell { --rail: 212px; display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); min-height: 100vh; background: var(--ground); }
 .sidebar {

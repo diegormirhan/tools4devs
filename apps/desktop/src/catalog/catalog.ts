@@ -673,22 +673,40 @@ function requireDelivery(value: string): CatalogTool["delivery"] {
   throw new Error(`Unsupported delivery strategy: ${value}`);
 }
 
-export function filterCatalogRows(rows: CatalogRow[], rawQuery: string): CatalogRow[] {
-  const query = normalizeSearch(rawQuery);
-  if (!query) return rows;
+export type ActionMatch = { row: CatalogRow; tool: CatalogTool; operation: ToolOperation };
+export type ToolMatch = { row: CatalogRow; tool: CatalogTool };
 
-  return rows
-    .map((row) => ({
-      ...row,
-      tools: row.tools.filter((tool) => searchableText(tool).includes(query)),
-    }))
-    .filter((row) => row.tools.length > 0);
-}
+/**
+ * What the command palette lists for a query: actions (a tool's operation or
+ * utility) and whole tools. Every word has to appear, in any order, in the
+ * English source or in the text the person actually reads.
+ */
+export function searchCatalog(
+  rows: CatalogRow[],
+  rawQuery: string,
+  translate: (text: string) => string = (text) => text,
+): { actions: ActionMatch[]; tools: ToolMatch[] } {
+  const words = normalizeSearch(rawQuery).split(/\s+/).filter(Boolean);
+  const pairs = rows.flatMap((row) => row.tools.map((tool) => ({ row, tool })));
+  if (words.length === 0) return { actions: [], tools: pairs };
 
-function searchableText(tool: CatalogTool): string {
-  return normalizeSearch(
-    [tool.integrationName, tool.title, tool.description, ...tool.keywords, ...tool.capabilities].join(" "),
-  );
+  const matches = (...texts: string[]) => {
+    const haystack = normalizeSearch(texts.flatMap((text) => [text, translate(text)]).join(" "));
+    return words.every((word) => haystack.includes(word));
+  };
+
+  const actions = pairs
+    .flatMap(({ row, tool }) => tool.operations.map((operation) => ({ row, tool, operation })))
+    .filter(({ operation }) => matches(operation.label, operation.description));
+  // An action whose name says it outranks one that only mentions it.
+  const named = actions.filter(({ operation }) => matches(operation.label));
+
+  return {
+    actions: [...named, ...actions.filter((action) => !named.includes(action))],
+    tools: pairs.filter(({ tool }) =>
+      matches(tool.integrationName, tool.title, tool.description, ...tool.keywords, ...tool.capabilities),
+    ),
+  };
 }
 
 /** Accents are stripped so a search still matches whatever the user's keyboard produces. */

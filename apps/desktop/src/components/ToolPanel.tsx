@@ -20,6 +20,8 @@ export type RunOperationInput = {
 
 type ToolPanelProps = {
   tool: CatalogTool;
+  /** The operation to open on, as chosen in the sidebar or the palette. */
+  initialSubId?: string;
   initialPath?: string | null;
   droppedPaths?: string[];
   jobs?: ToolJob[];
@@ -37,14 +39,16 @@ type ToolPanelProps = {
 
 type SelectedFile = { name: string; path: string };
 
-export function ToolPanel({ tool, initialPath, droppedPaths, jobs = [], defaultFolder = "", leaving = false, onClose, onExited, onRun, onCancel, onDirtyChange }: ToolPanelProps) {
+export function ToolPanel({ tool, initialSubId, initialPath, droppedPaths, jobs = [], defaultFolder = "", leaving = false, onClose, onExited, onRun, onCancel, onDirtyChange }: ToolPanelProps) {
   const t = useT();
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>(() =>
     initialPath && ![...urlTools, ...folderTools].includes(tool.id)
       ? [{ path: initialPath, name: fileNameOnly(initialPath) }]
       : [],
   );
-  const [selectedOperationId, setSelectedOperationId] = useState(tool.operations[0]?.id ?? "");
+  const [selectedOperationId, setSelectedOperationId] = useState(
+    tool.operations.find((operation) => operation.id === initialSubId)?.id ?? tool.operations[0]?.id ?? "",
+  );
   const [sourceUrl, setSourceUrl] = useState("");
   const [operationOptions, setOperationOptions] = useState<Record<string, string>>({});
   const [outputPath, setOutputPath] = useState("");

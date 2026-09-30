@@ -3,9 +3,10 @@
  * with our blue --primary and cooler sidebar and background tones on top.
  * Every colour lives in the :root (light) or .dark block; nothing below them.
  *
- * Preflight is left out on purpose: the screens still drawn by app.css depend on the
- * browser defaults it resets. Utilities are generated only from the sources listed
- * here, so a legacy class name such as "hidden" never picks up a Tailwind rule.
+ * Tailwind's preflight is not imported: the screens still drawn by app.css depend on
+ * the browser defaults it resets. The part the components need is applied below, only
+ * inside them. Utilities are generated only from the sources listed here, so a legacy
+ * class name such as "hidden" never picks up a Tailwind rule.
  */
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
@@ -17,6 +18,7 @@
 @import "@fontsource/jetbrains-mono/500.css";
 
 @source "../components/ui";
+@source "../navigation";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -48,6 +50,9 @@
   --sidebar-accent-foreground: oklch(0.218 0.008 223.9);
   --sidebar-border: oklch(0.905 0.01 245);
   --sidebar-ring: oklch(0.62 0.16 258);
+  /* A group tints its icons with its own hue at this lightness and chroma. */
+  --group-icon-l: 0.45;
+  --group-icon-c: 0.12;
 }
 
 .dark {
@@ -77,6 +82,8 @@
   --sidebar-accent-foreground: oklch(0.987 0.002 197.1);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.55 0.13 258);
+  --group-icon-l: 0.82;
+  --group-icon-c: 0.11;
 }
 
 @theme inline {
@@ -113,4 +120,63 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@utility text-group-icon {
+  color: oklch(var(--group-icon-l) var(--group-icon-c) var(--hue));
+}
+
+/*
+ * The part of Tailwind's preflight the components rely on, scoped to them: every
+ * shadcn element carries data-slot, and the frame marks what app.css still draws
+ * with data-legacy, where the scope stops. Dialogs render in a portal outside the
+ * frame and are still reached, because their own elements carry data-slot.
+ */
+@layer base {
+  @scope ([data-slot]) to ([data-legacy]) {
+    *,
+    ::before,
+    ::after,
+    ::backdrop {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border: 0 solid;
+      border-color: var(--border);
+      outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-size: inherit;
+      font-weight: inherit;
+    }
+    a {
+      color: inherit;
+      text-decoration: inherit;
+    }
+    ol, ul, menu {
+      list-style: none;
+    }
+    img, svg, video, canvas {
+      display: block;
+      vertical-align: middle;
+    }
+    img, video {
+      max-width: 100%;
+      height: auto;
+    }
+    button, input, select, textarea {
+      font: inherit;
+      letter-spacing: inherit;
+      color: inherit;
+      border-radius: 0;
+      background-color: transparent;
+    }
+    ::placeholder {
+      opacity: 1;
+      color: color-mix(in oklab, currentcolor 50%, transparent);
+    }
+    textarea {
+      resize: vertical;
+    }
+  }
 }

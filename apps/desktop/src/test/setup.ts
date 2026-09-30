@@ -34,4 +34,7 @@ class TestResizeObserver {
   disconnect() {}
 }
 Object.defineProperty(window, "ResizeObserver", { writable: true, value: TestResizeObserver });
+
+// The command palette scrolls the highlighted result into view; jsdom has no layout to scroll.
+Element.prototype.scrollIntoView = function scrollIntoView() {};
 globalThis.ResizeObserver = TestResizeObserver as unknown as typeof ResizeObserver;

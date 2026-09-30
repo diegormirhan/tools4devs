@@ -16,7 +16,7 @@ Regras que valem para toda etapa:
 | 0 | Decisões e ADR-0007 | P | — | — | ☑ |
 | 1 | Fundação Tailwind + shadcn | M | 0 | — | ☑ |
 | 2 | Modelo de dados (ícone, preview, árvore) | P | 1 | — | ☑ |
-| 3 | Shell, sidebar em árvore e Ctrl+K | G | 2 | UC-01, 03, 10, 11 | ☐ |
+| 3 | Shell, sidebar em árvore e Ctrl+K | G | 2 | UC-01, 03, 10, 11 | ☑ |
 | 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ☐ |
 | 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☐ |
 | 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ☐ |
@@ -89,22 +89,27 @@ Resultado (2026-09-30): 343 testes de interface e 44 de domínio verdes; `tsc` v
 
 As ferramentas **ainda abrem no painel modal antigo**; só a navegação muda. Detalhes: §7.1, §7.3, §8 Fase 3.
 
-Herdado da etapa 1:
+Herdado da etapa 1 (resolvido):
 
-- Acrescentar em `theme.css` um `@source` para cada pasta nova do shell e aplicar o preflight só dentro dele.
-- `.dark` só entra quando o `useTheme` roda. Com o sistema em escuro, os tokens novos mostram o claro por um instante. Resolver antes de o shell usar esses tokens (script inline no `index.html` ou `@media (prefers-color-scheme: dark)` como o `app.css:62`).
+- [x] `@source "../navigation"` em `theme.css`; o shell novo usa classes do Tailwind só dentro de `src/navigation/`, para não escanear o `App.tsx` cheio de classes legadas.
+- [x] Preflight escopado: `@scope ([data-slot]) to ([data-legacy])` em `theme.css`. Toda peça do shadcn tem `data-slot` (os diálogos em portal inclusive); o conteúdo legado fica sob `data-legacy`, onde o reset para. As regras de elemento do `app.css` (`button`, `input`, foco de 2 px) foram para `@scope ([data-legacy])`, senão venceriam os utilitários e dariam anel de foco duplo nos botões novos. Testes nos dois arquivos.
+- [x] Sem piscada de tema: script inline no `index.html` aplica `.dark` antes do React (a CSP do Tauri é `null`). Mesma chave e regra do `useTheme`.
 
-Sugestão de fatias, uma por commit:
+Fatias:
 
-1. [ ] Contexto de navegação (`view`, `toolId`, `subId`, `go`, `dirty`) com testes unitários, incluindo a guarda de `dirty`.
-2. [ ] Extrair `QueueView`, `HistoryView`, `SettingsView` e `CatalogView` de `App.tsx` sem mudar o visual.
-3. [ ] `AppShell` + `AppSidebar` (`variant="inset"`, `collapsible="icon"`): marca, busca, rodapé com selo de jobs na Fila.
-4. [ ] `NavTree`: acordeão, roving tabindex, setas/Enter, `aria-expanded`, rolagem, estado persistido (`tools4devs.*`, via `migratePreferences`).
-5. [ ] Favoritos ("Pinned"): só fixar manual, persistido.
-6. [ ] `CommandPalette` (Ctrl+K) sobre ferramentas e sub-ferramentas, reaproveitando `filterCatalogRows`.
-7. [ ] Abaixo de ~1000 px a sidebar recolhe sozinha para a faixa de ícones com tooltip; a escolha manual prevalece e fica guardada. A 800×600, grade em 2 colunas.
-8. [ ] Atualizar `App.test.tsx` preservando landmarks e nomes acessíveis (`complementary`, `searchbox`, imagem "tools4devs").
-9. [ ] Ajustar os seletores de `scripts/screenshots.mjs` que quebrarem (antes ficava para a Fase 8; quebrar a ferramenta no meio atrapalha a conferência visual das etapas seguintes).
+1. [x] Contexto de navegação em `src/navigation/navigation.tsx` (`location`, `go`, `dirty`, `pending`), com testes da guarda.
+2. [x] `JobView` (Fila e Histórico) e `SettingsView` foram para `src/views/`. `App.tsx` de 966 para ~410 linhas. O catálogo continua no `App.tsx` até a etapa 5, que o reescreve.
+3. [x] `AppShell` + `AppSidebar` (`variant="inset"`, `collapsible="icon"`): marca, busca, fixados, árvore, rodapé com selo de jobs. Cabeçalho com botão da sidebar e breadcrumb. O seletor de tema saiu do topo (fica nas Configurações, como no mockup).
+4. [x] `NavTree`: papéis `tree`/`treeitem` com `aria-level`, `aria-expanded` e `aria-current`; ↑↓ Home End, → abre ou entra, ← fecha ou sobe, Enter/Espaço vão; um grupo aberto por vez, guardado em `tools4devs.nav-open-group`; operações só da ferramenta atual, cinco e "N more…". Com a sidebar recolhida, as setas pulam o que está oculto e o Tab cai no grupo.
+5. [x] Fixados em `tools4devs.pinned`, com estrela ao passar o mouse (e no Tab).
+6. [x] `CommandPalette`: `searchCatalog()` substitui `filterCatalogRows()`; palavras em qualquer ordem, sem acento, casando o inglês e o texto traduzido. Ações primeiro (as que têm o termo no nome antes), ferramentas depois. Montada com `Dialog` + `Command`, porque o `CommandDialog` do shadcn deixa o título fora do conteúdo.
+7. [x] Abaixo de 1000 px a sidebar recolhe sozinha (tooltip nos ícones). A escolha manual fica em `tools4devs.sidebar-choice`; quem tinha "collapsed" na chave antiga continua recolhido. A grade de 2 colunas é dos cards novos (etapa 5).
+8. [x] `App.test.tsx`: 4 testes reescritos (busca, Ctrl+K, tema só nas Configurações) e 6 novos (UC-01, UC-03, UC-09, UC-10, "N more…", fixar).
+9. [ ] ~~`scripts/screenshots.mjs`~~: os seletores que ele usa (`#section-data`, `Get yt-dlp`) ainda existem. Passa para a etapa 5, que troca seções e cards.
+
+Os painéis ganharam `initialSubId` (abrem na operação ou utilitário escolhido); a troca por props controladas continua na etapa 4. A guarda usa o `confirm-card` antigo, ainda em inglês; a tradução e o `AlertDialog` são da etapa 4. CSS morto do shell antigo no `app.css` (`.app-shell`, `.sidebar`, `.topbar`, `.search-control`, `.nav-item`) fica para a etapa 7.
+
+Resultado (2026-09-30): 46 testes de domínio e 357 de interface verdes; `tsc` e build verdes; conferido no navegador em claro e escuro, 1440×900 e 800×600 (sem rolagem horizontal). Observação: o redimensionamento emulado do painel de preview não dispara `resize` nem `change` de `matchMedia`; numa janela real a sidebar recolhe ao estreitar.
 
 **Pronto quando**: UC-01, UC-03, UC-10 e UC-11 passam; o modal antigo abre a ferramenta certa a partir da árvore e da busca.
 
@@ -137,6 +142,7 @@ Detalhes: §4.2, §7.4, §8 Fase 5.
 - [ ] `ToolPreview`: atraso de ~300 ms, `preload="none"`, `IntersectionObserver`, posicionamento absoluto (sem reflow).
 - [ ] Remover grade de pontinhos, barra de destaque, elevação no hover e `card-arrive`.
 - [ ] Remover `ToolArtwork.tsx`, `CategoryFilter.tsx` e `ToolSection.tsx` (a sidebar assume os filtros).
+- [ ] Ajustar `scripts/screenshots.mjs` aos seletores novos (vindo da etapa 3).
 
 **Pronto quando**: UC-02 passa; a grade não treme ao abrir/fechar o preview; cards sem clipe mostram poster ou ícone.
 

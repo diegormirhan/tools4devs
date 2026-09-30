@@ -21,6 +21,15 @@ test("never writes a vendor prefix by hand", () => {
   assert.deepEqual(handWritten, []);
 });
 
+test("keeps its element rules to the screens it still draws", () => {
+  // Unlayered, these would beat every Tailwind utility on the new sidebar and
+  // header: a second focus outline on each shadcn button, for one.
+  const scoped = stylesheet.slice(stylesheet.indexOf("@scope ([data-legacy])"));
+  assert.notEqual(stylesheet.indexOf("@scope ([data-legacy])"), -1);
+  assert.match(scoped.slice(0, scoped.indexOf("\n}\n")), /button:focus-visible/);
+  assert.doesNotMatch(stylesheet.slice(0, stylesheet.indexOf("@scope ([data-legacy])")), /^button[ ,:{]/m);
+});
+
 test("blurs what is behind the modal", () => {
   assert.match(stylesheet, /\.panel-scrim\s*\{[^}]*backdrop-filter:\s*blur/);
 });
