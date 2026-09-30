@@ -17,7 +17,7 @@ Regras que valem para toda etapa:
 | 1 | Fundação Tailwind + shadcn | M | 0 | — | ☑ |
 | 2 | Modelo de dados (ícone, preview, árvore) | P | 1 | — | ☑ |
 | 3 | Shell, sidebar em árvore e Ctrl+K | G | 2 | UC-01, 03, 10, 11 | ☑ |
-| 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ☐ |
+| 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ◐ falta o layout dos utilitários (aguarda aprovação) |
 | 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☐ |
 | 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ☐ |
 | 7 | Primitivos restantes e limpeza do CSS | M | 4, 5 | UC-07, 08 | ☐ |
@@ -117,19 +117,21 @@ Resultado (2026-09-30): 46 testes de domínio e 357 de interface verdes; `tsc` e
 
 Detalhes: §8 Fase 4.
 
-1. [ ] `ToolPage` na área principal com breadcrumb; `PanelShell` sai.
-2. [ ] `UtilityPanel` recebe `utilityId` e `ToolPanel` recebe `selectedOperationId` por props (controlados pelo contexto).
-3. [ ] `DiscardDialog` (`AlertDialog`), traduzido, Esc = "Keep editing", foco no botão seguro (UC-09).
-4. [ ] `InstallDialog` → `Dialog` do shadcn, mesmo conteúdo (UC-04).
-5. [ ] Painéis especiais (`MusicPanel`, `ChatMockupPanel`, `PostMockupPanel`, `ImageSearchPanel`) trocam só de contêiner (UC-12).
-6. [ ] Soltar arquivo: sugestões na tela inicial e na busca; arquivo já selecionado ao abrir (UC-13).
-7. [ ] Jobs continuam ao trocar de ferramenta (UC-06).
-8. [ ] Utilitários de vários campos (CSS, cores, calculadoras), §12.5:
-   - [ ] Levantar em `registry.ts` quais utilitários têm mais de um campo de entrada.
-   - [ ] Mockups claro/escuro em `screens/` com o mesmo gerador (`build-shadcn.mjs`).
-   - [ ] **Aprovação dos mockups antes de implementar** (`AGENTS.md`: nada de interface final sem fluxo e visual confirmados).
-   - [ ] Implementar só a apresentação; a lógica de cálculo e os testes dela continuam iguais.
-9. [ ] Atualizar `App.test.tsx`, `App.native.test.tsx`, `ToolPanel.native.test.tsx`, `RecognitionPanels.native.test.tsx`.
+1. [x] A ferramenta abre na área principal. Em vez de um `ToolPage` novo, o próprio `PanelShell` (e o contêiner do `ToolPanel`) virou página: uma `section` nomeada pelo título, que recebe o foco ao abrir, sem botão de fechar, scrim ou animação de saída. O miolo dos painéis não mudou; `.tool-panel--page` no fim do `app.css` desfaz o posicionamento de modal até a etapa 7. A rolagem volta ao topo a cada página.
+2. [x] `UtilityPanel` e `ToolPanel` recebem `subId` e avisam a troca por `onSubChange`: o que se escolhe no painel aparece na árvore e no caminho, e o que se escolhe na árvore muda o painel sem remontá-lo. Trocar de sub-ferramenta na mesma ferramenta não pergunta nada, porque o arquivo e o texto ficam.
+3. [x] `DiscardDialog` com `AlertDialog`, traduzido; foco em "Keep editing", Esc responde o mesmo.
+4. [x] `InstallDialog` com `Dialog`, `Button` e `Progress`, como no mockup `install`. Não fecha com download em andamento. Terminada a instalação, oferece "Open {name}". O "X" do shadcn (com "Close" fixo em inglês) ficou desligado; o botão "Close" do rodapé basta.
+5. [x] Painéis especiais só trocaram de contêiner (UC-12).
+6. [x] `suggestToolsFor()` em `formats.ts` (ferramentas que aceitam qualquer arquivo ficam de fora). Sugestões na tela inicial e no grupo "For {arquivo}" da busca; a ferramenta abre com o arquivo já escolhido (UC-13).
+7. [x] Jobs continuam ao sair da página (UC-06): os testes nativos saem pela sidebar em vez do antigo "Close tool".
+8. [ ] Utilitários de vários campos (§12.5):
+   - [x] Levantamento: 49 dos 88 utilitários, em três formas. **Calculadora** (números → resposta e fatos): math-finance 9, everyday 7, dates-time 4, e test-card, color-mixer. **Gerador com prévia** (campos → prévia e código): css-tools 12. **Texto com opções** (texto + campos → resultado): text-tools 5, codes-hashes 4, qr-barcode 3, random-picks 3.
+   - [x] Mockups claro/escuro das três formas: `screens/png/b3-*-calc.png` (Financing), `b3-*-css.png` (Box shadow) e `b3-*-textopts.png` (Find and replace). Nas três, a fileira de abas do painel sai: os outros utilitários do grupo estão na árvore.
+   - [ ] **Aprovação dos mockups antes de implementar.**
+   - [ ] Implementar só a apresentação; a lógica e os testes dela continuam iguais.
+9. [x] Testes atualizados: painéis procurados como `region`, não `dialog`; 5 novos (foco na página, operação refletida na árvore, troca sem perder texto, diálogo em português, sugestões de arquivo).
+
+Não verificado: a operação real de ponta a ponta no `tauri:dev` (exige compilar o host Rust). Os testes nativos cobrem o fluxo com o host simulado.
 
 **Pronto quando**: UC-04, 05, 06, 09, 12 e 13 passam; uma operação real (qpdf ou conversão curta) roda de ponta a ponta no `tauri:dev`.
 

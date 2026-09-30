@@ -241,6 +241,9 @@ Todas em `screens/png/` no formato `b3-<claro|escuro>-<tela>.png`.
 | Mockup de chat | `chat` | Editor de conversa + celular |
 | Janela mínima | `narrow` | Faixa de ícones + 2 colunas |
 | Descartar trabalho | `discard` | `AlertDialog` sobre a página da ferramenta |
+| Calculadora | `calc` | Campos à esquerda, resposta grande e fatos à direita (Financing). Forma de 22 utilitários |
+| Gerador CSS | `css` | Controles, prévia com superfícies e o CSS com Copy (Box shadow). Os 12 geradores CSS |
+| Texto com opções | `textopts` | Opções em cima, entrada e resultado lado a lado (Find and replace). 15 utilitários |
 
 O que os mockups mostraram e já entra no plano:
 
