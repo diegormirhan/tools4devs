@@ -2,6 +2,8 @@
 
 **Plano de implementação, casos de uso e especificação do design: [`PLANO.md`](PLANO.md).**
 
+**Ordem de execução e checklist por etapa: [`ETAPAS.md`](ETAPAS.md).**
+
 Material de referência para a reestruturação do app (sidebar em árvore, cards com preview no hover, shadcn/ui). Nada aqui é importado pelo app: são imagens, vídeos e os scripts que os geram.
 
 ## Direção escolhida

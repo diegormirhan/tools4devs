@@ -1,0 +1,173 @@
+# Redesign: etapas de execução
+
+Checklist para executar o [`PLANO.md`](PLANO.md). O plano diz **o quê e por quê**; este arquivo diz **em que ordem**, **o que bloqueia o quê** e **quando uma etapa está pronta**. Marque as caixas conforme avança.
+
+Regras que valem para toda etapa:
+
+- Uma branch e um PR por etapa. O app abre e funciona ao fim de cada uma.
+- Teste primeiro para comportamento novo (TDD, ver `AGENTS.md`).
+- Portão de saída: `npm test`, `npx tsc --noEmit -p apps/desktop` e `npm run build` verdes; conferência visual em {claro, escuro} × {EN, PT} a 1200×820 e 800×600.
+- Todo texto novo com entrada em `pt.ts` ou `catalog-pt.ts`.
+
+## Visão geral
+
+| # | Etapa | Tamanho | Depende de | Casos de uso | Status |
+|---|---|---|---|---|---|
+| 0 | Decisões e ADR-0007 | P | — | — | ☑ |
+| 1 | Fundação Tailwind + shadcn | M | 0 | — | ☑ |
+| 2 | Modelo de dados (ícone, preview, árvore) | P | 1 | — | ☑ |
+| 3 | Shell, sidebar em árvore e Ctrl+K | G | 2 | UC-01, 03, 10, 11 | ☐ |
+| 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ☐ |
+| 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☐ |
+| 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ☐ |
+| 7 | Primitivos restantes e limpeza do CSS | M | 4, 5 | UC-07, 08 | ☐ |
+| 8 | Testes finais, docs e entrega | M | 1–7 | todos | ☐ |
+
+```
+0 ─► 1 ─► 2 ─► 3 ─► 4 ─┬─► 7 ─► 8
+               │       │
+               └─► 5 ──┘
+0 ─► 6 (paralelo; entra no app junto com a 5)
+```
+
+Caminho crítico: 0 → 1 → 2 → 3 → 4 → 7 → 8. A etapa 6 é trabalho de conteúdo e pode correr desde o início.
+
+---
+
+## Etapa 0 · Decisões e ADR-0007 (P)
+
+Fechar o que o `PLANO.md` §12 deixou em aberto antes de que vire suposição silenciosa no código.
+
+- [x] Texto dos clipes (§12.1): mantido como está, em inglês dentro do vídeo; o texto do preview fora do vídeo é traduzido.
+- [x] URL por hash (§12.2): não; só contexto.
+- [x] Favoritos (§12.3): só fixar manual.
+- [x] Sidebar em janela estreita (§12.4): recolhe sozinha abaixo de ~1000 px; a escolha manual prevalece e fica guardada.
+- [x] Utilitários de vários campos (§12.5): layout repensado na etapa 4, com mockup aprovado antes.
+- [x] Escrever `docs/decisions/ADR-0007-ui-stack.md` (local, fora do git): Tailwind v4, shadcn/ui (base Mist), fontes embarcadas, previews em WebM, sem roteador. O plano deixava para a Fase 8; entra antes porque as dependências da etapa 1 precisam de uma decisão registrada.
+- [x] Registrar em `docs/LICENSING.md` (local, fora do git) as licenças das fontes (OFL-1.1) e das dependências novas, com versões.
+
+**Pronto quando**: as cinco decisões estão escritas em §12 do plano (ou no ADR) e o ADR-0007 está aceito.
+
+## Etapa 1 · Fundação Tailwind + shadcn (M)
+
+Instalar sem mudar nenhum pixel. Detalhes: `PLANO.md` §8 Fase 1 e §7.5.
+
+- [x] Dependências em `package.json` da raiz, nas versões de `LICENSING.md` "Interface dependencies" (faixa `^` como as demais; o lockfile fixa).
+- [x] Avisos de terceiros do frontend: `scripts/notices/frontend-notices.mjs` (`npm run notices:stage`, parte do `build`) grava `FRONTEND-NOTICES.txt` ao lado de `THIRD-PARTY-NOTICES.txt` com os 121 pacotes de produção e o texto da licença de cada um; pacote não permissivo quebra o build. Testes em `tests/notices/`.
+- [x] OFL de cada família ao lado das fontes dos mockups (`fonts/*.OFL.txt`).
+- [x] Plugin do Tailwind em `apps/desktop/vite.config.ts`; `paths` `@/*` em `apps/desktop/tsconfig.json`.
+- [x] `apps/desktop/components.json` (`baseColor: "mist"`, `cssVariables: true`, alias `utils` → `@/lib/cn`).
+- [x] `src/lib/cn.ts` com `cn()`.
+- [x] Componentes em `src/components/ui/` (24, com `toggle`, `sheet` e `hooks/use-mobile.ts` puxados pela sidebar). O CLI `shadcn add` trava sem `package.json` em `apps/desktop`; os arquivos vieram do registro `new-york-v4` com os imports reescritos. `sonner.tsx` recebe `theme` por prop em vez de usar `next-themes`.
+- [x] Arquivo de tokens `src/styles/theme.css`: Mist + ajustes do B2 azul, claro (`:root`) e escuro (`.dark`), fontes via Fontsource.
+- [x] `useTheme` marca `data-theme` **e** `.dark` (`useTheme.test.tsx`).
+- [x] ~~Unificar o bloco de tema claro duplicado em `app.css`~~: não é duplicação acidental. `:62` vale antes do JS (evita piscar em escuro no Windows claro) e `:97` vale quando a pessoa escolhe claro com o sistema escuro; CSS não junta media query e atributo num bloco. O arquivo sai na etapa 7.
+- [x] Sem preflight. Utilitários gerados só a partir de `components/ui` (`source(none)` + `@source`); nenhuma das 523 classes geradas coincide com uma classe legada. O preflight escopado entra na etapa 3, junto do shell novo.
+- [x] `tests/interface/theme.test.mjs`: sem preflight, cores só nos blocos de token, claro e escuro com os mesmos tokens. `stylesheet.test.mjs` continua cobrindo o `app.css` até a etapa 7.
+- [x] `app.css:1034` usava `var(--font-mono, monospace)`, que passaria a pegar a JetBrains Mono quando o Tailwind emitir `--font-mono`; agora é `monospace` direto.
+
+**Pronto quando**: capturas antes/depois idênticas nas quatro combinações; portão de saída verde.
+
+Resultado (2026-09-30): estilos computados de todos os elementos, sem variáveis CSS, idênticos em catálogo, ferramenta, utilitário, configurações e histórico, claro e escuro, a 1280×860. 39 testes de domínio e 339 de interface verdes; `tsc` e build verdes. CSS de 56,7 kB para 136,9 kB (46 kB de utilitários ainda não usados, 25 kB de `@font-face`); ~400 kB de woff2 no `dist/`, baixados só quando usados.
+
+## Etapa 2 · Modelo de dados (P)
+
+Sem mudança visual. Detalhes: §7.2 e §8 Fase 2.
+
+- [x] Testes primeiro em `catalog.test.ts`: cada ferramenta com ícone próprio (39 distintos); cada grupo com ícone e matiz distinto; ids de sub-ferramenta únicos dentro da ferramenta; todo `preview` aponta para clipe e poster existentes em `public/`, clipe < 200 KB. A contagem de 9 grupos e 39 ferramentas já existia.
+- [x] `icon` (componente `LucideIcon`) e `preview?` em `CatalogTool` e `UtilityGroup`; ícones dos 39 cards conforme `data.mjs` dos mockups.
+- [x] `icon` e `hue` em cada grupo, em `rowDefinitions` (matizes de §4.2).
+- [x] ~~`buildNavigationTree(rows)`~~: `createCatalogRows()` já é a árvore (§7.2).
+- [x] ~~Traduções de `caption` e `uses`~~: campos cortados; o hover usa descrição e operações, já traduzidas (§7.2).
+- [x] Os 4 clipes prontos entraram em `apps/desktop/public/previews/` (`qr` renomeado para `qr-barcode`, o id do grupo), para o teste de preview ter dados reais.
+
+Resultado (2026-09-30): 343 testes de interface e 44 de domínio verdes; `tsc` verde; comparação de estilos idêntica nas 10 combinações.
+
+**Pronto quando**: testes novos verdes e o teste de 39 cards / máx. 6 por categoria continua passando.
+
+## Etapa 3 · Shell, sidebar em árvore e Ctrl+K (G)
+
+As ferramentas **ainda abrem no painel modal antigo**; só a navegação muda. Detalhes: §7.1, §7.3, §8 Fase 3.
+
+Herdado da etapa 1:
+
+- Acrescentar em `theme.css` um `@source` para cada pasta nova do shell e aplicar o preflight só dentro dele.
+- `.dark` só entra quando o `useTheme` roda. Com o sistema em escuro, os tokens novos mostram o claro por um instante. Resolver antes de o shell usar esses tokens (script inline no `index.html` ou `@media (prefers-color-scheme: dark)` como o `app.css:62`).
+
+Sugestão de fatias, uma por commit:
+
+1. [ ] Contexto de navegação (`view`, `toolId`, `subId`, `go`, `dirty`) com testes unitários, incluindo a guarda de `dirty`.
+2. [ ] Extrair `QueueView`, `HistoryView`, `SettingsView` e `CatalogView` de `App.tsx` sem mudar o visual.
+3. [ ] `AppShell` + `AppSidebar` (`variant="inset"`, `collapsible="icon"`): marca, busca, rodapé com selo de jobs na Fila.
+4. [ ] `NavTree`: acordeão, roving tabindex, setas/Enter, `aria-expanded`, rolagem, estado persistido (`tools4devs.*`, via `migratePreferences`).
+5. [ ] Favoritos ("Pinned"): só fixar manual, persistido.
+6. [ ] `CommandPalette` (Ctrl+K) sobre ferramentas e sub-ferramentas, reaproveitando `filterCatalogRows`.
+7. [ ] Abaixo de ~1000 px a sidebar recolhe sozinha para a faixa de ícones com tooltip; a escolha manual prevalece e fica guardada. A 800×600, grade em 2 colunas.
+8. [ ] Atualizar `App.test.tsx` preservando landmarks e nomes acessíveis (`complementary`, `searchbox`, imagem "tools4devs").
+9. [ ] Ajustar os seletores de `scripts/screenshots.mjs` que quebrarem (antes ficava para a Fase 8; quebrar a ferramenta no meio atrapalha a conferência visual das etapas seguintes).
+
+**Pronto quando**: UC-01, UC-03, UC-10 e UC-11 passam; o modal antigo abre a ferramenta certa a partir da árvore e da busca.
+
+## Etapa 4 · Páginas de ferramenta inline (G)
+
+Detalhes: §8 Fase 4.
+
+1. [ ] `ToolPage` na área principal com breadcrumb; `PanelShell` sai.
+2. [ ] `UtilityPanel` recebe `utilityId` e `ToolPanel` recebe `selectedOperationId` por props (controlados pelo contexto).
+3. [ ] `DiscardDialog` (`AlertDialog`), traduzido, Esc = "Keep editing", foco no botão seguro (UC-09).
+4. [ ] `InstallDialog` → `Dialog` do shadcn, mesmo conteúdo (UC-04).
+5. [ ] Painéis especiais (`MusicPanel`, `ChatMockupPanel`, `PostMockupPanel`, `ImageSearchPanel`) trocam só de contêiner (UC-12).
+6. [ ] Soltar arquivo: sugestões na tela inicial e na busca; arquivo já selecionado ao abrir (UC-13).
+7. [ ] Jobs continuam ao trocar de ferramenta (UC-06).
+8. [ ] Utilitários de vários campos (CSS, cores, calculadoras), §12.5:
+   - [ ] Levantar em `registry.ts` quais utilitários têm mais de um campo de entrada.
+   - [ ] Mockups claro/escuro em `screens/` com o mesmo gerador (`build-shadcn.mjs`).
+   - [ ] **Aprovação dos mockups antes de implementar** (`AGENTS.md`: nada de interface final sem fluxo e visual confirmados).
+   - [ ] Implementar só a apresentação; a lógica de cálculo e os testes dela continuam iguais.
+9. [ ] Atualizar `App.test.tsx`, `App.native.test.tsx`, `ToolPanel.native.test.tsx`, `RecognitionPanels.native.test.tsx`.
+
+**Pronto quando**: UC-04, 05, 06, 09, 12 e 13 passam; uma operação real (qpdf ou conversão curta) roda de ponta a ponta no `tauri:dev`.
+
+## Etapa 5 · Cards novos e preview no hover (G)
+
+Detalhes: §4.2, §7.4, §8 Fase 5.
+
+- [ ] Testes primeiro: estados de erro e progresso do `ToolCard`; nomes `Open {name}` / `Get {name}`; `ToolPreview` com reduced motion (só poster), um vídeo por vez, abre no foco.
+- [ ] `ToolCard` novo: ícone tingido por grupo, título em serifa, motor em mono, selos.
+- [ ] `ToolPreview`: atraso de ~300 ms, `preload="none"`, `IntersectionObserver`, posicionamento absoluto (sem reflow).
+- [ ] Remover grade de pontinhos, barra de destaque, elevação no hover e `card-arrive`.
+- [ ] Remover `ToolArtwork.tsx`, `CategoryFilter.tsx` e `ToolSection.tsx` (a sidebar assume os filtros).
+
+**Pronto quando**: UC-02 passa; a grade não treme ao abrir/fechar o preview; cards sem clipe mostram poster ou ícone.
+
+## Etapa 6 · Clipes de preview (G, paralela)
+
+Detalhes: §8 Fase 6. Motor em `previews/clip.html`.
+
+- [ ] `scripts/previews.mjs`: renderiza e codifica (6 s, 30 fps, 960×540, VP9 `-crf 36`, poster do quadro de 1,6 s).
+- [ ] Teste: cada `preview.src` existe e pesa < 200 KB; total ≤ 4 MB.
+- [x] Copiar os 4 prontos (`ffmpeg`, `qpdf`, `jq`, `qr` → `qr-barcode`) para `apps/desktop/public/previews/` (feito na etapa 2).
+- [ ] Lote 1 (mais usados): yt-dlp, Tesseract, ImageMagick, utilitários de texto e de código.
+- [ ] Lote 2: o restante até 39.
+
+**Pronto quando**: cada card tem clipe ou poster; nenhum clipe passa de 200 KB; loop sem salto.
+
+## Etapa 7 · Primitivos restantes e limpeza (M)
+
+Detalhes: §8 Fase 7.
+
+- [ ] `Select.tsx` → `Select`; `NumberField.tsx` → `Input`; `ThemeSwitch.tsx` → `ToggleGroup`; `UpdateCard.tsx` → `Sonner`/`Alert`; `.button--*` → `Button`.
+- [ ] Histórico com estados Done/Failed/Stopped, "Clear the history" com confirmação e estado vazio (UC-07).
+- [ ] Configurações em uma coluna; tema e idioma sem reiniciar (UC-08).
+- [ ] Apagar de `app.css` tudo que não for dos mockups de chat e post.
+
+**Pronto quando**: nenhum componente usa classes antigas; `stylesheet.test.mjs` verde.
+
+## Etapa 8 · Testes finais, docs e entrega (M)
+
+- [ ] Regenerar `docs/screenshots/*` (EN e `pt/`) e comparar com `screens/png/`.
+- [ ] Revisão de acessibilidade: teclado, anel de foco, leitura da árvore, contraste ≥ 4,5:1 (`docs/brand/CONTRAST.md`).
+- [ ] Orçamento: tamanho do `dist/` e dos clipes.
+- [ ] `README.md`, `CHANGELOG.md`; ADR-0007 revisado com o que mudou na execução.
+- [ ] Checklist de `PLANO.md` §10 completo.
+- [ ] Atualizar o status no topo do `PLANO.md` e em `docs/PROGRESS.md`.

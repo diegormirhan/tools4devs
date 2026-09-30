@@ -6,6 +6,7 @@ Documento de referência para a reestruturação do app. Junto com as imagens e 
 - Direção visual aprovada: **B2 em azul** (base Mist do shadcn, sidebar `inset`, títulos em serifa).
 - Mockups: [`screens/png/`](screens/png/) (12 telas em claro e escuro). Clipes de hover: [`previews/out/`](previews/out/).
 - Como regenerar os mockups e os vídeos: [`README.md`](README.md).
+- Ordem de execução e checklist: [`ETAPAS.md`](ETAPAS.md).
 
 ---
 
@@ -45,7 +46,7 @@ Hoje a pessoa tem dificuldade para achar o que precisa. Pelo código atual:
 ### Não objetivos (nesta rodada)
 
 - Trocar o motor de execução das ferramentas, o instalador de componentes ou o sistema de atualização.
-- Adicionar um roteador com URLs (fica opcional, ver §8.2).
+- Adicionar um roteador com URLs (ver §12.2).
 - Novas ferramentas ou novos utilitários.
 - Suporte a macOS ou Linux (o app continua só para Windows).
 - Clipes de hover para as sub-ferramentas (a infraestrutura os prevê, mas só os 39 cards entram).
@@ -272,31 +273,35 @@ interface NavigationApi extends Navigation {
 
 - `go()` consulta `dirty`; se houver trabalho, abre o `AlertDialog` do UC-09 e só navega se a pessoa confirmar.
 - `UtilityPanel` recebe `utilityId` controlado e `ToolPanel` recebe `selectedOperationId` controlado (hoje o estado é local a cada painel).
-- Sem roteador. Opcional: refletir `{view, toolId, subId}` em `location.hash` para facilitar testes e deep links (§8.2).
+- Sem roteador e sem `location.hash` (§12.2).
 
 ### 7.2 Modelo de dados
 
 Arquivos: `src/catalog/catalog.ts`, `src/utilities/registry.ts`, `src/i18n/catalog-pt.ts`.
 
+Implementado na Etapa 2:
+
 ```ts
 // catalog.ts
-type ToolPresentation = {
+type CatalogTool = {
   // …campos atuais…
-  icon: LucideIconName;            // novo
-  preview?: {                      // novo
-    src: string;                   // "/previews/ffmpeg.webm"
-    poster: string;                // "/previews/ffmpeg.jpg"
-    caption: string;               // frase curta, traduzida
-    uses: string[];                // 3 a 4 ações que aparecem em "What you can do"
-  };
+  icon: LucideIcon;                // componente do lucide-react, não o nome
+  preview?: ToolPreview;           // { src: "/previews/ffmpeg.webm", poster: "/previews/ffmpeg.jpg" }
+};
+
+type CatalogRow = {
+  // …campos atuais…
+  icon: LucideIcon;                // grupo na sidebar recolhida
+  hue: number;                     // matiz OKLCH do grupo (§4.2)
 };
 
 // registry.ts: cada UtilityGroup também ganha `icon` e `preview?`
 ```
 
-- O nome dos campos de texto novos deve ser `title`, `description`, `label` ou `hint`, porque `tests/interface/translations.test.mjs` só cobre esses nomes automaticamente.
-- `buildNavigationTree(rows: CatalogRow[])` devolve `Group[] → Tool[] → Sub[]`. A árvore usa a **linha** (`rowDefinitions`, `catalog.ts:472-527`) como grupo, porque a string `category` de cada ferramenta não bate com a linha (por exemplo, `ffmpeg` diz `downloads` mas fica em Vídeo e áudio).
-- Cada grupo ganha um `hue` (tabela em §4.2). Guardar em um único mapa em `catalog.ts`.
+- `icon` guarda o componente, não o nome: um mapa de nome para componente puxaria o pacote inteiro de ícones para o bundle.
+- `preview` não tem `caption` nem `uses`. O hover mostra a `description` e as operações da ferramenta ("What you can do"), que já existem e já são traduzidas. Sem texto novo, `translations.test.mjs` continua como está.
+- Não existe `buildNavigationTree()`: `createCatalogRows()` já devolve grupo → ferramenta → `operations`, usando a **linha** (`rowDefinitions`) como grupo e não a string `category` (que não bate: `ffmpeg` diz `downloads` mas fica em Vídeo e áudio). O endereço de uma sub-ferramenta é `{toolId, subId}`, e um teste garante que os ids de sub-ferramenta são únicos dentro de cada ferramenta.
+- `hue` e o ícone do grupo ficam em `rowDefinitions`, ao lado do resto da definição do grupo.
 
 ### 7.3 Componentes novos
 
@@ -319,7 +324,7 @@ Os painéis `ToolPanel` (989 linhas), `UtilityPanel` (395), `MusicPanel`, `ChatM
 ### 7.4 Preview de hover
 
 - Gatilho: `pointerenter` com atraso de ~300 ms ou `focus` por teclado; fecha no `pointerleave`/`blur`.
-- Conteúdo: `<video muted loop playsinline preload="none" poster=…>`, o título, o motor, o selo de download, `uses[]` como badges e o botão principal.
+- Conteúdo: `<video muted loop playsinline preload="none" poster=…>`, o título, o motor, o selo de download, a descrição, as primeiras operações como badges ("What you can do", com "+N" para o restante) e o botão principal.
 - Regras:
   - Um único vídeo toca por vez.
   - `IntersectionObserver` pausa o vídeo fora da tela.
@@ -340,9 +345,9 @@ Os painéis `ToolPanel` (989 linhas), `UtilityPanel` (395), `MusicPanel`, `ChatM
 
 O app usa um dicionário próprio: a **chave é a frase em inglês**, e `pt.ts` (868 entradas) e `catalog-pt.ts` (181) traduzem.
 
-- Todo texto novo (busca, selos, legendas dos clipes, "Nothing leaves your computer", "Discard this work?", "Keep editing") precisa de entrada em português.
-- O teste `translations.test.mjs` varre `t("…")` e campos `title|description|label|hint`; ele deve continuar verde.
-- O `AlertDialog` e a legenda dos clipes hoje estão sem tradução; corrigir na Fase 4.
+- Todo texto novo (busca, selos, "Nothing leaves your computer", "Discard this work?", "Keep editing") precisa de entrada em português. O texto gravado dentro dos vídeos fica em inglês (§12.1).
+- O teste `translations.test.mjs` varre `t("…")` e campos `title|description|label|hint|downloadLabel`; ele deve continuar verde.
+- O `AlertDialog` hoje está sem tradução; corrigir na Fase 4.
 
 ## 8. Plano de implementação por fases
 
@@ -368,7 +373,7 @@ Tamanho: **P** ≈ meio dia, **M** ≈ 1 a 2 dias, **G** ≈ 3 a 5 dias.
 ### Fase 2 · Modelo de dados (P)
 
 - Adicionar `icon` e `preview?` a `ToolPresentation` e `UtilityGroup`; preencher os 39 ícones (tabela no mockup: `clapperboard`, `scan-search`, `music`, `layers`, `download`, `images`…).
-- Implementar `buildNavigationTree()` e o mapa de matizes por grupo.
+- Matiz e ícone por grupo (sem `buildNavigationTree()`, ver §7.2).
 - Testes em `catalog.test.ts`: todo card tem `icon`; todo `preview.src` e `poster` existem em `public/previews/`; a árvore tem 9 grupos, 39 ferramentas e todas as sub-ferramentas; a soma bate com o número de operações e utilitários.
 - **Aceite**: nenhuma mudança visual; testes novos verdes; o teste que exige 39 cards e no máximo 6 por categoria continua passando.
 
@@ -419,7 +424,7 @@ Tamanho: **P** ≈ meio dia, **M** ≈ 1 a 2 dias, **G** ≈ 3 a 5 dias.
 ### Fase 8 · Testes, documentação e entrega (M)
 
 - Adaptar `scripts/screenshots.mjs` (seletores `#section-data` e `[aria-label="Get yt-dlp"]` quebram) e regenerar `docs/screenshots/*` (inglês e `pt/`).
-- Atualizar `README.md` e `CHANGELOG.md`; criar `docs/decisions/ADR-0007-ui-stack.md` (Tailwind, shadcn, tema, previews em WebM).
+- Atualizar `README.md` e `CHANGELOG.md`; revisar `docs/decisions/ADR-0007-ui-stack.md` (escrito na Etapa 0) com o que mudou na execução.
 - Revisar contraste nos dois temas (há `docs/brand/CONTRAST.md` como referência).
 - **Aceite**: checklist de §10 completo.
 
@@ -427,7 +432,7 @@ Tamanho: **P** ≈ meio dia, **M** ≈ 1 a 2 dias, **G** ≈ 3 a 5 dias.
 
 | Camada | O que cobrir | Onde |
 |---|---|---|
-| Unidade (Vitest) | `buildNavigationTree`, busca, matiz por grupo, contexto de navegação, guarda de `dirty` | `src/catalog/*.test.ts`, `src/navigation/*.test.tsx` |
+| Unidade (Vitest) | ícones, matiz por grupo, ids de sub-ferramenta, previews, busca, contexto de navegação, guarda de `dirty` | `src/catalog/*.test.ts`, `src/navigation/*.test.tsx` |
 | Componentes (Testing Library) | `NavTree` (teclado e ARIA), `CommandPalette`, `ToolCard` (estados), `ToolPreview` (reduced motion, um vídeo por vez), `DiscardDialog` | ao lado de cada componente |
 | Integração (App) | UC-01, UC-03, UC-04 (com Tauri mockado), UC-06, UC-09 | `App.test.tsx`, `App.native.test.tsx` |
 | Node (`tests/**/*.test.mjs`) | Tradução de todos os textos novos, tokens de cor, existência e tamanho dos clipes | `tests/interface/` |
@@ -462,20 +467,22 @@ Matriz mínima por fase: {claro, escuro} × {inglês, português}. Janela 1200×
 | Persistência antiga de preferências | Perder configuração ao atualizar | Reaproveitar `migratePreferences`; novas chaves com prefixo `tools4devs.*` |
 | Documentação do shadcn indisponível na rede do ambiente | Detalhes de CLI podem ter mudado | Conferir o CLI (`npx shadcn@latest init`) na hora; os tokens e componentes usados aqui vêm do repositório oficial |
 
-## 12. Decisões em aberto
+## 12. Decisões da Etapa 0
 
-1. **Idioma dos clipes**: hoje as legendas estão em inglês. Opções: só inglês (menor e simples), inglês e português (dobra o peso) ou legenda traduzida em HTML por cima do vídeo (mais flexível, exige sincronizar o tempo). Sugestão: só inglês no primeiro corte, com a legenda do card traduzida.
-2. **URL por hash** (`#/tool/ffmpeg/extract-audio`): facilita testes e deep links, mas não é necessária. Decidir na Fase 3.
-3. **Favoritos**: começar só com "fixar" manual, ou também "recentes" automáticos.
-4. **Recolher a sidebar por padrão** em janelas estreitas ou só quando o usuário pedir.
-5. **Painel dos utilitários de vários campos** (CSS, cores, calculadoras): manter a lógica atual dentro da página nova ou repensar o layout. Sugestão: manter a lógica e revisar depois.
+Fechadas em 2026-09-30.
+
+1. **Texto dos clipes**: os clipes são motion design e ficam como estão, com o texto gravado em inglês ("Convert.", "Compress.", o rótulo do motor, nomes de arquivo). Não há versão por idioma nem legenda sobreposta em HTML. O texto em volta do vídeo (descrição e operações) já é traduzido. Os 35 clipes novos seguem o mesmo padrão.
+2. **URL por hash**: não. A navegação vive só no contexto React (§7.1). Os testes navegam pelo contexto.
+3. **Favoritos**: só "fixar" manual. Sem seção de recentes.
+4. **Sidebar em janela estreita**: recolhe sozinha para a faixa de ícones abaixo de ~1000 px de largura. Se a pessoa abrir ou recolher manualmente, a escolha dela prevalece e fica guardada.
+5. **Utilitários de vários campos** (CSS, cores, calculadoras): o layout é repensado dentro do redesign. Antes de implementar, esses painéis ganham mockups no mesmo sistema visual (`screens/`), que precisam ser aprovados. A lógica de cálculo não muda; muda a apresentação.
 
 ## 13. Mapa de arquivos
 
 | Área | Arquivos atuais | Mudança |
 |---|---|---|
 | Shell | `src/App.tsx` (966 linhas), `src/main.tsx` | Dividir em `AppShell`, `AppSidebar` e views |
-| Catálogo | `src/catalog/catalog.ts`, `sizes.ts`, `formats.ts` | Novos campos `icon` e `preview`; `buildNavigationTree` |
+| Catálogo | `src/catalog/catalog.ts`, `sizes.ts`, `formats.ts` | Novos campos `icon`, `preview`, `hue` |
 | Utilitários | `src/utilities/registry.ts` | `icon` e `preview` por grupo |
 | Cards e seções | `ToolCard.tsx`, `ToolSection.tsx`, `CategoryFilter.tsx`, `ToolArtwork.tsx` | Novo `ToolCard`; filtros de categoria saem (a sidebar assume); artwork sai |
 | Painéis | `PanelShell.tsx`, `ToolPanel.tsx`, `UtilityPanel.tsx`, painéis especiais | Sai o modal; sub-ferramenta controlada |
