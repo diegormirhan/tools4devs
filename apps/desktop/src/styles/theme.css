@@ -19,6 +19,7 @@
 
 @source "../components/ui";
 @source "../navigation";
+@source "../components/InstallDialog.tsx";
 
 @custom-variant dark (&:is(.dark *));
 

@@ -75,7 +75,7 @@ it('sends a picture from this machine to the one engine that accepts an upload',
   });
 
   render(
-    <ImageSearchPanel tool={catalogTool('image-search')} initialPath="C:/pictures/cat.png" onClose={vi.fn()} />,
+    <ImageSearchPanel tool={catalogTool('image-search')} initialPath="C:/pictures/cat.png" />,
   );
 
   await userEvent.click(screen.getByRole('button', { name: 'Search' }));
@@ -94,7 +94,7 @@ it('offers every engine once an address is typed, because none of them needs the
     return 'https://yandex.com/images/search';
   });
 
-  render(<ImageSearchPanel tool={catalogTool('image-search')} initialPath="C:/pictures/cat.png" onClose={vi.fn()} />);
+  render(<ImageSearchPanel tool={catalogTool('image-search')} initialPath="C:/pictures/cat.png" />);
   await screen.findByRole('combobox', { name: 'Search with' });
 
   // With a local file chosen, only the uploading engine is on offer.
@@ -117,7 +117,7 @@ it('refuses a file the search cannot read, and says which kinds it takes', async
   vi.mocked(invoke).mockResolvedValue(engines);
   vi.mocked(open).mockResolvedValue('C:/documents/report.pdf');
 
-  render(<ImageSearchPanel tool={catalogTool('image-search')} onClose={vi.fn()} />);
+  render(<ImageSearchPanel tool={catalogTool('image-search')} />);
   await userEvent.click(screen.getByRole('button', { name: 'Choose a picture' }));
 
   expect(await screen.findByText(/not something this tool reads/i)).toBeInTheDocument();
@@ -126,7 +126,7 @@ it('refuses a file the search cannot read, and says which kinds it takes', async
 
 it('says plainly that this is the tool that leaves the machine', async () => {
   vi.mocked(invoke).mockResolvedValue(engines);
-  render(<ImageSearchPanel tool={catalogTool('image-search')} onClose={vi.fn()} />);
+  render(<ImageSearchPanel tool={catalogTool('image-search')} />);
 
   expect(screen.getByText(/the one tool here that leaves your machine/i)).toBeInTheDocument();
 });
@@ -137,7 +137,7 @@ it('reports a refusal from the host instead of pretending the browser opened', a
     throw 'Google Lens refused the upload (HTTP 429). Try again in a moment.';
   });
 
-  render(<ImageSearchPanel tool={catalogTool('image-search')} initialPath="C:/pictures/cat.png" onClose={vi.fn()} />);
+  render(<ImageSearchPanel tool={catalogTool('image-search')} initialPath="C:/pictures/cat.png" />);
   await userEvent.click(screen.getByRole('button', { name: 'Search' }));
 
   expect(await screen.findByText(/HTTP 429/)).toBeInTheDocument();
@@ -173,7 +173,7 @@ function hosts(sources: typeof allSources, answer: unknown = match) {
 
 it('listens to what the machine is playing, and asks for nothing else first', async () => {
   hosts(allSources);
-  render(<MusicPanel tool={catalogTool('songrec')} onClose={vi.fn()} />);
+  render(<MusicPanel tool={catalogTool('songrec')} />);
 
   // One question at the start, and the answer that matters is already chosen.
   await waitFor(() => expect(screen.getByRole('combobox', { name: 'Listen to' })).toHaveTextContent(/playing/i));
@@ -190,7 +190,7 @@ it('listens to what the machine is playing, and asks for nothing else first', as
 
 it('asks which device only when there is more than one of that kind', async () => {
   hosts(allSources);
-  render(<MusicPanel tool={catalogTool('songrec')} onClose={vi.fn()} />);
+  render(<MusicPanel tool={catalogTool('songrec')} />);
   await screen.findByRole('combobox', { name: 'Listen to' });
 
   // Two speakers, so which one is a real question.
@@ -205,7 +205,7 @@ it('asks which device only when there is more than one of that kind', async () =
 
 it('records the microphone once that is what was chosen', async () => {
   hosts(allSources);
-  render(<MusicPanel tool={catalogTool('songrec')} onClose={vi.fn()} />);
+  render(<MusicPanel tool={catalogTool('songrec')} />);
   await screen.findByRole('combobox', { name: 'Listen to' });
 
   await choose(screen.getByRole('combobox', { name: 'Listen to' }), /microphone/i);
@@ -218,7 +218,7 @@ it('records the microphone once that is what was chosen', async () => {
 
 it('shows every field of a match, with the cover art described for a screen reader', async () => {
   hosts(allSources);
-  render(<MusicPanel tool={catalogTool('songrec')} onClose={vi.fn()} />);
+  render(<MusicPanel tool={catalogTool('songrec')} />);
   await screen.findByRole('combobox', { name: 'Listen to' });
   await userEvent.click(screen.getByRole('button', { name: /listen and identify/i }));
 
@@ -231,7 +231,7 @@ it('shows every field of a match, with the cover art described for a screen read
 
 it('offers each service, and opens it through the host rather than in this window', async () => {
   hosts(allSources);
-  render(<MusicPanel tool={catalogTool('songrec')} onClose={vi.fn()} />);
+  render(<MusicPanel tool={catalogTool('songrec')} />);
   await screen.findByRole('combobox', { name: 'Listen to' });
   await userEvent.click(screen.getByRole('button', { name: /listen and identify/i }));
 
@@ -250,7 +250,7 @@ it('offers each service, and opens it through the host rather than in this windo
 
 it('says so when nothing matched, rather than showing an empty card', async () => {
   hosts(allSources, { ...match, matched: false, title: '', artist: '', message: 'No match. Turn it up.' });
-  render(<MusicPanel tool={catalogTool('songrec')} onClose={vi.fn()} />);
+  render(<MusicPanel tool={catalogTool('songrec')} />);
   await screen.findByRole('combobox', { name: 'Listen to' });
   await userEvent.click(screen.getByRole('button', { name: /listen and identify/i }));
 
@@ -260,7 +260,7 @@ it('says so when nothing matched, rather than showing an empty card', async () =
 
 it('draws the sound the host reports while it is still recording', async () => {
   hosts(allSources);
-  const { container } = render(<MusicPanel tool={catalogTool('songrec')} onClose={vi.fn()} />);
+  const { container } = render(<MusicPanel tool={catalogTool('songrec')} />);
   await screen.findByRole('combobox', { name: 'Listen to' });
 
   const bars = () =>
@@ -282,7 +282,7 @@ it('draws the sound the host reports while it is still recording', async () => {
 
 it('promises that only the fingerprint is sent', async () => {
   hosts(allSources);
-  render(<MusicPanel tool={catalogTool('songrec')} onClose={vi.fn()} />);
+  render(<MusicPanel tool={catalogTool('songrec')} />);
 
   expect(screen.getByText(/only the\s+fingerprint is sent/i)).toBeInTheDocument();
 });
@@ -293,7 +293,7 @@ it('says it is still going after a lookup came back empty', async () => {
     if (command === 'list_audio_sources') return allSources;
     return new Promise(() => {});
   });
-  render(<MusicPanel tool={catalogTool('songrec')} onClose={vi.fn()} />);
+  render(<MusicPanel tool={catalogTool('songrec')} />);
   await screen.findByRole('combobox', { name: 'Listen to' });
   await userEvent.click(screen.getByRole('button', { name: /listen and identify/i }));
 

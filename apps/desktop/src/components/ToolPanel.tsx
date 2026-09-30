@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Check, CircleSlash, FilePlus2, FolderOpen, Play, X } from "lucide-react";
+import { AlertTriangle, Check, CircleSlash, FilePlus2, FolderOpen, Play } from "lucide-react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import type { CatalogTool } from "../catalog/catalog";
 import { findJob, type ToolJob } from "../domain/job-queue";
@@ -20,8 +20,10 @@ export type RunOperationInput = {
 
 type ToolPanelProps = {
   tool: CatalogTool;
-  /** The operation to open on, as chosen in the sidebar or the palette. */
-  initialSubId?: string;
+  /** The operation shown, as the sidebar and the palette name it; the first when absent. */
+  subId?: string;
+  /** Asked to show another operation, so the sidebar and the breadcrumb follow. */
+  onSubChange?: (subId: string) => void;
   initialPath?: string | null;
   droppedPaths?: string[];
   jobs?: ToolJob[];
@@ -29,9 +31,6 @@ type ToolPanelProps = {
   defaultFolder?: string;
   /** Raised when there is work a close would throw away. */
   onDirtyChange?: (dirty: boolean) => void;
-  leaving?: boolean;
-  onClose: () => void;
-  onExited?: () => void;
   onRun?: (input: RunOperationInput) => string;
   /** Stops the job this panel started, without leaving the panel. */
   onCancel?: (jobId: string) => void;
@@ -39,23 +38,23 @@ type ToolPanelProps = {
 
 type SelectedFile = { name: string; path: string };
 
-export function ToolPanel({ tool, initialSubId, initialPath, droppedPaths, jobs = [], defaultFolder = "", leaving = false, onClose, onExited, onRun, onCancel, onDirtyChange }: ToolPanelProps) {
+export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths, jobs = [], defaultFolder = "", onRun, onCancel, onDirtyChange }: ToolPanelProps) {
   const t = useT();
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>(() =>
     initialPath && ![...urlTools, ...folderTools].includes(tool.id)
       ? [{ path: initialPath, name: fileNameOnly(initialPath) }]
       : [],
   );
-  const [selectedOperationId, setSelectedOperationId] = useState(
-    tool.operations.find((operation) => operation.id === initialSubId)?.id ?? tool.operations[0]?.id ?? "",
-  );
+  const pickOperation = (id?: string) =>
+    tool.operations.find((operation) => operation.id === id)?.id ?? tool.operations[0]?.id ?? "";
+  const [selectedOperationId, setSelectedOperationId] = useState(() => pickOperation(subId));
   const [sourceUrl, setSourceUrl] = useState("");
   const [operationOptions, setOperationOptions] = useState<Record<string, string>>({});
   const [outputPath, setOutputPath] = useState("");
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [formError, setFormError] = useState("");
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const pageRef = useRef<HTMLElement>(null);
 
   const selectedOperation = tool.operations.find((operation) => operation.id === selectedOperationId);
   /**
@@ -154,16 +153,23 @@ export function ToolPanel({ tool, initialSubId, initialPath, droppedPaths, jobs 
   const resultMessage = formError || (currentJob && currentJob.status !== "running" ? jobResultText(currentJob) : "");
   const resultIsError = Boolean(formError) || currentJob?.status === "failed";
 
-  useEffect(() => {
-    closeButtonRef.current?.focus();
-  }, []);
+  // Arriving from the keyboard lands on the page, not back at the top of the sidebar.
+  useEffect(() => pageRef.current?.focus({ preventScroll: true }), []);
 
-  // Reduced motion collapses the exit to ~1ms, so guarantee the unmount either way.
+  // The files stay; the options and the destination belong to the operation that is left.
+  function showOperation(id: string) {
+    setSelectedOperationId(id);
+    setOperationOptions({});
+    setOutputPath("");
+    resetFeedback();
+  }
+
+  // The sidebar or the palette chose another operation of this tool.
   useEffect(() => {
-    if (!leaving || !onExited) return;
-    const timeout = window.setTimeout(onExited, 320);
-    return () => window.clearTimeout(timeout);
-  }, [leaving, onExited]);
+    const next = pickOperation(subId);
+    if (next !== selectedOperationId) showOperation(next);
+    // Only a change from outside matters; the selection follows it, not the other way round.
+  }, [subId]);
 
   // A file dropped on the window belongs to the tool the user already has open.
   useEffect(() => {
@@ -176,27 +182,14 @@ export function ToolPanel({ tool, initialSubId, initialPath, droppedPaths, jobs 
   }, [droppedPaths, tool.id]);
 
   return (
-    <aside
-      className={`tool-panel${previewable ? " tool-panel--wide" : ""}`}
-      role="dialog"
-      aria-modal="false"
+    <section
+      ref={pageRef}
+      tabIndex={-1}
+      className={`tool-panel tool-panel--page${previewable ? " tool-panel--wide" : ""}`}
       aria-labelledby="tool-panel-title"
-      data-leaving={leaving ? "true" : undefined}
-      onAnimationEnd={(event) => {
-        if (leaving && event.animationName.includes("panel-exit")) onExited?.();
-      }}
     >
       <div className="tool-panel__topbar">
         <span>{tool.integrationName}</span>
-        <button
-          ref={closeButtonRef}
-          className="icon-button"
-          type="button"
-          onClick={onClose}
-          aria-label={t("Close tool")}
-        >
-          <X size={18} />
-        </button>
       </div>
       <div className={`tool-panel__body${previewable ? " tool-panel__body--split" : ""}`}>
         {previewable && (
@@ -232,10 +225,8 @@ export function ToolPanel({ tool, initialSubId, initialPath, droppedPaths, jobs 
                 label: t(operation.label),
               }))}
               onChange={(next) => {
-                setSelectedOperationId(next);
-                setOperationOptions({});
-                setOutputPath("");
-                resetFeedback();
+                showOperation(next);
+                onSubChange?.(next);
               }}
             />
             <small>{selectedOperation ? t(selectedOperation.description) : ""}</small>
@@ -398,7 +389,7 @@ export function ToolPanel({ tool, initialSubId, initialPath, droppedPaths, jobs 
           </button>
         )}
       </div>
-    </aside>
+    </section>
   );
 
   function FileField() {

@@ -41,15 +41,9 @@ const BAR_COUNT = 40;
  */
 export function MusicPanel({
   tool,
-  leaving = false,
-  onClose,
-  onExited,
   onDirtyChange,
 }: {
   tool: CatalogTool;
-  leaving?: boolean;
-  onClose: () => void;
-  onExited?: () => void;
   onDirtyChange?: (dirty: boolean) => void;
 }) {
   const t = useT();
@@ -63,10 +57,7 @@ export function MusicPanel({
   const [tried, setTried] = useState(0);
   const [error, setError] = useState("");
   const [result, setResult] = useState<Recognition | null>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => closeButtonRef.current?.focus(), []);
 
   useEffect(() => {
     if (!isNativeHost()) return;
@@ -171,11 +162,7 @@ export function MusicPanel({
 
   return (
     <PanelShell
-      ref={closeButtonRef}
       title={tool.integrationName}
-      leaving={leaving}
-      onClose={onClose}
-      onExited={onExited}
     >
       <section className="tool-panel__controls">
         <h2 id="tool-panel-title">{t(tool.title)}</h2>

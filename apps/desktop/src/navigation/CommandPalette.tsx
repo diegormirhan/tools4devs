@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { searchCatalog, type CatalogRow } from "../catalog/catalog";
+import { searchCatalog, type CatalogRow, type CatalogTool } from "../catalog/catalog";
 import { useT } from "../i18n/language";
 import {
   Command,
@@ -17,10 +17,14 @@ export function CommandPalette({
   rows,
   open,
   onOpenChange,
+  file,
+  suggestedTools,
 }: {
   rows: CatalogRow[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  file: string | null;
+  suggestedTools: CatalogTool[];
 }) {
   const t = useT();
   const { go } = useNavigation();
@@ -54,6 +58,25 @@ export function CommandPalette({
           />
           <CommandList className="max-h-[380px]">
             <CommandEmpty>{t("No tool matches that")}</CommandEmpty>
+            {file && !query.trim() && suggestedTools.length > 0 && (
+              <CommandGroup heading={t("For {name}", { name: file.split(/[\\/]/).pop() ?? file })}>
+                {suggestedTools.map((tool) => {
+                  const Icon = tool.icon;
+                  return (
+                    <CommandItem
+                      key={tool.id}
+                      value={`file/${tool.id}`}
+                      onSelect={() => choose({ view: "tool", toolId: tool.id })}
+                      className="gap-3"
+                    >
+                      <Icon className="size-5" />
+                      <span className="flex-1 font-medium">{t(tool.title)}</span>
+                      <small className="text-xs text-muted-foreground">{tool.integrationName}</small>
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            )}
             {actions.length > 0 && (
               <CommandGroup heading={t("Actions")}>
                 {actions.map(({ row, tool, operation }) => {

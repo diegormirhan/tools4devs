@@ -154,3 +154,18 @@ export function acceptsFile(
   const expected = families.join(" or ");
   return { ok: false, reason: `${what} is not something this tool reads. It takes ${expected} files.` };
 }
+
+/**
+ * The tools made for this file, for the suggestions after a drop. A tool that
+ * takes anything is left out: listing the archiver for every file says nothing.
+ */
+export function suggestToolsFor(path: string): string[] {
+  const extension = extensionOf(path);
+  return Object.entries(toolAccepts)
+    .filter(
+      ([, families]) =>
+        !families.includes("any") &&
+        families.some((family) => family !== "any" && familyExtensions[family].includes(extension)),
+    )
+    .map(([toolId]) => toolId);
+}

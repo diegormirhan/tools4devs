@@ -37,6 +37,13 @@ export const portuguese: Record<string, string> = {
   move: "mover",
   open: "abrir",
   close: "fechar",
+  "Discard this work?": "Descartar este trabalho?",
+  "The file you chose and the settings you changed will be cleared. Nothing on disk is touched either way.":
+    "O arquivo que você escolheu e as opções que mudou serão apagados. Nada no disco é alterado, em nenhum dos casos.",
+  "Keep editing": "Continuar editando",
+  Discard: "Descartar",
+  "Tools that read this file": "Ferramentas que leem este arquivo",
+  "For {name}": "Para {name}",
 
   // ── The catalog screen
   "What do you want to do?": "O que você quer fazer?",
@@ -739,7 +746,6 @@ export const portuguese: Record<string, string> = {
   "Chrome": "Chrome",
   "Chromium": "Chromium",
   "Close": "Fechar",
-  "Close tool": "Fechar a ferramenta",
   "Codec": "Codec",
   "Columns": "Colunas",
   "Compatible — mp4, plays anywhere": "Compatível — mp4, toca em qualquer lugar",

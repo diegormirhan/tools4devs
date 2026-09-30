@@ -31,19 +31,12 @@ const PLATFORM_LABELS: Record<PostPlatform, string> = {
  */
 export function PostMockupPanel({
   tool,
-  leaving = false,
-  onClose,
-  onExited,
   onDirtyChange,
 }: {
   tool: CatalogTool;
-  leaving?: boolean;
-  onClose: () => void;
-  onExited?: () => void;
   onDirtyChange?: (dirty: boolean) => void;
 }) {
   const t = useT();
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const [platform, setPlatform] = useState<PostPlatform>("tweet");
@@ -89,11 +82,7 @@ export function PostMockupPanel({
 
   return (
     <PanelShell
-      ref={closeButtonRef}
       title={tool.integrationName}
-      leaving={leaving}
-      onClose={onClose}
-      onExited={onExited}
       wide
       bodyClassName="mockup-panel__body"
     >

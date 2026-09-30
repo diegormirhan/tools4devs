@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Upload } from "lucide-react";
 import toolManifest from "../../../tooling/tools.json";
 import { open } from "@tauri-apps/plugin-dialog";
 import { createCatalogRows, type CatalogTool } from "./catalog/catalog";
+import { suggestToolsFor } from "./catalog/formats";
 import { InstallDialog } from "./components/InstallDialog";
 import { ToolPanel, type RunOperationInput } from "./components/ToolPanel";
 import { ImageSearchPanel } from "./components/ImageSearchPanel";
@@ -22,14 +23,13 @@ import { useInstallationState } from "./hooks/useInstallationState";
 import { useStoredState } from "./hooks/useStoredState";
 import { useTheme } from "./hooks/useTheme";
 import { AppShell } from "./navigation/AppShell";
-import { NavigationProvider, useNavigation, type View } from "./navigation/navigation";
+import { NavigationProvider, useNavigation } from "./navigation/navigation";
 import { JobView } from "./views/JobView";
 import { SettingsView } from "./views/SettingsView";
 import "./styles/theme.css";
 import "./styles/app.css";
 
 type SidebarChoice = "collapsed" | "expanded" | null;
-type ShownTool = { tool: CatalogTool; subId?: string };
 
 export function App() {
   return (
@@ -51,8 +51,6 @@ function Shell() {
     () => new Map(catalogRows.flatMap((row) => row.tools.map((tool) => [tool.id, tool] as const))),
     [catalogRows],
   );
-  // The page behind a tool panel, and where closing the panel returns to.
-  const [page, setPage] = useState<Exclude<View, "tool">>("catalog");
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [pendingTool, setPendingTool] = useState<CatalogTool | null>(null);
   const [pendingFile, setPendingFile] = useState<string | null>(null);
@@ -112,42 +110,19 @@ function Shell() {
     [],
   );
   const runningCount = runner.runningJobs.length;
+  // A file chosen or dropped before any tool: the tools made for it, in catalog order.
+  const suggestedTools = useMemo(() => {
+    if (!pendingFile) return [];
+    const ids = new Set(suggestToolsFor(pendingFile));
+    return catalogRows.flatMap((row) => row.tools.filter((tool) => ids.has(tool.id)));
+  }, [pendingFile, catalogRows]);
 
-  const navigatedTool = location.view === "tool" ? (toolsById.get(location.toolId ?? "") ?? null) : null;
-  // The panel outlives the navigation by its exit animation, so it is tracked apart from it.
-  const [shownTool, setShownTool] = useState<ShownTool | null>(null);
-  const [panelLeaving, setPanelLeaving] = useState(false);
-  const returnFocusRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    if (location.view !== "tool") setPage(location.view);
-  }, [location.view]);
-
-  useEffect(() => {
-    if (navigatedTool) {
-      if (!shownTool && document.activeElement instanceof HTMLElement) returnFocusRef.current = document.activeElement;
-      setShownTool({ tool: navigatedTool, subId: location.subId });
-      setPanelLeaving(false);
-    } else if (shownTool) {
-      setPanelLeaving(true);
-    }
-  }, [navigatedTool, location.subId]);
-
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key !== "Escape" || event.defaultPrevented) return;
-      if (pendingTool) setPendingTool(null);
-      else if (navigation.pending) navigation.cancelPending();
-      else if (location.view === "tool") closeTool();
-    }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [pendingTool, navigation, location.view, page]);
+  const openedTool = location.view === "tool" ? (toolsById.get(location.toolId ?? "") ?? null) : null;
 
   useEffect(() => {
     if (fileDrop.droppedPaths.length === 0) return;
     setFileMessage("");
-    if (!navigatedTool) setPendingFile(fileDrop.droppedPaths[0]!);
+    if (!openedTool) setPendingFile(fileDrop.droppedPaths[0]!);
   }, [fileDrop.droppedPaths]);
 
   useEffect(() => {
@@ -165,18 +140,6 @@ function Shell() {
     go({ view: "tool", toolId: tool.id });
   }
 
-  /** Back to the page behind the panel; the guard asks first when there is work to lose. */
-  function closeTool() {
-    go({ view: page });
-  }
-
-  function finishClosingTool() {
-    setShownTool(null);
-    setPanelLeaving(false);
-    const trigger = returnFocusRef.current;
-    window.setTimeout(() => trigger?.isConnected && trigger.focus(), 0);
-  }
-
   function requestInstallation(tool: CatalogTool) {
     setPendingTool(tool);
   }
@@ -190,14 +153,7 @@ function Shell() {
     });
   }
 
-  const panelKey = shownTool ? `${shownTool.tool.id}/${shownTool.subId ?? ""}` : "";
-  const panelProps = shownTool && {
-    tool: shownTool.tool,
-    leaving: panelLeaving,
-    onDirtyChange: navigation.setDirty,
-    onClose: closeTool,
-    onExited: finishClosingTool,
-  };
+  const showSub = (subId: string) => go({ view: "tool", toolId: location.toolId, subId });
 
   return (
     <AppShell
@@ -208,6 +164,8 @@ function Shell() {
       onCollapsedChange={setSidebarCollapsed}
       paletteOpen={paletteOpen}
       onPaletteOpenChange={setPaletteOpen}
+      file={pendingFile}
+      suggestedTools={suggestedTools}
       overlays={
         <>
           {pendingTool && (
@@ -218,69 +176,56 @@ function Shell() {
               states={installations.states}
               canInstall={pinnedToolIds.has(pendingTool.id)}
               onInstall={() => void installations.installTool(pendingTool.id)}
+              onOpen={() => {
+                setPendingTool(null);
+                openTool(pendingTool);
+              }}
               onClose={() => setPendingTool(null)}
             />
           )}
           <UpdateCard state={update.state} onRestart={update.restart} onDismiss={update.dismiss} />
-          {shownTool && panelProps && (
-            <>
-              <div
-                className="panel-scrim"
-                role="presentation"
-                data-leaving={panelLeaving ? "true" : undefined}
-                onMouseDown={closeTool}
-              />
-              {navigation.pending && (
-                <div className="confirm-layer" role="presentation">
-                  <div className="confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="confirm-close-title">
-                    <h2 id="confirm-close-title">Discard this work?</h2>
-                    <p>The file you chose and the settings you changed will be cleared. Nothing on disk is touched either way.</p>
-                    <div className="dialog-actions">
-                      <button className="button button--light" type="button" autoFocus onClick={navigation.cancelPending}>
-                        Keep editing
-                      </button>
-                      <button className="button button--primary" type="button" onClick={navigation.confirmPending}>
-                        Discard
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {utilityGroupIds.includes(shownTool.tool.id) ? (
-                <UtilityPanel key={panelKey} {...panelProps} initialSubId={shownTool.subId} />
-              ) : shownTool.tool.id === "image-search" ? (
-                <ImageSearchPanel
-                  key={panelKey}
-                  {...panelProps}
-                  initialPath={pendingFile}
-                  droppedPaths={fileDrop.droppedPaths}
-                />
-              ) : shownTool.tool.id === "songrec" ? (
-                <MusicPanel key={panelKey} {...panelProps} />
-              ) : shownTool.tool.id === "chat-mockup" ? (
-                <ChatMockupPanel key={panelKey} {...panelProps} />
-              ) : shownTool.tool.id === "post-mockup" ? (
-                <PostMockupPanel key={panelKey} {...panelProps} />
-              ) : (
-                <ToolPanel
-                  key={panelKey}
-                  {...panelProps}
-                  initialSubId={shownTool.subId}
-                  initialPath={pendingFile}
-                  droppedPaths={fileDrop.droppedPaths}
-                  jobs={runner.jobs}
-                  defaultFolder={defaultFolder}
-                  onRun={runToolOperation}
-                  onCancel={runner.cancelOperation}
-                />
-              )}
-            </>
-          )}
         </>
       }
     >
-      {page === "catalog" ? (
+      {openedTool ? (
+        utilityGroupIds.includes(openedTool.id) ? (
+          <UtilityPanel
+            key={openedTool.id}
+            tool={openedTool}
+            subId={location.subId}
+            onSubChange={showSub}
+            onDirtyChange={navigation.setDirty}
+          />
+        ) : openedTool.id === "image-search" ? (
+          <ImageSearchPanel
+            key={openedTool.id}
+            tool={openedTool}
+            initialPath={pendingFile}
+            droppedPaths={fileDrop.droppedPaths}
+            onDirtyChange={navigation.setDirty}
+          />
+        ) : openedTool.id === "songrec" ? (
+          <MusicPanel key={openedTool.id} tool={openedTool} onDirtyChange={navigation.setDirty} />
+        ) : openedTool.id === "chat-mockup" ? (
+          <ChatMockupPanel key={openedTool.id} tool={openedTool} onDirtyChange={navigation.setDirty} />
+        ) : openedTool.id === "post-mockup" ? (
+          <PostMockupPanel key={openedTool.id} tool={openedTool} onDirtyChange={navigation.setDirty} />
+        ) : (
+          <ToolPanel
+            key={openedTool.id}
+            tool={openedTool}
+            subId={location.subId}
+            onSubChange={showSub}
+            onDirtyChange={navigation.setDirty}
+            initialPath={pendingFile}
+            droppedPaths={fileDrop.droppedPaths}
+            jobs={runner.jobs}
+            defaultFolder={defaultFolder}
+            onRun={runToolOperation}
+            onCancel={runner.cancelOperation}
+          />
+        )
+      ) : location.view === "catalog" ? (
         <div className="catalog-view">
           <section className="drop-workspace" aria-labelledby="workspace-title">
             <div className="drop-workspace__copy">
@@ -322,6 +267,15 @@ function Shell() {
                 {fileMessage}
               </p>
             )}
+            {suggestedTools.length > 0 && (
+              <div className="category-filter" role="group" aria-label={t("Tools that read this file")}>
+                {suggestedTools.map((tool) => (
+                  <button key={tool.id} type="button" className="category-chip" onClick={() => openTool(tool)}>
+                    {t(tool.title)}
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
 
           <CategoryFilter rows={catalogRows} active={activeCategory} onChange={setActiveCategory} />
@@ -338,7 +292,7 @@ function Shell() {
             ))}
           </div>
         </div>
-      ) : page === "settings" ? (
+      ) : location.view === "settings" ? (
         <SettingsView
           preference={theme.preference}
           onThemeChange={theme.setPreference}
@@ -361,7 +315,7 @@ function Shell() {
         />
       ) : (
         <JobView
-          activeNavigation={page}
+          activeNavigation={location.view === "history" ? "history" : "queue"}
           runningJobs={runner.runningJobs}
           finishedJobs={runner.finishedJobs}
           onClearHistory={runner.clearFinishedJobs}

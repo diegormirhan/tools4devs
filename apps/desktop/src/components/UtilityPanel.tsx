@@ -16,30 +16,41 @@ import { useT } from "../i18n/language";
  */
 export function UtilityPanel({
   tool,
-  initialSubId,
-  leaving = false,
-  onClose,
-  onExited,
+  subId,
+  onSubChange,
   onDirtyChange,
 }: {
   tool: CatalogTool;
-  /** The utility to open on, as chosen in the sidebar or the palette. */
-  initialSubId?: string;
-  leaving?: boolean;
-  onClose: () => void;
-  onExited?: () => void;
+  /** The utility shown, as the sidebar and the palette name it; the first when absent. */
+  subId?: string;
+  /** Asked to show another utility, so the sidebar and the breadcrumb follow. */
+  onSubChange?: (subId: string) => void;
   onDirtyChange?: (dirty: boolean) => void;
 }) {
   const t = useT();
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const group = utilityGroup(tool.id);
-  const [utilityId, setUtilityId] = useState(
-    group?.utilities.find((utility) => utility.id === initialSubId)?.id ?? group?.utilities[0]?.id ?? "",
-  );
+  const pickUtility = (id?: string) =>
+    group?.utilities.find((utility) => utility.id === id)?.id ?? group?.utilities[0]?.id ?? "";
+  const [utilityId, setUtilityId] = useState(() => pickUtility(subId));
   const [input, setInput] = useState("");
   const [options, setOptions] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
   const [touched, setTouched] = useState(false);
+
+  // What was typed stays; the options belong to the utility that is left.
+  function showUtility(id: string) {
+    setUtilityId(id);
+    setOptions({});
+    setTouched(false);
+  }
+
+  // The sidebar or the palette chose another utility of this group.
+  useEffect(() => {
+    const next = pickUtility(subId);
+    if (next !== utilityId) showUtility(next);
+    // Only a change from outside matters; utilityId follows it, not the other way round.
+  }, [subId]);
+
   const [seed, setSeed] = useState(0);
   const isRandomized = group?.id === "random-picks";
   const [previewSurface, setPreviewSurface] = useState<"box" | "text" | "button" | "card">("box");
@@ -116,12 +127,8 @@ export function UtilityPanel({
 
   return (
     <PanelShell
-      ref={closeButtonRef}
       title={tool.integrationName}
       wide={group.id === "dates-time"}
-      leaving={leaving}
-      onClose={onClose}
-      onExited={onExited}
     >
       <section className="tool-panel__controls">
         <h2 id="tool-panel-title">{t(tool.title)}</h2>
@@ -136,9 +143,8 @@ export function UtilityPanel({
               aria-selected={entry.id === utilityId}
               className={`tool-panel__menu-item${entry.id === utilityId ? " is-active" : ""}`}
               onClick={() => {
-                setUtilityId(entry.id);
-                setOptions({});
-                setTouched(false);
+                showUtility(entry.id);
+                onSubChange?.(entry.id);
               }}
             >
               {t(entry.label)}

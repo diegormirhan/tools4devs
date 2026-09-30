@@ -1,6 +1,6 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, type ReactNode } from "react";
 import { PanelLeft } from "lucide-react";
-import type { CatalogRow } from "../catalog/catalog";
+import type { CatalogRow, CatalogTool } from "../catalog/catalog";
 import { useT } from "../i18n/language";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { CommandPalette } from "./CommandPalette";
+import { DiscardDialog } from "./DiscardDialog";
 import { useNavigation, type Location, type View } from "./navigation";
 
 const pageTitles: Record<Exclude<View, "tool">, string> = {
@@ -36,6 +37,8 @@ export function AppShell({
   onCollapsedChange,
   paletteOpen,
   onPaletteOpenChange,
+  file,
+  suggestedTools,
   overlays,
   children,
 }: {
@@ -46,9 +49,19 @@ export function AppShell({
   onCollapsedChange: (collapsed: boolean) => void;
   paletteOpen: boolean;
   onPaletteOpenChange: (open: boolean) => void;
+  /** A file chosen before any tool, and the tools made for it. */
+  file: string | null;
+  suggestedTools: CatalogTool[];
   overlays: ReactNode;
   children: ReactNode;
 }) {
+  const { location } = useNavigation();
+  const pageRef = useRef<HTMLDivElement>(null);
+  // Every page starts at its top; the scroll of the previous one means nothing here.
+  useEffect(() => {
+    if (pageRef.current) pageRef.current.scrollTop = 0;
+  }, [location.view, location.toolId]);
+
   return (
     <SidebarProvider
       open={!collapsed}
@@ -63,12 +76,19 @@ export function AppShell({
       />
       <SidebarInset className="min-h-0 overflow-hidden">
         <ShellHeader rows={rows} />
-        <div data-legacy className="min-h-0 flex-1 overflow-auto">
+        <div ref={pageRef} data-legacy className="min-h-0 flex-1 overflow-auto">
           {children}
         </div>
       </SidebarInset>
       <div data-legacy>{overlays}</div>
-      <CommandPalette rows={rows} open={paletteOpen} onOpenChange={onPaletteOpenChange} />
+      <CommandPalette
+        rows={rows}
+        open={paletteOpen}
+        onOpenChange={onPaletteOpenChange}
+        file={file}
+        suggestedTools={suggestedTools}
+      />
+      <DiscardDialog />
     </SidebarProvider>
   );
 }

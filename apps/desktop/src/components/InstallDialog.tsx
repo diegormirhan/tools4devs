@@ -1,9 +1,13 @@
-import { Download, HardDrive, ShieldCheck, X } from "lucide-react";
+import { Download, HardDrive, ShieldCheck } from "lucide-react";
 import type { InstallationPlanStep } from "../../../../scripts/component-installation/resolve-installation-plan.mjs";
 import type { InstallationState } from "../../../../scripts/component-installation/installation-state.mjs";
 import type { CatalogTool } from "../catalog/catalog";
 import { downloadSize, formatBytes } from "../catalog/sizes";
 import { useT } from "../i18n/language";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/cn";
 
 type InstallDialogProps = {
   tool: CatalogTool;
@@ -12,6 +16,8 @@ type InstallDialogProps = {
   states: Record<string, InstallationState>;
   canInstall: boolean;
   onInstall: () => void;
+  /** Goes to the tool once everything it needs is in place. */
+  onOpen: () => void;
   onClose: () => void;
 };
 
@@ -31,6 +37,7 @@ export function InstallDialog({
   states,
   canInstall,
   onInstall,
+  onOpen,
   onClose,
 }: InstallDialogProps) {
   const steps = plan.length > 0 ? plan : [{ toolId: tool.id, reason: "requested" as const }];
@@ -43,20 +50,16 @@ export function InstallDialog({
   const total = steps.reduce((sum, step) => sum + (downloadSize(step.toolId) ?? 0), 0);
 
   return (
-    <div
-      className="dialog-layer"
-      role="presentation"
-      onMouseDown={(event) => event.target === event.currentTarget && !busy && onClose()}
-    >
-      <section className="install-dialog" role="dialog" aria-modal="true" aria-labelledby="install-title">
-        <button className="icon-button install-dialog__close" type="button" onClick={onClose} aria-label={t("Close")}>
-          <X size={18} />
-        </button>
-        <div className="dialog-icon">
-          <Download size={24} aria-hidden="true" />
+    // A download in progress keeps the dialog open: closing it would hide the only progress there is.
+    <Dialog open onOpenChange={(open) => !open && !busy && onClose()}>
+      <DialogContent showCloseButton={false} className="gap-5 sm:max-w-[520px]">
+        <div className="grid size-12 place-items-center rounded-lg bg-primary/15 text-primary">
+          <Download className="size-6" aria-hidden="true" />
         </div>
-        <h2 id="install-title">{t("Install {name}", { name: tool.integrationName })}</h2>
-        <p className="install-dialog__lead">
+        <DialogTitle className="font-heading text-xl font-semibold tracking-tight">
+          {t("Install {name}", { name: tool.integrationName })}
+        </DialogTitle>
+        <DialogDescription className="text-sm leading-relaxed">
           {canInstall
             ? total > 0
               ? t(
@@ -69,19 +72,20 @@ export function InstallDialog({
             : t(
                 "This component has no pinned artifact and hash yet, so the app cannot install it. It only works if this Windows already has it.",
               )}
-        </p>
+        </DialogDescription>
 
-        <div className="plan-list" aria-label={t("Installation plan")}>
+        <ol className="overflow-hidden rounded-md border" aria-label={t("Installation plan")}>
           {steps.map((step, index) => {
             const state = states[step.toolId];
             const progress = state?.progress == null ? null : Math.round(state.progress * 100);
             const ready = state?.availability === "ready";
+            const name = labelsById[step.toolId] ?? step.toolId;
             return (
-              <div className="plan-step" key={step.toolId}>
-                <span className="plan-step__index">{String(index + 1).padStart(2, "0")}</span>
-                <span className="plan-step__copy">
-                  <strong>{labelsById[step.toolId] ?? step.toolId}</strong>
-                  <small>
+              <li key={step.toolId} className="flex items-center gap-3.5 border-b px-3.5 py-3 last:border-b-0">
+                <span className="font-mono text-xs text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>
+                <span className="grid flex-1">
+                  <strong className="font-medium">{name}</strong>
+                  <small className="text-xs text-muted-foreground">
                     {ready
                       ? t("Ready")
                       : state && state.phase !== "idle"
@@ -92,47 +96,49 @@ export function InstallDialog({
                   </small>
                 </span>
                 {state && state.phase !== "idle" && !ready && (
-                  <div
-                    className={`progress-track${state.progress == null ? " progress-track--indeterminate" : ""}`}
-                    role="progressbar"
-                    aria-label={t("Progress of {name}", { name: labelsById[step.toolId] ?? step.toolId })}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={progress ?? undefined}
-                  >
-                    <span style={{ inlineSize: progress == null ? undefined : `${progress}%` }} />
-                  </div>
+                  <Progress
+                    value={progress}
+                    className={cn("w-36", progress == null && "animate-pulse")}
+                    aria-label={t("Progress of {name}", { name })}
+                  />
                 )}
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ol>
 
         {failure && (
-          <p className="install-dialog__error" role="alert">
+          <p className="text-sm text-destructive" role="alert">
             {failure}
           </p>
         )}
 
-        <div className="dialog-assurances">
-          <span>
-            <ShieldCheck size={16} aria-hidden="true" /> {t("SHA-256 checked before anything is activated")}
+        <div className="grid gap-2 text-[13px] text-muted-foreground">
+          <span className="flex items-center gap-2">
+            <ShieldCheck className="size-4 text-primary" aria-hidden="true" />
+            {t("SHA-256 checked before anything is activated")}
           </span>
-          <span>
-            <HardDrive size={16} aria-hidden="true" /> {t("Installed per version, with no administrator rights")}
+          <span className="flex items-center gap-2">
+            <HardDrive className="size-4 text-primary" aria-hidden="true" />
+            {t("Installed per version, with no administrator rights")}
           </span>
         </div>
-        <div className="dialog-actions">
-          <button className="button button--quiet" type="button" onClick={onClose} disabled={busy}>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={busy}>
             {t("Close")}
-          </button>
-          {canInstall && !done && (
-            <button className="button button--primary" type="button" onClick={onInstall} disabled={busy}>
-              {t(busy ? "Installing…" : failure ? "Try again" : "Download and install")}
-            </button>
+          </Button>
+          {done ? (
+            <Button onClick={onOpen}>{t("Open {name}", { name: tool.integrationName })}</Button>
+          ) : (
+            canInstall && (
+              <Button onClick={onInstall} disabled={busy}>
+                {t(busy ? "Installing…" : failure ? "Try again" : "Download and install")}
+              </Button>
+            )
           )}
-        </div>
-      </section>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

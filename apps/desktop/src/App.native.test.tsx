@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { invoke } from '@tauri-apps/api/core';
@@ -85,7 +85,7 @@ async function startDownload() {
   return { operation, user };
 }
 
-it('keeps a running operation in the queue after its tool panel is closed', async () => {
+it('keeps a running operation in the queue after its tool page is left', async () => {
   const { operation, user } = await startDownload();
 
   emitProgress({
@@ -97,10 +97,9 @@ it('keeps a running operation in the queue after its tool panel is closed', asyn
     message: 'Downloading media…',
   });
 
-  await user.click(screen.getByRole('button', { name: 'Close tool' }));
-  await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Download media' })).not.toBeInTheDocument());
-
+  // Leaving the tool's page does not stop what it started.
   await user.click(screen.getByRole('button', { name: /queue, 1 running/i }));
+  expect(screen.queryByRole('region', { name: 'Download media' })).not.toBeInTheDocument();
 
   const row = screen.getByRole('article', { name: /download video/i });
   expect(within(row).getByText(/Running 37%/)).toBeVisible();
@@ -110,7 +109,6 @@ it('keeps a running operation in the queue after its tool panel is closed', asyn
 it('moves a finished background operation to the history with its output path', async () => {
   const { operation, user } = await startDownload();
 
-  await user.click(screen.getByRole('button', { name: 'Close tool' }));
   operation.finish({ stdout: '', outputPath: 'C:\\videos\\video.mp4' });
 
   await user.click(screen.getByRole('button', { name: 'History' }));
@@ -138,7 +136,6 @@ it('records a failed background operation instead of dropping it', async () => {
   vi.mocked(save).mockResolvedValue('C:\\videos\\video.mp4');
   await user.click(screen.getByRole('button', { name: 'Run' }));
 
-  await user.click(screen.getByRole('button', { name: 'Close tool' }));
   await user.click(screen.getByRole('button', { name: 'History' }));
 
   const row = await screen.findByRole('article', { name: /download video/i });
@@ -165,6 +162,28 @@ it('accepts a file dropped on the window instead of only the picker button', asy
   expect(await screen.findByText('contrato.pdf')).toBeVisible();
 });
 
+it('suggests the tools made for a dropped file, and opens one with the file in it (UC-13)', async () => {
+  vi.mocked(invoke).mockResolvedValue(['qpdf']);
+  const user = userEvent.setup();
+  render(<App />);
+  await screen.findByRole('button', { name: /open qpdf/i });
+
+  act(() => emitDragDrop({ type: 'drop', paths: ['C:\\fixtures\\contrato.pdf'] }));
+
+  const suggestions = await screen.findByRole('group', { name: 'Tools that read this file' });
+  expect(within(suggestions).queryByRole('button', { name: 'Compress files' })).not.toBeInTheDocument();
+
+  // The search offers them too, before anything is typed.
+  await user.keyboard('{Control>}k{/Control}');
+  const palette = screen.getByRole('dialog', { name: 'Search tools' });
+  expect(within(palette).getByRole('group', { name: 'For contrato.pdf' })).toBeVisible();
+  await user.keyboard('{Escape}');
+
+  await user.click(within(suggestions).getByRole('button', { name: 'Organise PDFs' }));
+  const page = screen.getByRole('region', { name: 'Organise PDFs' });
+  expect(within(page).getByText('contrato.pdf')).toBeVisible();
+});
+
 it('hands a dropped file to the tool panel that is already open', async () => {
   vi.mocked(invoke).mockResolvedValue(['qpdf']);
   const user = userEvent.setup();
@@ -173,7 +192,7 @@ it('hands a dropped file to the tool panel that is already open', async () => {
   await user.click(await screen.findByRole('button', { name: /open qpdf/i }));
   act(() => emitDragDrop({ type: 'drop', paths: ['C:\\fixtures\\contrato.pdf'] }));
 
-  const panel = screen.getByRole('dialog', { name: 'Organise PDFs' });
+  const panel = screen.getByRole('region', { name: 'Organise PDFs' });
   expect(await within(panel).findByText('contrato.pdf')).toBeVisible();
 });
 

@@ -44,13 +44,16 @@ it("stays put when the person keeps editing", () => {
   expect(result.current.dirty).toBe(true);
 });
 
-it("asks before switching to another sub-tool, since the panel starts over", () => {
+it("switches sub-tool without asking, since the page and its file stay", () => {
   const { result } = setup();
   act(() => result.current.go({ view: "tool", toolId: "ffmpeg", subId: "trim" }));
   act(() => result.current.setDirty(true));
 
   act(() => result.current.go({ view: "tool", toolId: "ffmpeg", subId: "crop" }));
-  expect(result.current.pending).toEqual({ view: "tool", toolId: "ffmpeg", subId: "crop" });
+  expect(result.current.pending).toBeNull();
+  expect(result.current.location).toEqual({ view: "tool", toolId: "ffmpeg", subId: "crop" });
+  // The page did not change, so neither did what is unsaved on it.
+  expect(result.current.dirty).toBe(true);
 });
 
 it("moves at once when forced, or when going nowhere new", () => {

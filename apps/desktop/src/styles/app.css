@@ -1400,3 +1400,13 @@ body { min-height: 100vh; overflow: hidden; color: var(--text); background: var(
   .dialog-layer { backdrop-filter: none; }
   .tool-card, .file-drop, .search-control { border-color: var(--line-strong); }
 }
+
+/* Tools open as a page in the main area now, not as a modal over it. The modal
+   rules above stay until the last legacy screen is gone. */
+.tool-panel--page {
+  position: static; z-index: auto; inset: auto; transform: none; animation: none;
+  width: auto; max-width: 1180px; height: auto; max-height: none; overflow: visible;
+  margin: 8px 32px 64px; box-shadow: none;
+}
+.tool-panel--page:focus { outline: none; }
+.tool-panel--page.tool-panel--wide { width: auto; height: min(840px, calc(100svh - 120px)); overflow: hidden; }

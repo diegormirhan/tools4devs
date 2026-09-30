@@ -36,6 +36,11 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     (next: Location, options?: { force?: boolean }) => {
       const { location: here, dirty: unsaved } = current.current;
       if (sameLocation(here, next)) return;
+      // Another sub-tool of the same tool keeps the page, and the work on it.
+      if (here.view === "tool" && next.view === "tool" && here.toolId === next.toolId) {
+        setLocation(next);
+        return;
+      }
       if (unsaved && !options?.force && here.view === "tool") {
         setPending(next);
         return;

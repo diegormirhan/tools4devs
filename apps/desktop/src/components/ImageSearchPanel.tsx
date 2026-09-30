@@ -32,17 +32,11 @@ export function ImageSearchPanel({
   tool,
   initialPath,
   droppedPaths,
-  leaving = false,
-  onClose,
-  onExited,
   onDirtyChange,
 }: {
   tool: CatalogTool;
   initialPath?: string | null;
   droppedPaths?: string[];
-  leaving?: boolean;
-  onClose: () => void;
-  onExited?: () => void;
   onDirtyChange?: (dirty: boolean) => void;
 }) {
   const t = useT();
@@ -53,7 +47,6 @@ export function ImageSearchPanel({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [opened, setOpened] = useState("");
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const resultRef = useRef<HTMLParagraphElement>(null);
 
   const engine = engines.find((candidate) => candidate.id === engineId) ?? engines[0];
@@ -70,8 +63,6 @@ export function ImageSearchPanel({
   useEffect(() => {
     onDirtyChange?.(canSearch && !opened);
   }, [canSearch, opened, onDirtyChange]);
-
-  useEffect(() => closeButtonRef.current?.focus(), []);
 
   useEffect(() => {
     // Optional call: jsdom has the element but not the method.
@@ -131,12 +122,8 @@ export function ImageSearchPanel({
 
   return (
     <PanelShell
-      ref={closeButtonRef}
       title={tool.integrationName}
       wide={Boolean(path) && !usingUrl}
-      leaving={leaving}
-      onClose={onClose}
-      onExited={onExited}
       bodyClassName={path && !usingUrl ? "tool-panel__body--split" : ""}
     >
       {path && !usingUrl && (
