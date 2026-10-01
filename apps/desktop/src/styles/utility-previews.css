@@ -1,0 +1,82 @@
+/*
+ * What the CSS generators draw their sample with.
+ *
+ * The sample is a plain element styled entirely through inline properties the
+ * generator computed: never markup, so nothing here is parsed as HTML. The few
+ * kinds that need more than a static style get the part an inline style cannot
+ * reach (a pseudo-element, a keyframe the generated `animation` names). The
+ * keyframe names are part of the generated CSS the person copies, so they stay.
+ */
+
+.utility-preview { display: inline-block; }
+
+/* A box needs a size and a fill of its own: a shadow or a radius on an empty
+   inline element draws nothing. The generator's inline style overrides both. */
+.utility-preview--box {
+  inline-size: 140px;
+  block-size: 90px;
+  background: var(--card);
+  /* Not under the border: the triangle is a zero-size box drawn by its borders. */
+  background-clip: padding-box;
+  border: 1px solid var(--border);
+}
+
+.utility-preview--surface-text {
+  max-inline-size: 320px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+.utility-preview--surface-button {
+  font: inherit;
+  cursor: default;
+  padding: 10px 20px;
+  border: none;
+  color: var(--primary-foreground);
+}
+.utility-preview--surface-card {
+  display: block;
+  inline-size: min(320px, 100%);
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+.utility-preview--surface-card strong { display: block; margin-bottom: 6px; color: var(--card-foreground); }
+.utility-preview--surface-card p { color: var(--muted-foreground); font-size: 0.85rem; }
+
+.utility-preview--switch { position: relative; }
+.utility-preview--switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  inline-size: var(--thumb-size, 20px);
+  block-size: var(--thumb-size, 20px);
+  border-radius: 50%;
+  /* A switch's thumb is white in either theme, like the ones it imitates. */
+  background: white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+.utility-preview--bezier {
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+.utility-preview--glitch { font: 700 2.4rem/1 var(--font-sans); letter-spacing: 0.02em; }
+
+@keyframes utility-spin { to { transform: rotate(360deg); } }
+@keyframes utility-dots {
+  0%, 100% { background-position: 0 0, 33% 0, 66% 0; }
+  50% { background-position: 0 -20%, 33% -20%, 66% -20%; }
+}
+@keyframes utility-slide {
+  from { transform: translateX(-90px); }
+  to { transform: translateX(90px); }
+}
+@keyframes utility-glitch {
+  0%, 92%, 100% { transform: translate(0, 0); }
+  93% { transform: translate(-2px, 1px); }
+  95% { transform: translate(2px, -1px); }
+  97% { transform: translate(-1px, 0); }
+}

@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { Check, Copy, Download, Eraser, ExternalLink, RefreshCw } from "lucide-react";
+import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { Check, Copy, Download, Eraser, ExternalLink, RefreshCw, Upload } from "lucide-react";
 import type { CatalogTool } from "../catalog/catalog";
 import { utilityById, utilityGroup, type Utility } from "../utilities/registry";
-import { PanelShell } from "./PanelShell";
+import { OutboundNotice, PageCard, ToolPage } from "./ToolPage";
 import { Select } from "./Select";
 import { NumberField } from "./NumberField";
 import { useT } from "../i18n/language";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/cn";
 
 /**
  * The panel for tools the app performs itself.
@@ -36,6 +39,8 @@ export function UtilityPanel({
   const [options, setOptions] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
   const [touched, setTouched] = useState(false);
+  const inputLabelId = useId();
+  const resultLabelId = useId();
 
   // What was typed stays; the options belong to the utility that is left.
   function showUtility(id: string) {
@@ -124,156 +129,82 @@ export function UtilityPanel({
   if (!group || !utility) return null;
 
   const result = facts ? facts.map(([name, value]) => `${name}: ${value}`).join("\n") : output;
+  const takesText = utility.input === "text" && !isGenerating;
+  const visibleFields = (utility.fields ?? []).filter((field) => field.showWhen?.(values) ?? true);
+  const setOption = (key: string, value: string) => {
+    setOptions((current) => ({ ...current, [key]: value }));
+    setTouched(true);
+  };
 
   return (
-    <PanelShell
-      title={tool.integrationName}
-      wide={group.id === "dates-time"}
-    >
-      <section className="tool-panel__controls">
-        <h2 id="tool-panel-title">{t(tool.title)}</h2>
-        <p>{t(tool.description)}</p>
+    <ToolPage tool={tool} title={t(utility.label)} description={t(utility.description)} showEngine={false}>
+      {utility.outbound && (
+        <OutboundNotice icon={<ExternalLink aria-hidden="true" />}>{t(utility.outbound)}</OutboundNotice>
+      )}
 
-        <div className="tool-panel__menu" role="tablist" aria-label={t("Tool")}>
-          {group.utilities.map((entry) => (
-            <button
-              key={entry.id}
-              type="button"
-              role="tab"
-              aria-selected={entry.id === utilityId}
-              className={`tool-panel__menu-item${entry.id === utilityId ? " is-active" : ""}`}
-              onClick={() => {
-                showUtility(entry.id);
-                onSubChange?.(entry.id);
-              }}
-            >
-              {t(entry.label)}
-            </button>
-          ))}
-        </div>
-        <p className="tool-panel__menu-description">{t(utility.description)}</p>
-
-        {utility.outbound && (
-          <p className="notice notice--outbound">
-            <ExternalLink size={14} aria-hidden="true" />
-            <span>{t(utility.outbound)}</span>
-          </p>
-        )}
-
-        {utility.input === "text" && !isGenerating && (
-          <label className="utility-field">
-            <span className="utility-field__label-row">
-              {t(utility.inputLabel ?? "Your text")}
-              {utility.acceptFiles && (
-                <span className="utility-file-upload">
-                  <input
-                    type="file"
-                    accept={utility.acceptFiles.join(",")}
-                    aria-label={t("Upload a file")}
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      event.target.value = "";
-                      if (!file) return;
-                      void file.text().then((text) => {
-                        setInput(text);
-                        setTouched(true);
-                      });
-                    }}
+      {visibleFields.length > 0 && (
+        <PageCard title={t("Options")}>
+          <div className="grid gap-5 sm:grid-cols-2" aria-label={t("Options")}>
+            {visibleFields.map((field) => (
+              <label key={field.key} className="grid content-start gap-2">
+                <span className="text-sm font-medium">{t(field.label)}</span>
+                {field.type === "select" ? (
+                  <Select
+                    label={t(field.label)}
+                    value={values[field.key] ?? ""}
+                    choices={(field.choices ?? []).map((choice) => ({
+                      value: choice.value,
+                      label: t(choice.label),
+                    }))}
+                    onChange={(next) => setOption(field.key, next)}
                   />
-                  {t("Upload a file")}
-                </span>
-              )}
-            </span>
-            <textarea
-              className="utility-input"
-              value={input}
-              spellCheck={false}
-              placeholder={t("Type or paste here")}
-              onChange={(event) => {
-                setInput(event.target.value);
-                setTouched(true);
-              }}
-            />
-          </label>
-        )}
-
-        {utility.fields && utility.fields.length > 0 && (
-          <div className="operation-options" aria-label={t("Options")}>
-            {utility.fields
-              .filter((field) => field.showWhen?.(values) ?? true)
-              .map((field) => (
-                <label key={field.key}>
-                  <span>{t(field.label)}</span>
-                  {field.type === "select" ? (
-                    <Select
-                      label={t(field.label)}
-                      value={values[field.key] ?? ""}
-                      choices={(field.choices ?? []).map((choice) => ({
-                        value: choice.value,
-                        label: t(choice.label),
-                      }))}
-                      onChange={(next) => {
-                        setOptions((current) => ({ ...current, [field.key]: next }));
-                        setTouched(true);
-                      }}
-                    />
-                  ) : field.type === "color" ? (
-                    <span className="utility-color-field">
-                      <input
-                        aria-label={t(field.label)}
-                        type="color"
-                        value={/^#[0-9a-fA-F]{6}$/.test(values[field.key] ?? "") ? values[field.key] : "#000000"}
-                        onChange={(event) => {
-                          setOptions((current) => ({ ...current, [field.key]: event.target.value }));
-                          setTouched(true);
-                        }}
-                      />
-                      <input
-                        aria-label={t(field.label)}
-                        type="text"
-                        className="utility-color-field__hex"
-                        value={values[field.key] ?? ""}
-                        placeholder={field.placeholder && t(field.placeholder)}
-                        onChange={(event) => {
-                          setOptions((current) => ({ ...current, [field.key]: event.target.value }));
-                          setTouched(true);
-                        }}
-                      />
-                    </span>
-                  ) : field.type === "number" ? (
-                    <NumberField
-                      label={t(field.label)}
-                      value={values[field.key] ?? ""}
-                      min={field.min}
-                      max={field.max}
-                      onChange={(next) => {
-                        setOptions((current) => ({ ...current, [field.key]: next }));
-                        setTouched(true);
-                      }}
-                    />
-                  ) : (
+                ) : field.type === "color" ? (
+                  <span className="flex gap-2">
                     <input
                       aria-label={t(field.label)}
-                      type="text"
+                      type="color"
+                      className="h-9 w-12 shrink-0 cursor-pointer rounded-md border bg-transparent p-1 shadow-xs"
+                      value={/^#[0-9a-fA-F]{6}$/.test(values[field.key] ?? "") ? values[field.key] : "#000000"}
+                      onChange={(event) => setOption(field.key, event.target.value)}
+                    />
+                    <Input
+                      aria-label={t(field.label)}
+                      className="font-mono"
                       value={values[field.key] ?? ""}
                       placeholder={field.placeholder && t(field.placeholder)}
-                      onChange={(event) => {
-                        setOptions((current) => ({ ...current, [field.key]: event.target.value }));
-                        setTouched(true);
-                      }}
+                      onChange={(event) => setOption(field.key, event.target.value)}
                     />
-                  )}
-                  {field.hint && <small className="operation-options__hint">{t(field.hint)}</small>}
-                </label>
-              ))}
+                  </span>
+                ) : field.type === "number" ? (
+                  <NumberField
+                    label={t(field.label)}
+                    value={values[field.key] ?? ""}
+                    min={field.min}
+                    max={field.max}
+                    onChange={(next) => setOption(field.key, next)}
+                  />
+                ) : (
+                  <Input
+                    aria-label={t(field.label)}
+                    value={values[field.key] ?? ""}
+                    placeholder={field.placeholder && t(field.placeholder)}
+                    onChange={(event) => setOption(field.key, event.target.value)}
+                  />
+                )}
+                {field.hint && <small className="text-xs text-muted-foreground">{t(field.hint)}</small>}
+              </label>
+            ))}
           </div>
-        )}
+        </PageCard>
+      )}
 
-        {preview && !failure && (
-          <div className="utility-preview-section">
+      {preview && !failure && (
+        <PageCard>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-heading text-lg font-semibold">{t("Preview")}</h2>
             {preview.kind === "box" && (
-              <label className="utility-preview-surface">
-                <span>{t("Preview on")}</span>
+              <label className="flex items-center gap-2">
+                <span className="text-sm whitespace-nowrap text-muted-foreground">{t("Preview on")}</span>
                 <Select
                   label={t("Preview on")}
                   value={previewSurface}
@@ -287,98 +218,181 @@ export function UtilityPanel({
                 />
               </label>
             )}
-            <div className="utility-preview-frame" aria-hidden="true">
-              {preview.kind !== "box" || previewSurface === "box" ? (
-                <span className={`utility-preview utility-preview--${preview.kind}`} style={preview.style as CSSProperties}>
-                  {preview.label}
-                </span>
-              ) : previewSurface === "text" ? (
-                <p className="utility-preview utility-preview--surface-text" style={preview.style as CSSProperties}>
-                  {t("The quick brown fox jumps over the lazy dog.")}
-                </p>
-              ) : previewSurface === "button" ? (
-                <button type="button" className="utility-preview utility-preview--surface-button" style={preview.style as CSSProperties}>
-                  {t("Sample button")}
-                </button>
-              ) : (
-                <div className="utility-preview utility-preview--surface-card" style={preview.style as CSSProperties}>
-                  <strong>{t("Card title")}</strong>
-                  <p>{t("Supporting text for the card.")}</p>
-                </div>
-              )}
-            </div>
           </div>
-        )}
-
-        {failure ? (
-          <p className="run-message run-message--error" role="alert">
-            {failure}
-          </p>
-        ) : facts ? (
-          <dl className="utility-facts">
-            {facts.map(([name, value]) => (
-              <div key={name}>
-                <dt>{t(name)}</dt>
-                <dd>{value}</dd>
+          {/* The sample is drawn by utility-previews.css and the generator's own inline style. */}
+          <div className="flex min-h-32 items-center justify-center rounded-lg border bg-muted/50 p-6" aria-hidden="true">
+            {preview.kind !== "box" || previewSurface === "box" ? (
+              <span className={`utility-preview utility-preview--${preview.kind}`} style={preview.style as CSSProperties}>
+                {preview.label}
+              </span>
+            ) : previewSurface === "text" ? (
+              <p className="utility-preview utility-preview--surface-text" style={preview.style as CSSProperties}>
+                {t("The quick brown fox jumps over the lazy dog.")}
+              </p>
+            ) : previewSurface === "button" ? (
+              <button type="button" tabIndex={-1} className="utility-preview utility-preview--surface-button" style={preview.style as CSSProperties}>
+                {t("Sample button")}
+              </button>
+            ) : (
+              <div className="utility-preview utility-preview--surface-card" style={preview.style as CSSProperties}>
+                <strong>{t("Card title")}</strong>
+                <p>{t("Supporting text for the card.")}</p>
               </div>
-            ))}
-          </dl>
-        ) : utility.outputKind === "image" && output ? (
-          <div className="utility-image-frame">
-            <img src={output} alt={t(utility.label)} />
+            )}
           </div>
-        ) : (
-          <label className="utility-field">
-            <span>{t("Result")}</span>
-            <textarea className="utility-input utility-input--result" value={output} readOnly spellCheck={false} />
-          </label>
-        )}
-      </section>
+        </PageCard>
+      )}
 
-      <div className="tool-panel__footer">
-        <div className="tool-panel__status" aria-live="polite">
-          <p>{failure ? t("Nothing to copy while that is being fixed.") : t("It runs here, as you type.")}</p>
-        </div>
-        {utility.input === "text" && !isGenerating && (
-          <button className="button button--light" type="button" onClick={() => setInput("")} disabled={!input}>
-            <Eraser size={16} aria-hidden="true" /> {t("Clear")}
-          </button>
+      <div className={cn("grid items-stretch gap-4", takesText && "md:grid-cols-2")}>
+        {takesText && (
+          <IoCard
+            labelId={inputLabelId}
+            label={t(utility.inputLabel ?? "Your text")}
+            action={
+              utility.acceptFiles && (
+                <Button asChild variant="ghost" size="sm" className="relative">
+                  <label>
+                    <input
+                      type="file"
+                      className="sr-only"
+                      accept={utility.acceptFiles.join(",")}
+                      aria-label={t("Upload a file")}
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        event.target.value = "";
+                        if (!file) return;
+                        void file.text().then((text) => {
+                          setInput(text);
+                          setTouched(true);
+                        });
+                      }}
+                    />
+                    <Upload aria-hidden="true" />
+                    {t("Upload a file")}
+                  </label>
+                </Button>
+              )
+            }
+          >
+            <textarea
+              aria-labelledby={inputLabelId}
+              className={ioText}
+              value={input}
+              spellCheck={false}
+              placeholder={t("Type or paste here")}
+              onChange={(event) => {
+                setInput(event.target.value);
+                setTouched(true);
+              }}
+            />
+          </IoCard>
+        )}
+
+        <IoCard
+          labelId={resultLabelId}
+          label={t("Result")}
+          action={
+            utility.outputKind === "image" ? (
+              <Button size="sm" disabled={!output} onClick={() => downloadImage(output, `${utility.id}.svg`)}>
+                <Download aria-hidden="true" /> {t("Save image")}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                disabled={!result || Boolean(failure)}
+                onClick={() => {
+                  void navigator.clipboard
+                    ?.writeText(result)
+                    .then(() => {
+                      setCopied(true);
+                      window.setTimeout(() => setCopied(false), 2000);
+                    })
+                    .catch(() => undefined);
+                }}
+              >
+                {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+                {t(copied ? "Copied" : "Copy")}
+              </Button>
+            )
+          }
+        >
+          {failure ? (
+            <p className="m-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+              {failure}
+            </p>
+          ) : facts ? (
+            <dl className="divide-y">
+              {facts.map(([name, value]) => (
+                <div key={name} className="flex items-baseline justify-between gap-4 px-6 py-2.5">
+                  <dt className="text-sm text-muted-foreground">{t(name)}</dt>
+                  <dd className="text-right font-mono text-sm break-all tabular-nums">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : utility.outputKind === "image" && output ? (
+            // An SVG loaded as a picture, never inlined: no script in it ever runs.
+            // White behind it in either theme, because a scanner needs the contrast.
+            <div className="m-4 flex min-h-40 items-center justify-center rounded-lg border bg-white p-6">
+              <img src={output} alt={t(utility.label)} />
+            </div>
+          ) : (
+            <textarea
+              aria-labelledby={resultLabelId}
+              className={cn(ioText, "text-muted-foreground")}
+              value={output}
+              readOnly
+              spellCheck={false}
+            />
+          )}
+        </IoCard>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <p className="text-sm text-muted-foreground" aria-live="polite">
+          {failure ? t("Nothing to copy while that is being fixed.") : t("It runs here, as you type.")}
+        </p>
+        {takesText && (
+          <Button variant="ghost" size="sm" onClick={() => setInput("")} disabled={!input}>
+            <Eraser aria-hidden="true" /> {t("Clear")}
+          </Button>
         )}
         {showRegenerate && (
-          <button className="button button--light" type="button" onClick={() => setSeed((value) => value + 1)}>
-            <RefreshCw size={16} aria-hidden="true" /> {t(isGenerating ? "Generate" : "Regenerate")}
-          </button>
-        )}
-        {utility.outputKind === "image" ? (
-          <button
-            className="button button--primary"
-            type="button"
-            disabled={!output}
-            onClick={() => downloadImage(output, `${utility.id}.svg`)}
-          >
-            <Download size={16} aria-hidden="true" /> {t("Save image")}
-          </button>
-        ) : (
-          <button
-            className="button button--primary"
-            type="button"
-            disabled={!result}
-            onClick={() => {
-              void navigator.clipboard
-                ?.writeText(result)
-                .then(() => {
-                  setCopied(true);
-                  window.setTimeout(() => setCopied(false), 2000);
-                })
-                .catch(() => undefined);
-            }}
-          >
-            {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
-            {t(copied ? "Copied" : "Copy the result")}
-          </button>
+          <Button variant="outline" size="sm" onClick={() => setSeed((value) => value + 1)}>
+            <RefreshCw aria-hidden="true" /> {t(isGenerating ? "Generate" : "Regenerate")}
+          </Button>
         )}
       </div>
-    </PanelShell>
+    </ToolPage>
+  );
+}
+
+/** The text boxes fill their card edge to edge, under its header. */
+const ioText =
+  "block min-h-36 w-full flex-1 resize-y bg-transparent px-6 py-4 font-mono text-sm leading-relaxed break-words outline-none placeholder:text-muted-foreground focus-visible:bg-accent/40";
+
+/** The input or the result: a header with its name and an action, the content below. */
+function IoCard({
+  labelId,
+  label,
+  action,
+  children,
+}: {
+  labelId: string;
+  label: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      aria-labelledby={labelId}
+      className="flex min-w-0 flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-xs"
+    >
+      <header className="flex min-h-14 items-center justify-between gap-3 border-b px-6 py-2">
+        <h2 id={labelId} className="text-sm font-medium">{label}</h2>
+        {action}
+      </header>
+      {children}
+    </section>
   );
 }
 

@@ -30,6 +30,7 @@
 @source "../components/ToolPage.tsx";
 @source "../components/ImageSearchPanel.tsx";
 @source "../components/MusicPanel.tsx";
+@source "../components/UtilityPanel.tsx";
 
 @custom-variant dark (&:is(.dark *));
 

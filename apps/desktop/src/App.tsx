@@ -26,6 +26,7 @@ import { NavigationProvider, useNavigation } from "./navigation/navigation";
 import { JobView } from "./views/JobView";
 import { SettingsView } from "./views/SettingsView";
 import "./styles/theme.css";
+import "./styles/utility-previews.css";
 import "./styles/app.css";
 
 type SidebarChoice = "collapsed" | "expanded" | null;
@@ -208,9 +209,7 @@ function Shell() {
           />
         ) : openedTool.id === "songrec" ? (
           <MusicPanel key={openedTool.id} tool={openedTool} onDirtyChange={navigation.setDirty} />
-        ) : legacyPanel(openedTool.id) ? (
-        <div data-legacy>
-        {utilityGroupIds.includes(openedTool.id) ? (
+        ) : utilityGroupIds.includes(openedTool.id) ? (
           <UtilityPanel
             key={openedTool.id}
             tool={openedTool}
@@ -218,12 +217,14 @@ function Shell() {
             onSubChange={showSub}
             onDirtyChange={navigation.setDirty}
           />
-        ) : openedTool.id === "chat-mockup" ? (
-          <ChatMockupPanel key={openedTool.id} tool={openedTool} onDirtyChange={navigation.setDirty} />
-        ) : openedTool.id === "post-mockup" ? (
-          <PostMockupPanel key={openedTool.id} tool={openedTool} onDirtyChange={navigation.setDirty} />
-        ) : null}
-        </div>
+        ) : legacyPanel(openedTool.id) ? (
+          <div data-legacy>
+            {openedTool.id === "chat-mockup" ? (
+              <ChatMockupPanel key={openedTool.id} tool={openedTool} onDirtyChange={navigation.setDirty} />
+            ) : (
+              <PostMockupPanel key={openedTool.id} tool={openedTool} onDirtyChange={navigation.setDirty} />
+            )}
+          </div>
         ) : (
           <ToolPanel
             key={openedTool.id}
@@ -288,7 +289,7 @@ function Shell() {
 
 /** Pages still drawn by app.css; each moves out of this list as it is rebuilt. */
 function legacyPanel(toolId: string): boolean {
-  return utilityGroupIds.includes(toolId) || ["chat-mockup", "post-mockup"].includes(toolId);
+  return ["chat-mockup", "post-mockup"].includes(toolId);
 }
 
 /** The sidebar used to be remembered as expanded on every launch; only "collapsed" was ever a choice. */

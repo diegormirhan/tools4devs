@@ -14,10 +14,19 @@ import { cn } from "@/lib/cn";
  */
 export function ToolPage({
   tool,
+  title,
+  description,
+  showEngine = true,
   className,
   children,
 }: {
   tool: CatalogTool;
+  /** Already translated; the tool's own title when absent. */
+  title?: string;
+  /** Already translated; the tool's own description when absent. */
+  description?: string;
+  /** The engine's name in a badge. The app's own utilities have none to show. */
+  showEngine?: boolean;
   className?: string;
   children: ReactNode;
 }) {
@@ -36,13 +45,15 @@ export function ToolPage({
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="grid gap-1.5">
           <h1 id="tool-panel-title" className="font-heading text-3xl font-semibold tracking-tight">
-            {t(tool.title)}
+            {title ?? t(tool.title)}
           </h1>
-          <p className="text-muted-foreground">{t(tool.description)}</p>
+          <p className="text-muted-foreground">{description ?? t(tool.description)}</p>
         </div>
-        <Badge variant="outline" className="font-mono uppercase">
-          {tool.integrationName}
-        </Badge>
+        {showEngine && (
+          <Badge variant="outline" className="font-mono uppercase">
+            {tool.integrationName}
+          </Badge>
+        )}
       </header>
       {children}
     </section>

@@ -255,7 +255,7 @@ describe("finding a tool in the sidebar and the search", () => {
 
     await user.click(item(/^Quick tools/));
     await user.click(item("Work on text"));
-    await user.type(within(screen.getByRole("region", { name: "Work on text" })).getAllByRole("textbox")[0]!, "hello");
+    await user.type(within(screen.getByRole("region", { name: "Change case" })).getAllByRole("textbox")[0]!, "hello");
 
     await user.keyboard("{Control>}k{/Control}");
     await user.keyboard("rotate pages{Enter}");
@@ -264,12 +264,12 @@ describe("finding a tool in the sidebar and the search", () => {
     expect(screen.getByRole("button", { name: "Keep editing" })).toHaveFocus();
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Work on text" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "Change case" })).toBeVisible();
 
     await user.keyboard("{Control>}k{/Control}");
     await user.keyboard("rotate pages{Enter}");
     await user.click(screen.getByRole("button", { name: "Keep editing" }));
-    expect(screen.getByRole("region", { name: "Work on text" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "Change case" })).toBeVisible();
 
     await user.keyboard("{Control>}k{/Control}");
     await user.keyboard("rotate pages{Enter}");
@@ -286,7 +286,7 @@ describe("finding a tool in the sidebar and the search", () => {
     const ptTree = within(screen.getByRole("tree", { name: "Todas as ferramentas" }));
     await user.click(ptTree.getByRole("treeitem", { name: /^Ferramentas rápidas/ }));
     await user.click(ptTree.getByRole("treeitem", { name: "Trabalhar com texto" }));
-    await user.type(within(screen.getByRole("region", { name: "Trabalhar com texto" })).getAllByRole("textbox")[0]!, "olá");
+    await user.type(within(screen.getByRole("region", { name: "Mudar a caixa" })).getAllByRole("textbox")[0]!, "olá");
     await user.click(screen.getByRole("button", { name: "Fila" }));
 
     expect(screen.getByRole("alertdialog", { name: "Descartar este trabalho?" })).toBeVisible();
@@ -331,13 +331,13 @@ describe("a tool as a page in the main area", () => {
 
     await user.click(item(/^Quick tools/));
     await user.click(item("Work on text"));
-    const page = screen.getByRole("region", { name: "Work on text" });
+    const page = screen.getByRole("region", { name: "Change case" });
     await user.type(within(page).getAllByRole("textbox")[0]!, "hello");
 
     const utilities = tree().querySelectorAll<HTMLElement>('[role="treeitem"][aria-level="3"]');
     await user.click(utilities[1]!);
 
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
-    expect(within(screen.getByRole("region", { name: "Work on text" })).getAllByRole("textbox")[0]).toHaveValue("hello");
+    expect(within(screen.getByRole("region", { name: "Reverse text" })).getAllByRole("textbox")[0]).toHaveValue("hello");
   });
 });
