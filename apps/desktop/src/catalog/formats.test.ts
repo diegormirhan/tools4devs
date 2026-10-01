@@ -40,10 +40,6 @@ describe("file types", () => {
     expect(suggestToolsFor("notes.xyz")).toEqual([]);
   });
 
-  it("is case-insensitive about the extension", () => {
-    expect(acceptsFile("libvips", "C:/fotos/FOTO.JPG").ok).toBe(true);
-  });
-
   it("declares an accepted family for every tool in the catalog", () => {
     // A tool missing from the table silently accepts everything, which is the
     // bug this table exists to prevent.

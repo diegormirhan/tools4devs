@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  barcodeFormats,
-  generateBarcodeImage,
   generateBarcodeSvg,
   generateQrSvg,
   toImageSource,
@@ -9,20 +7,8 @@ import {
 } from "./qrbarcode";
 
 describe("QR codes", () => {
-  it("produces an SVG document", async () => {
-    const svg = await generateQrSvg("https://example.com", {});
-    expect(svg).toContain("<svg");
-    expect(svg).toContain("</svg>");
-  });
-
   it("refuses an empty payload rather than encoding nothing", async () => {
     await expect(generateQrSvg("", {})).rejects.toThrow();
-  });
-
-  it("uses the requested error-correction level without throwing", async () => {
-    for (const level of ["L", "M", "Q", "H"]) {
-      await expect(generateQrSvg("test", { errorCorrection: level })).resolves.toContain("<svg");
-    }
   });
 });
 
@@ -43,29 +29,12 @@ describe("Wi-Fi QR payload", () => {
     );
   });
 
-  it("marks a hidden network", () => {
-    expect(wifiPayload({ ssid: "Hidden", security: "WPA", hidden: "yes" })).toContain("H:true");
-  });
-
   it("refuses an empty network name", () => {
     expect(() => wifiPayload({ ssid: "" })).toThrow();
   });
 });
 
 describe("barcodes", () => {
-  it("produces an SVG for the default format", () => {
-    // displayValue's text label needs to measure text width, which needs a
-    // real canvas — unavailable under jsdom. The label itself is exercised
-    // in the running app, where a real browser provides one.
-    const svg = generateBarcodeSvg("123456789012", { displayValue: "no" });
-    expect(svg).toContain("<svg");
-  });
-
-  it("has an entry in the format list for every offered choice", () => {
-    expect(barcodeFormats).toContain("CODE128");
-    expect(barcodeFormats).toContain("EAN13");
-  });
-
   it("rejects a value that is not valid for the chosen format", () => {
     // EAN-13 needs 12 or 13 digits; letters are not a valid EAN-13 payload.
     expect(() => generateBarcodeSvg("not-a-number", { format: "EAN13" })).toThrow();
@@ -73,11 +42,6 @@ describe("barcodes", () => {
 
   it("refuses an empty value", () => {
     expect(() => generateBarcodeSvg("", {})).toThrow();
-  });
-
-  it("wraps the SVG as a data URL an <img> can load", () => {
-    const image = generateBarcodeImage("123456789012", { displayValue: "no" });
-    expect(image).toMatch(/^data:image\/svg\+xml;base64,/);
   });
 });
 

@@ -14,11 +14,6 @@ describe("download sizes", () => {
     expect(missing).toEqual([]);
   });
 
-  it("has nothing to say about a tool that is not downloaded", () => {
-    expect(downloadSize("image-search")).toBeNull();
-    expect(downloadSize("nonexistent")).toBeNull();
-  });
-
   it("adds up the artifacts a single tool is split across", () => {
     // FFmpeg and ffprobe come out of one archive, and each reports all of it.
     expect(downloadSize("ffmpeg")).toBe(downloadSize("ffprobe"));

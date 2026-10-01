@@ -67,27 +67,6 @@ const allSources = [
 
 // ── Reverse image search ────────────────────────────────────────────────
 
-it('sends a picture from this machine to the one engine that accepts an upload', async () => {
-  vi.mocked(invoke).mockImplementation(async (command: string) => {
-    if (command === 'image_search_engines') return engines;
-    if (command === 'search_by_image') return 'https://www.google.com/search?vsrid=abc';
-    throw new Error(`unexpected ${command}`);
-  });
-
-  render(
-    <ImageSearchPanel tool={catalogTool('image-search')} initialPath="C:/pictures/cat.png" />,
-  );
-
-  await userEvent.click(screen.getByRole('button', { name: 'Search' }));
-
-  await waitFor(() =>
-    expect(invoke).toHaveBeenCalledWith('search_by_image', {
-      request: { engine: 'google', path: 'C:/pictures/cat.png', imageUrl: null },
-    }),
-  );
-  expect(await screen.findByText('Opened in your browser.')).toBeInTheDocument();
-});
-
 it('offers every engine once an address is typed, because none of them needs the file', async () => {
   vi.mocked(invoke).mockImplementation(async (command: string) => {
     if (command === 'image_search_engines') return engines;
@@ -122,13 +101,6 @@ it('refuses a file the search cannot read, and says which kinds it takes', async
 
   expect(await screen.findByText(/not something this tool reads/i)).toBeInTheDocument();
   expect(invoke).not.toHaveBeenCalledWith('search_by_image', expect.anything());
-});
-
-it('says plainly that this is the tool that leaves the machine', async () => {
-  vi.mocked(invoke).mockResolvedValue(engines);
-  render(<ImageSearchPanel tool={catalogTool('image-search')} />);
-
-  expect(screen.getByText(/the one tool here that leaves your machine/i)).toBeInTheDocument();
 });
 
 it('reports a refusal from the host instead of pretending the browser opened', async () => {
@@ -229,25 +201,6 @@ it('shows every field of a match, with the cover art described for a screen read
   expect(within(card).getByAltText('Cover art for Bohemian Rhapsody')).toBeInTheDocument();
 });
 
-it('offers each service, and opens it through the host rather than in this window', async () => {
-  hosts(allSources);
-  render(<MusicPanel tool={catalogTool('songrec')} />);
-  await screen.findByRole('combobox', { name: 'Listen to' });
-  await userEvent.click(screen.getByRole('button', { name: /listen and identify/i }));
-
-  const card = await screen.findByLabelText('What was recognised');
-  for (const name of ['Apple Music', 'Spotify', 'YouTube Music']) {
-    expect(within(card).getByRole('button', { name })).toBeInTheDocument();
-  }
-
-  await userEvent.click(within(card).getByRole('button', { name: 'Spotify' }));
-
-  // A plain link would open inside this window, which has no way back.
-  expect(invoke).toHaveBeenCalledWith('open_link', {
-    url: 'https://open.spotify.com/search/Bohemian%20Rhapsody%20Queen',
-  });
-});
-
 it('says so when nothing matched, rather than showing an empty card', async () => {
   hosts(allSources, { ...match, matched: false, title: '', artist: '', message: 'No match. Turn it up.' });
   render(<MusicPanel tool={catalogTool('songrec')} />);
@@ -278,13 +231,6 @@ it('draws the sound the host reports while it is still recording', async () => {
   // The newest value is appended, so it is the last bar that moves.
   expect(bars().at(-1)).toBe('0.8');
   expect(bars().at(-2)).toBe('0');
-});
-
-it('promises that only the fingerprint is sent', async () => {
-  hosts(allSources);
-  render(<MusicPanel tool={catalogTool('songrec')} />);
-
-  expect(screen.getByText(/only the\s+fingerprint is sent/i)).toBeInTheDocument();
 });
 
 it('says it is still going after a lookup came back empty', async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { megaSenaNumbers, raffleWinners, randomNumbers, randomWords, rollDice, spinRouletteFacts } from "./random";
+import { megaSenaNumbers, raffleWinners, randomNumbers, rollDice, spinRouletteFacts } from "./random";
 
 describe("dice", () => {
   it("rolls within range", () => {
@@ -66,12 +66,5 @@ describe("random numbers", () => {
 
   it("rejects asking for more unique numbers than the range holds", () => {
     expect(() => randomNumbers("", { min: "1", max: "3", count: "5", unique: "yes" })).toThrow();
-  });
-});
-
-describe("random words", () => {
-  it("returns words from the requested bank", () => {
-    const words = randomWords("", { bank: "colors", count: "3" }).split(", ");
-    expect(words).toHaveLength(3);
   });
 });

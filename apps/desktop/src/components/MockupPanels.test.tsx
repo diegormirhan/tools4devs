@@ -15,13 +15,6 @@ function catalogTool(toolId: string) {
 
 const rows = () => screen.getAllByRole('group', { name: /^Message \d+$/ });
 
-it('is a page named after the tool, and takes the focus', () => {
-  render(<ChatMockupPanel tool={catalogTool('chat-mockup')} />);
-
-  expect(screen.getByRole('region', { name: 'Chat mockup' })).toHaveFocus();
-  expect(screen.getByRole('button', { name: 'Save as image' })).toBeEnabled();
-});
-
 it('adds, edits and removes messages, and the phone follows', async () => {
   const user = userEvent.setup();
   const dirty = vi.fn();

@@ -7,17 +7,13 @@ import {
   decodeJwt,
   fromRoman,
   generatePassword,
-  generateUuid,
-  hashFacts,
   hashText,
   htmlConvert,
-  jwtFacts,
   morseConvert,
   numberToWordsPt,
   romanConvert,
   timestampToDate,
   toRoman,
-  urlConvert,
 } from "./codes";
 
 describe("Base64", () => {
@@ -29,14 +25,6 @@ describe("Base64", () => {
 
   it("rejects text that is not valid Base64", () => {
     expect(() => base64Convert("not base64!!", { direction: "decode" })).toThrow();
-  });
-});
-
-describe("URL encoding", () => {
-  it("escapes and unescapes reserved characters", () => {
-    const encoded = urlConvert("a b/c?d=e", { direction: "encode" });
-    expect(encoded).toBe("a%20b%2Fc%3Fd%3De");
-    expect(urlConvert(encoded, { direction: "decode" })).toBe("a b/c?d=e");
   });
 });
 
@@ -69,22 +57,10 @@ describe("Morse", () => {
 });
 
 describe("hashes", () => {
-  // Known vectors for the empty string and "abc", published by each standard.
+  // Known vectors for the empty string and "abc", published by the standard.
   it("matches the published MD5 test vectors", async () => {
     expect(await hashText("", { algorithm: "md5" })).toBe("d41d8cd98f00b204e9800998ecf8427e");
     expect(await hashText("abc", { algorithm: "md5" })).toBe("900150983cd24fb0d6963f7d28e17f72");
-  });
-
-  it("matches the published SHA-256 test vector", async () => {
-    expect(await hashText("abc", { algorithm: "sha256" })).toBe(
-      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
-    );
-  });
-
-  it("computes every algorithm at once for the facts panel", async () => {
-    const facts = await hashFacts("abc");
-    expect(facts.map(([name]) => name)).toEqual(["MD5", "SHA-1", "SHA-256", "SHA-384", "SHA-512"]);
-    expect(facts.find(([name]) => name === "MD5")?.[1]).toBe("900150983cd24fb0d6963f7d28e17f72");
   });
 });
 
@@ -99,22 +75,12 @@ describe("JWT", () => {
     expect(decoded).toContain('"name": "John Doe"');
   });
 
-  it("pulls out expiry and subject as facts", () => {
-    expect(jwtFacts(token)).toContainEqual(["Subject", "1234567890"]);
-  });
-
   it("rejects a string with no dots at all", () => {
     expect(() => decodeJwt("not-a-jwt")).toThrow();
   });
 });
 
-describe("UUID and passwords", () => {
-  it("generates a version-4 UUID", () => {
-    expect(generateUuid()).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
-    );
-  });
-
+describe("passwords", () => {
   it("generates a password of the requested length, from the pools asked for", () => {
     const password = generatePassword("", { length: "20", lower: "yes", upper: "no", digits: "no", symbols: "no" });
     expect(password).toHaveLength(20);

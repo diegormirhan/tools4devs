@@ -1,17 +1,21 @@
 import { expect, test } from "./fixtures";
 
 test("UC-02: hovering a card plays its clip after a pause, one at a time", async ({ page }) => {
+  // A controlled clock, so "not before the pause" is checked, not raced.
+  await page.clock.install();
   await page.goto("/");
-  const ffmpeg = page.getByRole("button", { name: "Get FFmpeg" });
-  await ffmpeg.hover();
+  await page.getByRole("button", { name: "Get FFmpeg" }).hover();
+  await page.clock.runFor(200);
   // Not at once: a pointer crossing the grid should not set off every card.
   await expect(page.locator("video")).toHaveCount(0);
+  await page.clock.runFor(200);
   const clip = page.locator("video");
   await expect(clip).toHaveCount(1);
   await expect(clip).toHaveAttribute("src", /ffmpeg\.webm$/);
   await expect.poll(() => clip.evaluate((video: HTMLVideoElement) => video.muted && !video.paused)).toBe(true);
 
-  await page.getByRole("button", { name: /Get Inspect media|Get ffprobe/i }).first().hover();
+  await page.getByRole("button", { name: "Get ffprobe" }).hover();
+  await page.clock.runFor(400);
   await expect(page.locator("video")).toHaveCount(1);
   await expect(page.locator("video")).not.toHaveAttribute("src", /ffmpeg\.webm$/);
 

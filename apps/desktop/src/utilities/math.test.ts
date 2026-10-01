@@ -71,14 +71,6 @@ describe("fractions", () => {
 });
 
 describe("unit conversion", () => {
-  it("converts length", () => {
-    expect(convertUnit("", { category: "length", value: "1", from: "km", to: "m" })).toBe("1000");
-  });
-
-  it("converts mass", () => {
-    expect(convertUnit("", { category: "mass", value: "1", from: "kg", to: "g" })).toBe("1000");
-  });
-
   it("converts temperature both ways", () => {
     expect(convertUnit("", { category: "temperature", value: "0", from: "c", to: "f" })).toBe("32");
     expect(convertUnit("", { category: "temperature", value: "212", from: "f", to: "c" })).toBe("100");

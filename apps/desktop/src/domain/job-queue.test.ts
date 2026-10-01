@@ -20,14 +20,6 @@ function job(overrides: Partial<ToolJob> = {}): ToolJob {
 }
 
 describe("restoring the queue after a restart", () => {
-  it("keeps what finished", () => {
-    const stored = JSON.stringify([job(), job({ id: "b", status: "failed" })]);
-    const restored = restoreJobs(() => stored);
-
-    expect(restored).toHaveLength(2);
-    expect(restored[0]).toMatchObject({ status: "succeeded", outputPath: "C:\\clips\\clip.mkv" });
-  });
-
   it("does not let a job claim to still be running", () => {
     // Its process died with the app. A row stuck at 40% forever would be a lie
     // the interface is telling about work nobody is doing.

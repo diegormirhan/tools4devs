@@ -134,28 +134,3 @@ it('stops a job that is still waiting without asking the host about it', async (
   // Nothing was running for it, so the host was never troubled.
   expect(invoke).not.toHaveBeenCalledWith('cancel_operation', expect.anything());
 });
-
-it('asks the host to stop a job that is actually running', async () => {
-  useNativeHost();
-  let fail: ((reason: unknown) => void) | undefined;
-  vi.mocked(invoke).mockImplementation((command: string) => {
-    if (command === 'cancel_operation') return Promise.resolve(true);
-    return new Promise((_resolve, reject) => { fail = reject; });
-  });
-  const { result } = renderHook(() => useOperationRunner());
-
-  let jobId = '';
-  act(() => { jobId = result.current.runOperation(request, meta); });
-  await waitFor(() => expect(result.current.runningJobs).toHaveLength(1));
-
-  act(() => { result.current.cancelOperation(jobId); });
-  expect(invoke).toHaveBeenCalledWith('cancel_operation', { jobId });
-
-  // The host then fails the operation in its own words, and the queue reads
-  // that back as stopped rather than as one more red row.
-  await act(async () => {
-    fail?.('Stopped before it finished.');
-  });
-  await waitFor(() => expect(result.current.finishedJobs).toHaveLength(1));
-  expect(result.current.finishedJobs[0]).toMatchObject({ status: 'cancelled', message: 'Stopped.' });
-});

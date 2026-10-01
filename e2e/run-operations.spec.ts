@@ -111,7 +111,7 @@ test.describe("a job that fails", () => {
 });
 
 test.describe("installing a tool", () => {
-  test.use({ host: { available: bundled } });
+  test.use({ host: { available: bundled, stepMs: 400 } });
 
   test("UC-04: the plan shows its size first, nothing downloads before the click, and the tool opens after", async ({ page }) => {
     await page.goto("/");
@@ -121,6 +121,10 @@ test.describe("installing a tool", () => {
     expect(await hostCalls(page, "install_component")).toHaveLength(0);
 
     await dialog.getByRole("button", { name: "Download and install" }).click();
+    // The host's progress reaches the dialog while it downloads.
+    const progress = dialog.getByRole("progressbar", { name: "Progress of 7-Zip" });
+    await expect(progress).toHaveAttribute("aria-valuenow", "50");
+    await expect(dialog.getByText(/Downloading/)).toBeVisible();
     await expect(dialog.getByRole("button", { name: /Open 7-Zip/ })).toBeVisible();
     expect(await hostCalls(page, "install_component")).toHaveLength(1);
 

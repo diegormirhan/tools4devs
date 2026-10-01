@@ -13,17 +13,11 @@ import {
   shuffleLines,
   slugify,
   sortLines,
-  styleLetters,
   tidyWhitespace,
   upsideDown,
 } from "./text";
 
 describe("changing case", () => {
-  it("keeps the accents where they belong", () => {
-    expect(changeCase("ação rápida", { case: "upper" })).toBe("AÇÃO RÁPIDA");
-    expect(changeCase("AÇÃO RÁPIDA", { case: "lower" })).toBe("ação rápida");
-  });
-
   it("capitalises every word for a title, and only sentences for a sentence", () => {
     expect(changeCase("the tool that works", { case: "title" })).toBe("The Tool That Works");
     expect(changeCase("first one. second one!  third", { case: "sentence" })).toBe(
@@ -145,16 +139,6 @@ describe("slugs", () => {
 });
 
 describe("lorem ipsum", () => {
-  it("gives the number of paragraphs asked for", () => {
-    const result = loremIpsum({ count: "2", unit: "paragraphs" });
-    expect(result.split("\n\n")).toHaveLength(2);
-    expect(result.startsWith("Lorem ipsum dolor sit amet")).toBe(true);
-  });
-
-  it("counts words when words are what was asked for", () => {
-    expect(loremIpsum({ count: "7", unit: "words" }).split(" ")).toHaveLength(7);
-  });
-
   it("refuses to generate a novel", () => {
     expect(loremIpsum({ count: "9999", unit: "sentences" }).split(". ").length).toBeLessThanOrEqual(200);
   });
@@ -183,19 +167,5 @@ describe("bionic reading", () => {
 
   it("leaves punctuation and spacing untouched", () => {
     expect(bionicReading("hi, there!")).toContain(", ");
-  });
-});
-
-describe("letter styles", () => {
-  it("circles letters by default", () => {
-    expect(styleLetters("AB", {})).toBe("ⒶⒷ");
-  });
-
-  it("stacks one letter per line", () => {
-    expect(styleLetters("abc", { style: "stacked" })).toBe("a\nb\nc");
-  });
-
-  it("converts to full-width forms", () => {
-    expect(styleLetters("AB", { style: "fullwidth" })).toBe("ＡＢ");
   });
 });

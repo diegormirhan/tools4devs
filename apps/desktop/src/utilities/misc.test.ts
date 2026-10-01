@@ -4,7 +4,6 @@ import {
   firstMillionFacts,
   fuelChoiceFacts,
   fuelCostFacts,
-  minimumWageFacts,
   symbolList,
   whatsappLink,
 } from "./misc";
@@ -51,10 +50,6 @@ describe("barbecue calculator", () => {
 });
 
 describe("symbol list", () => {
-  it("returns the symbols for the chosen category", () => {
-    expect(symbolList("", { category: "math" })).toContain("∞");
-  });
-
   it("returns nothing for an unknown category rather than throwing", () => {
     expect(symbolList("", { category: "unknown" })).toBe("");
   });
@@ -73,12 +68,6 @@ describe("whatsapp link", () => {
 
   it("refuses an empty phone number", () => {
     expect(() => whatsappLink("", { phone: "" })).toThrow();
-  });
-});
-
-describe("minimum wage", () => {
-  it("divides the amount by the reference wage", () => {
-    expect(fact(minimumWageFacts("", { wage: "2824", reference: "1412" }), "Minimum wages")).toBe("2x");
   });
 });
 

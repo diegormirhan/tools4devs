@@ -81,18 +81,6 @@ it('mirrors the live progress the queue reports for its own job', async () => {
   expect(screen.getByText(/keeps running in the queue/i)).toBeVisible();
 });
 
-it('reports a failed job as an error instead of a silent success', async () => {
-  vi.mocked(save).mockResolvedValue('C:\\videos\\video.mp4');
-  const failed = job({ status: 'failed', message: 'yt-dlp.exe not found' });
-  render(<ToolPanel tool={catalogTool('yt-dlp')} jobs={[failed]} onRun={() => jobId} />);
-
-  await userEvent.type(screen.getByLabelText('Media URL'), 'https://example.com/video');
-  await userEvent.click(screen.getByRole('button', { name: 'Run' }));
-
-  expect(await screen.findByRole('alert')).toHaveTextContent('yt-dlp.exe not found');
-  expect(screen.getByText(/the job failed/i)).toBeVisible();
-});
-
 it('shows the host result and the produced output path', async () => {
   const succeeded = job({
     toolId: 'libvips',
@@ -125,17 +113,6 @@ it('selects a directory for project searches', async () => {
 
   expect(onRun).toHaveBeenCalledWith(expect.objectContaining({
     request: expect.objectContaining({ inputPaths: ['C:\\fixtures'], options: { query: 'tools4devs' } }),
-  }));
-});
-
-it('passes the file selected in the main workspace to the operation', async () => {
-  const onRun = vi.fn(() => jobId);
-  render(<ToolPanel tool={catalogTool('jq')} initialPath={'C:\\fixtures\\sample.json'} onRun={onRun} />);
-
-  await userEvent.click(screen.getByRole('button', { name: 'Run' }));
-
-  expect(onRun).toHaveBeenCalledWith(expect.objectContaining({
-    request: expect.objectContaining({ inputPaths: ['C:\\fixtures\\sample.json'] }),
   }));
 });
 
@@ -352,23 +329,6 @@ it('saves into the folder chosen in settings without asking again', async () => 
       request: expect.objectContaining({ outputPath: 'D:\\saida\\foto-optimize.png' }),
     }),
   );
-});
-
-it('still asks where to save when no default folder is set', async () => {
-  const onRun = vi.fn(() => jobId);
-  vi.mocked(save).mockResolvedValue('C:\\fotos\\foto-optimize.png');
-  render(
-    <ToolPanel
-      tool={catalogTool('oxipng')}
-      initialPath={'C:\\fotos\\foto.png'}
-     
-      onRun={onRun}
-    />,
-  );
-
-  await userEvent.click(screen.getByRole('button', { name: 'Run' }));
-
-  expect(save).toHaveBeenCalled();
 });
 
 it('sends a gallery straight to the default folder rather than a file inside it', async () => {

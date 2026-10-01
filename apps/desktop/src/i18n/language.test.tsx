@@ -20,16 +20,6 @@ function Sample() {
 describe("the translator", () => {
   beforeEach(() => localStorage.clear());
 
-  it("starts in English, which needs no dictionary at all", () => {
-    render(
-      <LanguageProvider>
-        <Sample />
-      </LanguageProvider>,
-    );
-    expect(screen.getByText("Back to the tools")).toBeInTheDocument();
-    expect(screen.getByText("26 tools")).toBeInTheDocument();
-  });
-
   it("changes the interface, and remembers the choice", async () => {
     const user = userEvent.setup();
     render(

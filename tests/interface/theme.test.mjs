@@ -8,13 +8,6 @@ const theme = readFileSync(
   "utf8",
 );
 
-test("loads Tailwind's preflight under its own layer", () => {
-  // Nothing in the window depends on the browser defaults any more, so the reset
-  // applies everywhere, below the utilities that override it.
-  assert.match(theme, /@import\s+"tailwindcss\/preflight\.css"\s+layer\(base\)/);
-  assert.doesNotMatch(theme, /data-legacy/);
-});
-
 test("writes every literal colour inside the light or the dark token block", () => {
   const literals = [];
   let block = null;

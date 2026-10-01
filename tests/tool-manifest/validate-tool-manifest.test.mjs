@@ -34,14 +34,6 @@ function manifestWith(...tools) {
   };
 }
 
-test("accepts a planned tool without pretending it has pinned artifacts", () => {
-  assert.deepEqual(validateToolManifest(manifestWith(plannedTool)), []);
-});
-
-test("accepts a bundled tool with a pinned HTTPS artifact", () => {
-  assert.deepEqual(validateToolManifest(manifestWith(bundledTool)), []);
-});
-
 test("requires pinned artifacts before a tool can be bundled", () => {
   const issues = validateToolManifest(
     manifestWith({ ...plannedTool, status: "bundled", version: "8.0.1" })

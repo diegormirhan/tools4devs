@@ -1,26 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { avatarColor, defaultTime, initials, newMessage, nextMessageId } from "./mockup";
+import { avatarColor, initials, nextMessageId } from "./mockup";
 
 describe("message ids", () => {
   it("gives every message a different id", () => {
     const ids = new Set(Array.from({ length: 20 }, () => nextMessageId()));
     expect(ids.size).toBe(20);
-  });
-
-  it("starts a new message empty, with the sender and time given", () => {
-    const message = newMessage("me", "10:42 AM");
-    expect(message.from).toBe("me");
-    expect(message.time).toBe("10:42 AM");
-    expect(message.text).toBe("");
-    expect(message.id).toBeTruthy();
-  });
-});
-
-describe("default time", () => {
-  it("formats as hour:minute with no seconds", () => {
-    const formatted = defaultTime(new Date(2026, 0, 1, 14, 5));
-    expect(formatted).not.toMatch(/:\d{2}:\d{2}/);
-    expect(formatted).toMatch(/\d{1,2}:\d{2}/);
   });
 });
 

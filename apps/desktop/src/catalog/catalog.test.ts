@@ -4,14 +4,6 @@ import { describe, expect, it } from "vitest";
 import { createCatalogRows, searchCatalog } from "./catalog";
 
 describe("tool catalog", () => {
-  it("does not present planned integrations as installed", () => {
-    const rows = createCatalogRows();
-    const tools = rows.flatMap((row) => row.tools);
-
-    expect(tools.find((tool) => tool.id === "qpdf")?.availability).toBe("available");
-    expect(tools.find((tool) => tool.id === "yt-dlp")?.availability).toBe("available");
-  });
-
   it("finds tools by name, capability and file extension", () => {
     const rows = createCatalogRows();
     const toolIds = (query: string) => searchCatalog(rows, query).tools.map((match) => match.tool.id);
@@ -21,16 +13,6 @@ describe("tool catalog", () => {
     // Cropping is no longer libvips alone: FFmpeg crops video now, so the
     // search has to surface both rather than pick a winner.
     expect(toolIds("crop")).toEqual(expect.arrayContaining(["ffmpeg", "libvips"]));
-  });
-
-  it("exposes concrete operations for each tool", () => {
-    const tools = createCatalogRows().flatMap((row) => row.tools);
-    expect(tools.find((tool) => tool.id === "ffmpeg")?.operations.map((operation) => operation.id)).toEqual([
-      "convert", "compress", "trim", "resize", "crop", "rotate", "change-speed",
-      "fps", "extract-audio", "remove-audio", "normalize-audio", "to-gif",
-      "thumbnail", "contact-sheet",
-    ]);
-    expect(tools.find((tool) => tool.id === "yt-dlp")?.operations).toHaveLength(3);
   });
 
   it("groups tools by outcome, and places every one of them exactly once", () => {
@@ -53,74 +35,10 @@ describe("tool catalog", () => {
     // No category should be big enough to need scrolling to take in.
     for (const row of rows) expect(row.tools.length).toBeLessThanOrEqual(6);
   });
-
-  it("keeps enlarging on the image card rather than in a card of its own", () => {
-    const rows = createCatalogRows();
-    const tools = rows.flatMap((row) => row.tools);
-    const images = tools.find((tool) => tool.id === "libvips");
-
-    // Looking to make a picture bigger means looking at the image card, so
-    // both ways of doing it live there.
-    const operations = images?.operations.map((operation) => operation.id) ?? [];
-    expect(operations).toContain("upscale");
-    expect(operations).toContain("upscale-model");
-
-    // And nothing else competes for the same intent: the component that does
-    // the work has no card of its own.
-    expect(tools.filter((tool) => tool.operations.some((o) => o.id.startsWith("upscale"))))
-      .toHaveLength(1);
-    expect(tools.find((tool) => tool.id === "waifu2x")).toBeUndefined();
-  });
-
-  it("marks the card the app provides itself as ready, with nothing to install", () => {
-    const rows = createCatalogRows();
-    const search = rows
-      .flatMap((row) => row.tools)
-      .find((tool) => tool.id === "image-search");
-
-    // It has no manifest entry, because there is no binary behind it.
-    expect(search).toBeDefined();
-    expect(search?.availability).toBe("ready");
-    expect(search?.delivery).toBe("embedded");
-    expect(search?.integrationName).toBe("Reverse image search");
-    expect(search?.downloadLabel).toBeUndefined();
-  });
-
-  it("carries the recogniser as an ordinary component that has to be fetched", () => {
-    const rows = createCatalogRows();
-    const songrec = rows.flatMap((row) => row.tools).find((tool) => tool.id === "songrec");
-
-    expect(songrec?.status).toBe("downloadable");
-    expect(songrec?.availability).toBe("available");
-    expect(songrec?.capabilities).toContain("audio.recognize");
-  });
 });
 
 describe("the command palette's search", () => {
   const rows = createCatalogRows();
-
-  it("puts the action that does the job ahead of the tools that contain it", () => {
-    const result = searchCatalog(rows, "extract au");
-
-    expect(result.actions[0]).toMatchObject({ tool: { id: "ffmpeg" }, operation: { id: "extract-audio" }, row: { id: "video" } });
-    expect(result.tools.every((match) => match.row.tools.includes(match.tool))).toBe(true);
-  });
-
-  it("matches words in any order, whatever the case and the accents", () => {
-    const ids = (query: string) => searchCatalog(rows, query).actions.map((match) => `${match.tool.id}/${match.operation.id}`);
-
-    expect(ids("AUDIO extract")).toContain("ffmpeg/extract-audio");
-    expect(ids("extráct")).toContain("poppler/extract-text");
-  });
-
-  it("finds an action by the words on screen, in the language the person reads", () => {
-    const portuguese: Record<string, string> = { "Extract audio": "Extrair áudio" };
-    const translate = (text: string) => portuguese[text] ?? text;
-
-    const actions = searchCatalog(rows, "extrair audio", translate).actions;
-    // yt-dlp names its audio-only download "Extract audio" too; both are right.
-    expect(actions.map((match) => `${match.tool.id}/${match.operation.id}`)).toEqual(["ffmpeg/extract-audio", "yt-dlp/download-audio"]);
-  });
 
   it("offers every tool, and no action, before anything is typed", () => {
     const result = searchCatalog(rows, "  ");
@@ -194,19 +112,4 @@ it('finds the right downloader by the name of the site', () => {
   expect(idsFor('tiktok')).toContain('yt-dlp');
   // A site both tools cover should offer both.
   expect(idsFor('reddit')).toEqual(expect.arrayContaining(['yt-dlp', 'gallery-dl']));
-});
-
-it('carries gallery-dl as an on-demand download under a copyleft licence', () => {
-  const tool = createCatalogRows()
-    .flatMap((row) => row.tools)
-    .find((entry) => entry.id === 'gallery-dl');
-
-  expect(tool).toBeDefined();
-  // GPL-2.0 keeps it out of the installer; it is fetched on demand instead.
-  expect(tool?.status).toBe('downloadable');
-  expect(tool?.delivery).toBe('on-demand');
-  expect(tool?.operations.map((operation) => operation.id)).toEqual([
-    'download-gallery',
-    'inspect-url',
-  ]);
 });

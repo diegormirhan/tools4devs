@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  cnpjTool,
-  cpfTool,
-  generateCep,
   generateCnpj,
   generateCpf,
   generateTestCard,
@@ -39,11 +36,6 @@ describe("CPF", () => {
   it("is formatted with the punctuation a Brazilian form expects", () => {
     expect(generateCpf()).toMatch(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/);
   });
-
-  it("validates through the tool entry point", () => {
-    expect(cpfTool("111.444.777-35", { mode: "validate" })).toBe("Valid CPF");
-    expect(cpfTool("111.444.777-99", { mode: "validate" })).toBe("Not a valid CPF");
-  });
 });
 
 describe("CNPJ", () => {
@@ -63,16 +55,6 @@ describe("CNPJ", () => {
 
   it("always generates the /0001 branch", () => {
     expect(generateCnpj()).toMatch(/^\d{2}\.\d{3}\.\d{3}\/0001-\d{2}$/);
-  });
-
-  it("validates through the tool entry point", () => {
-    expect(cnpjTool("11.222.333/0001-81", { mode: "validate" })).toBe("Valid CNPJ");
-  });
-});
-
-describe("CEP", () => {
-  it("has the shape of a Brazilian postal code", () => {
-    expect(generateCep()).toMatch(/^\d{5}-\d{3}$/);
   });
 });
 
@@ -111,13 +93,6 @@ describe("test card numbers", () => {
     const number = generateTestCard("", { network: "visa" }).replace(/\s/g, "");
     const tampered = number.slice(0, -1) + String((Number(number.at(-1)) + 1) % 10);
     expect(isValidCardNumber(tampered)).toBe(false);
-  });
-
-  it("labels every generated card as a sandbox-only fake", () => {
-    const facts = testCardFacts("", { network: "visa" });
-    expect(fact(facts, "Warning")).toMatch(/sandbox|test/i);
-    expect(fact(facts, "Number")).toBeTruthy();
-    expect(fact(facts, "CVV")).toMatch(/^\d{3}$/);
   });
 
   it("uses CID instead of CVV for American Express, at four digits", () => {

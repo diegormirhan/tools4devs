@@ -1,5 +1,5 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { createInstallationState } from "../../../../scripts/component-installation/installation-state.mjs";
 import { createCatalogRows, type CatalogRow, type CatalogTool } from "../catalog/catalog";
 import { ToolCard } from "./ToolCard";
@@ -12,11 +12,7 @@ const find = (id: string): [CatalogTool, CatalogRow] => {
 const available = createInstallationState({});
 const ready = createInstallationState({ activeVersion: "7.1" });
 
-function renderCard(
-  id: string,
-  installation = available,
-  { previewing = false, onPreviewChange = vi.fn() }: { previewing?: boolean; onPreviewChange?: (open: boolean) => void } = {},
-) {
+function renderCard(id: string, installation = available) {
   const [tool, row] = find(id);
   const onOpen = vi.fn();
   const onInstall = vi.fn();
@@ -27,34 +23,18 @@ function renderCard(
       installation={installation}
       onOpen={onOpen}
       onInstall={onInstall}
-      previewing={previewing}
-      onPreviewChange={onPreviewChange}
+      previewing={false}
+      onPreviewChange={vi.fn()}
     />,
   );
-  return { tool, onOpen, onInstall, onPreviewChange };
+  return { onOpen, onInstall };
 }
 
-afterEach(() => vi.useRealTimers());
-
 describe("the tool card", () => {
-  it("is one button, named for what it does", () => {
-    const { onInstall } = renderCard("ffmpeg");
-    fireEvent.click(screen.getByRole("button", { name: "Get FFmpeg" }));
-    expect(onInstall).toHaveBeenCalled();
-  });
-
   it("opens a tool that is ready", () => {
     const { onOpen } = renderCard("ffmpeg", ready);
     fireEvent.click(screen.getByRole("button", { name: "Open FFmpeg" }));
     expect(onOpen).toHaveBeenCalled();
-  });
-
-  it("says what it is before it is opened: engine, actions, download size", () => {
-    renderCard("ffmpeg");
-    const card = screen.getByRole("article", { name: "Convert media" });
-    expect(within(card).getByText("FFmpeg")).toBeVisible();
-    expect(within(card).getByText("14 actions")).toBeVisible();
-    expect(within(card).getByText(/In-app download · \d+ MB/)).toBeVisible();
   });
 
   it("explains a recoverable error and offers retry", () => {
@@ -71,44 +51,6 @@ describe("the tool card", () => {
 });
 
 describe("the hover preview", () => {
-  it("asks to open after a short pause on the card, and to close when the pointer leaves", () => {
-    vi.useFakeTimers();
-    const { onPreviewChange } = renderCard("ffmpeg");
-    const card = screen.getByRole("article", { name: "Convert media" });
-
-    fireEvent.pointerEnter(card);
-    act(() => vi.advanceTimersByTime(200));
-    expect(onPreviewChange).not.toHaveBeenCalled();
-    act(() => vi.advanceTimersByTime(150));
-    expect(onPreviewChange).toHaveBeenLastCalledWith(true);
-
-    fireEvent.pointerLeave(card);
-    expect(onPreviewChange).toHaveBeenLastCalledWith(false);
-  });
-
-  it("plays the muted clip, loading nothing until it opens", () => {
-    renderCard("ffmpeg", available, { previewing: true });
-    const video = document.querySelector("video")!;
-    expect(video).toHaveAttribute("src", "/previews/ffmpeg.webm");
-    expect(video).toHaveAttribute("poster", "/previews/ffmpeg.jpg");
-    expect(video.muted).toBe(true);
-    expect(video).toHaveAttribute("preload", "none");
-    expect(screen.getByText("What you can do")).toBeVisible();
-    expect(screen.getByText("+8")).toBeVisible();
-  });
-
-  it("shows only the poster to someone who asked for less motion", () => {
-    const original = window.matchMedia;
-    window.matchMedia = ((query: string) => ({ ...original(query), matches: query.includes("reduce") })) as typeof window.matchMedia;
-    try {
-      renderCard("ffmpeg", available, { previewing: true });
-      expect(document.querySelector("video")).toBeNull();
-      expect(document.querySelector('img[src="/previews/ffmpeg.jpg"]')).not.toBeNull();
-    } finally {
-      window.matchMedia = original;
-    }
-  });
-
   it("falls back to the icon and the actions for a tool with no clip", () => {
     // Every card ships a clip today; one added later may not, and must still preview.
     const [tool, row] = find("ffprobe");

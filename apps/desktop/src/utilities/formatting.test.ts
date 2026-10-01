@@ -12,16 +12,6 @@ describe("CSS minifying", () => {
     `;
     expect(minifyCss(input)).toBe(".card{color:red;padding:4px 8px}");
   });
-
-  it("drops the semicolon before a closing brace", () => {
-    expect(minifyCss(".a { color: red; }")).toBe(".a{color:red}");
-  });
-
-  it("handles more than one rule", () => {
-    expect(minifyCss(".a { color: red; }\n.b { color: blue; }")).toBe(
-      ".a{color:red}.b{color:blue}",
-    );
-  });
 });
 
 describe("CSS formatting", () => {

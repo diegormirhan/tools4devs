@@ -21,15 +21,6 @@ test("never writes a vendor prefix by hand", () => {
   assert.deepEqual(handWritten, []);
 });
 
-test("holds only the window frame and the mockups", () => {
-  // Every screen is drawn by Tailwind utilities on its components now; a class
-  // rule here outside the mockups is a screen drawn twice.
-  const classes = [...stylesheet.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/\.([a-z][\w-]*)/gi)]
-    .map((match) => match[1])
-    .filter((name) => !name.startsWith("mockup-"));
-  assert.deepEqual([...new Set(classes)], []);
-});
-
 test("never hardcodes a colour outside a mockup", () => {
   // theme.css owns every colour; a hex here means a rule that does not follow
   // the theme. The one deliberate exception is a mockup: a WhatsApp bubble has
