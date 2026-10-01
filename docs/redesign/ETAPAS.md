@@ -17,10 +17,10 @@ Regras que valem para toda etapa:
 | 1 | Fundação Tailwind + shadcn | M | 0 | — | ☑ |
 | 2 | Modelo de dados (ícone, preview, árvore) | P | 1 | — | ☑ |
 | 3 | Shell, sidebar em árvore e Ctrl+K | G | 2 | UC-01, 03, 10, 11 | ☑ |
-| 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ◐ falta o layout dos utilitários (aguarda aprovação) |
+| 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ◐ faltam as três formas de vários campos (aguardam aprovação) |
 | 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☑ |
 | 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ☑ |
-| 7 | Primitivos restantes e limpeza do CSS | M | 4, 5 | UC-07, 08 | ☐ |
+| 7 | Primitivos restantes e limpeza do CSS | M | 4, 5 | UC-07, 08 | ☑ |
 | 8 | Testes finais, docs e entrega | M | 1–7 | todos | ☐ |
 
 ```
@@ -171,12 +171,19 @@ Resultado (2026-10-01): 39 de 39 com clipe; o maior tem 115 KB; clipes e posters
 
 ## Etapa 7 · Primitivos restantes e limpeza (M)
 
-Detalhes: §8 Fase 7.
+Detalhes: §8 Fase 7. Feita em sete fatias, um commit cada.
 
-- [ ] `Select.tsx` → `Select`; `NumberField.tsx` → `Input`; `ThemeSwitch.tsx` → `ToggleGroup`; `UpdateCard.tsx` → `Sonner`/`Alert`; `.button--*` → `Button`.
-- [ ] Histórico com estados Done/Failed/Stopped, "Clear the history" com confirmação e estado vazio (UC-07).
-- [ ] Configurações em uma coluna; tema e idioma sem reiniciar (UC-08).
-- [ ] Apagar de `app.css` tudo que não for dos mockups de chat e post.
+- [x] 7a. Fila, Histórico e Configurações como nos mockups: ícone da ferramenta por job, selos de estado, barra de progresso; Configurações em uma coluna com `Select`, `Switch` e o grupo de rádio do tema. "Clear the history" pede confirmação, no Histórico e nas Configurações (UC-07). Tema e idioma mudam sem reiniciar (UC-08).
+- [x] 7b. `UpdateCard` redesenhado com os tokens novos. O `sonner` saiu: não havia toast nenhum, e ele deixou o bundle e os avisos.
+- [x] 7c. Página da ferramenta externa: título e motor em cima, arquivo ou URL, card de Opções e card de Resumo com progresso e Executar/Parar. `Select.tsx` e `NumberField.tsx` continuam nossos (papéis acessíveis e testes) com os tokens novos; `ThemeSwitch` ficou como `radiogroup` em vez de `ToggleGroup`, que não anuncia uma escolha única como rádio.
+- [x] 7d. Busca por imagem e Reconhecer música no mesmo `ToolPage` (cabeçalho, foco ao chegar). Quatro frases que só existiam em inglês entraram no dicionário.
+- [x] 7e. Página do utilitário como no mockup `utility`: nome do utilitário como título, sem a fileira de abas, Opções em cima, Entrada e Resultado lado a lado. Era a única página sem testes de interface; `UtilityPanel.test.tsx` traz 8. As amostras dos geradores de CSS foram para `styles/utility-previews.css`; a amostra "caixa" ganhou tamanho próprio (antes sombra e raio não desenhavam nada).
+- [x] 7f. Mockups de chat e post: formulário com os primitivos novos (quem enviou como alternância de duas posições). O telefone e o post imitam cada app e continuam no `app.css`. `MockupPanels.test.tsx` traz 7 testes, onde não havia nenhum.
+- [x] 7g. `app.css` de 1.412 linhas para 176: só o quadro da janela e as imitações de chat e post. A prévia de arquivo usa utilitários; o retângulo de recorte foi para `styles/crop-overlay.css`. O preflight do Tailwind entra inteiro e o `@scope` com `data-legacy` sai; `@source` por pastas. `useTheme` deixou de gravar `data-theme`.
+
+Fica para a etapa 4.8: as três formas de vários campos (calculadora, gerador com prévia, texto com opções). Até a aprovação, esses utilitários usam a página genérica da 7e.
+
+Resultado (2026-10-01): 42 testes de domínio e 392 de interface verdes; `tsc` e `vite build` verdes (o `npm run build` completo baixa binários do Windows por PowerShell e não roda num contêiner Linux). Conferido no navegador em claro e escuro, 1440×900 e 800×600, sem rolagem horizontal; recorte conferido com o host simulado. CSS de 136,9 kB para 110,1 kB.
 
 **Pronto quando**: nenhum componente usa classes antigas; `stylesheet.test.mjs` verde.
 
