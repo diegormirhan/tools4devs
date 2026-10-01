@@ -2,7 +2,24 @@
 
 All notable changes to tools4devs. Versions follow [semantic versioning](https://semver.org/).
 
-## 4.0.0 (2026-09-27)
+## Unreleased
+
+### Changed
+
+- Redesign the interface on Tailwind CSS 4 and shadcn/ui, with embedded Inter, Fraunces and JetBrains Mono, in light and dark.
+- Replace the category tabs with a sidebar tree of every tool and each of its actions. Pin the tools you use. The sidebar folds to icons in a narrow window and remembers your choice.
+- Search everything with Ctrl+K: actions first, then tools, in English or Portuguese, ignoring accents and word order.
+- Open tools as pages in the main window instead of a dialog. The sidebar and the path above the page follow the action you choose, and leaving unsaved work asks first.
+- Show every tool as a card with its group's colour, its engine and its actions. Hovering or focusing a card plays a six-second clip of the tool at work, or shows a still with reduced motion.
+- Drop or choose a file on the home page to see the tools that can open it.
+- Rebuild the queue, history, settings, install dialog, update notice, quick tools and chat and post mockups to match. A quick tool page is named after the tool and shows input and result side by side.
+- Clearing the history asks for confirmation.
+
+### Fixed
+
+- The CSS generators' box sample now has a size of its own; box shadow and border radius previews used to draw nothing.
+
+
 
 ### Changed
 

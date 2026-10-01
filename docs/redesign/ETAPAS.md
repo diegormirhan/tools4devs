@@ -21,7 +21,7 @@ Regras que valem para toda etapa:
 | 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☑ |
 | 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ☑ |
 | 7 | Primitivos restantes e limpeza do CSS | M | 4, 5 | UC-07, 08 | ☑ |
-| 8 | Testes finais, docs e entrega | M | 1–7 | todos | ☐ |
+| 8 | Testes finais, docs e entrega | M | 1–7 | todos | ◐ falta o que é local ou do Windows |
 
 ```
 0 ─► 1 ─► 2 ─► 3 ─► 4 ─┬─► 7 ─► 8
@@ -189,9 +189,12 @@ Resultado (2026-10-01): 42 testes de domínio e 392 de interface verdes; `tsc` e
 
 ## Etapa 8 · Testes finais, docs e entrega (M)
 
-- [ ] Regenerar `docs/screenshots/*` (EN e `pt/`) e comparar com `screens/png/`.
-- [ ] Revisão de acessibilidade: teclado, anel de foco, leitura da árvore, contraste ≥ 4,5:1 (`docs/brand/CONTRAST.md`).
-- [ ] Orçamento: tamanho do `dist/` e dos clipes.
-- [ ] `README.md`, `CHANGELOG.md`; ADR-0007 revisado com o que mudou na execução.
-- [ ] Checklist de `PLANO.md` §10 completo.
-- [ ] Atualizar o status no topo do `PLANO.md` e em `docs/PROGRESS.md`.
+- [x] `docs/screenshots/*` (EN e `pt/`) regenerados com `scripts/screenshots.mjs`. As capturas mostraram a busca da sidebar quebrando em duas linhas em português; corrigido.
+- [x] Acessibilidade. Contraste medido no navegador, texto a texto contra o fundo pintado, em 13 telas (início, preview, paleta, instalação, descarte, ferramenta, utilitário, música, busca por imagem, chat, Fila, Histórico, Configurações) nos dois temas: só o aviso de envio para fora ficava abaixo (4,33:1) e foi corrigido. Teclado: Tab por 7 páginas, ~75 paradas cada; as caixas de texto dos utilitários não tinham anel de foco e passaram a ter. A leitura da árvore está coberta pelos testes de `NavTree`.
+- [x] Orçamento: clipes e posters 3,76 MB (teto 4 MB); `dist/` 5,3 MB; JS 808 kB (era 604 kB antes da etapa 1), CSS 111 kB.
+- [x] `README.md` (busca, árvore, preview no hover; stack) e `CHANGELOG.md` (seção Unreleased).
+- [ ] ADR-0007 revisado com o que mudou na execução: o arquivo é local (`docs/decisions/` fica fora do git). Pontos a registrar: `sonner` saiu; preflight inteiro no lugar do escopado; `Select`, `NumberField` e `ThemeSwitch` continuaram próprios.
+- [x] Checklist de `PLANO.md` §10 marcado, com o que falta dito em cada item.
+- [x] Status no topo do `PLANO.md`. `docs/PROGRESS.md` é local e fica para atualizar fora do git.
+
+Falta, e não dá para fazer daqui: `npm run build` completo e uma operação real no `tauri:dev`, ambos no Windows; a aprovação dos mockups da etapa 4.8.

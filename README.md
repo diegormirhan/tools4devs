@@ -25,6 +25,7 @@ You don't need a browser, a package manager or PATH changes. Everything runs on 
 ## Features
 
 - **Nothing to install by hand.** Each tool is pinned to an exact URL, version and SHA-256. A download that doesn't match its digest is refused, and nothing asks for administrator rights.
+- **Find a tool in a few keys.** A sidebar tree lists every tool and each of its actions, and Ctrl+K searches all of them, accents and word order aside. Hover a card to see a short clip of what the tool does. Drop a file on the window and the tools that can open it are suggested.
 - **Tools grouped by result.** Categories are named after what you want to get (a smaller video, a merged PDF, the text from a scan), not after the project that does the work.
 - **A queue that keeps running.** Start a job, close the tool, and the job continues. Stopping a job ends its whole process tree, and the history survives a restart.
 - **Built-in quick tools.** Case changes, Base64, hashes, date math, financing and BMI calculators, colour conversion, CSS generators, CSS and HTML minifiers, QR codes and barcodes, CPF, CNPJ and test card numbers, dice and raffles. Results show up as you type.
@@ -65,7 +66,7 @@ Download the installer from the [latest release](https://github.com/diegormirhan
 ## How it works
 
 ```
-apps/desktop/src/          React 19 + TypeScript interface
+apps/desktop/src/          React 19 + TypeScript interface, Tailwind CSS 4 and shadcn/ui
 apps/desktop/src-tauri/    Rust host: adapters, component store, process supervision
 tooling/tools.json         every tool, pinned to a URL, a version and a SHA-256
 scripts/                   manifest validation, staging, release manifest

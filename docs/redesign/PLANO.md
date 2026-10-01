@@ -2,7 +2,7 @@
 
 Documento de referência para a reestruturação do app. Junto com as imagens e os vídeos desta pasta, ele descreve o que muda, por quê, como fazer em fases e como saber que ficou pronto.
 
-- Status: **planejado, nada implementado no app ainda**.
+- Status: **implementado (etapas 0 a 8)**, com duas pendências: as três formas de utilitário de vários campos aguardam aprovação dos mockups (etapa 4.8), e a operação real de ponta a ponta no `tauri:dev` não foi conferida. Detalhes em [`ETAPAS.md`](ETAPAS.md).
 - Direção visual aprovada: **B2 em azul** (base Mist do shadcn, sidebar `inset`, títulos em serifa).
 - Mockups: [`screens/png/`](screens/png/) (12 telas em claro e escuro). Clipes de hover: [`previews/out/`](previews/out/).
 - Como regenerar os mockups e os vídeos: [`README.md`](README.md).
@@ -446,15 +446,15 @@ Matriz mínima por fase: {claro, escuro} × {inglês, português}. Janela 1200×
 
 ## 10. Critérios de conclusão
 
-- [ ] Todos os UC-01 a UC-13 atendem ao aceite.
-- [ ] A árvore da sidebar mostra as 39 ferramentas e todas as sub-ferramentas; a busca as encontra.
-- [ ] Cada card tem ícone, cor de grupo e preview (clipe ou poster).
-- [ ] Nenhum modal para abrir ferramentas; a guarda de trabalho não salvo funciona ao trocar pela árvore.
-- [ ] Claro e escuro corretos; sem cores soltas fora dos tokens (exceto os mockups de chat e post).
-- [ ] Textos novos traduzidos; `translations.test.mjs` verde.
-- [ ] `npm test`, `npx tsc --noEmit` e `npm run build` verdes.
-- [ ] Tamanho do `dist/` e dos clipes dentro do orçamento (clipes ≤ 4 MB no total).
-- [ ] README, CHANGELOG, screenshots e ADR-0007 atualizados.
+- [ ] Todos os UC-01 a UC-13 atendem ao aceite. Cobertos por testes com o host simulado; falta rodar uma operação real no `tauri:dev` (UC-04) e as três formas de vários campos de UC-05 (etapa 4.8).
+- [x] A árvore da sidebar mostra as 39 ferramentas e todas as sub-ferramentas; a busca as encontra.
+- [x] Cada card tem ícone, cor de grupo e preview (clipe ou poster).
+- [x] Nenhum modal para abrir ferramentas; a guarda de trabalho não salvo funciona ao trocar pela árvore.
+- [x] Claro e escuro corretos; sem cores soltas fora dos tokens (exceto os mockups de chat e post). Contraste do texto ≥ 4,5:1 (3:1 no texto grande) medido em 13 telas nos dois temas.
+- [x] Textos novos traduzidos; `translations.test.mjs` verde.
+- [ ] `npm test`, `npx tsc --noEmit` e `npm run build` verdes. Os dois primeiros e o `vite build` estão verdes; o `npm run build` completo baixa binários do Windows por PowerShell e precisa rodar no Windows.
+- [x] Tamanho do `dist/` e dos clipes dentro do orçamento (clipes ≤ 4 MB no total): clipes e posters 3,76 MB; `dist/` 5,3 MB; JS 808 kB (246 kB gzip), CSS 111 kB.
+- [ ] README, CHANGELOG, screenshots e ADR-0007 atualizados. Os três primeiros sim; o ADR-0007 é local, fora do git.
 
 ## 11. Riscos e mitigação
 
