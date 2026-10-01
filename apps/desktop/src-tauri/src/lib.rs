@@ -4,6 +4,7 @@ mod data_migration;
 mod recognize;
 mod running;
 mod search;
+mod title_bar;
 
 use std::io::{BufRead, BufReader, Read};
 use tauri::{Emitter, Manager};
@@ -40,7 +41,8 @@ pub fn run() {
             recognize_music,
             open_link,
             reveal_path,
-            cancel_operation
+            cancel_operation,
+            title_bar::paint_title_bar
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

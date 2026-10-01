@@ -21,6 +21,7 @@ import { useInstallationState } from "./hooks/useInstallationState";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { useStoredState } from "./hooks/useStoredState";
 import { useTheme } from "./hooks/useTheme";
+import { useTitleBarColors } from "./hooks/useTitleBarColors";
 import { AppShell } from "./navigation/AppShell";
 import { NavigationProvider, useNavigation } from "./navigation/navigation";
 import { JobView } from "./views/JobView";
@@ -59,6 +60,7 @@ function Shell() {
   const installations = useInstallationState();
   const fileDrop = useFileDrop();
   const theme = useTheme();
+  useTitleBarColors(theme.resolvedTheme);
   const [concurrency, setConcurrency] = useState(() => readNumberSetting("tools4devs.concurrency", 2));
   const [conflictPolicy, setConflictPolicy] = useState(
     () => readSetting("tools4devs.conflict") || "keep-both",
