@@ -30,7 +30,7 @@ for (const id of ids) {
   }
   execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-framerate", String(FPS), "-i", join(dir, "f%04d.png"), "-vf", "scale=960:540:flags=lanczos",
     "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "36", "-row-mt", "1", "-pix_fmt", "yuv420p", "-an", join(OUT, `${id}.webm`)]);
-  execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", join(dir, "f0048.png"), "-vf", "scale=960:540", "-q:v", "3", join(OUT, `${id}.jpg`)]);
+  execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", join(dir, "f0048.png"), "-vf", "scale=640:360:flags=lanczos", "-q:v", "5", join(OUT, `${id}.jpg`)]);
   console.log(id, "ok");
   await ctx.close();
 }
