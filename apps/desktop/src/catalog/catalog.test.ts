@@ -168,6 +168,14 @@ describe("what the sidebar and the cards draw from", () => {
       expect(statSync(clip).size, `${id}: ${preview.src}`).toBeLessThan(200 * 1024);
     }
   });
+
+  it("keeps all the clips together within the installer's budget", () => {
+    const publicDirectory = path.resolve(import.meta.dirname, "../../public");
+    const total = tools
+      .flatMap((tool) => (tool.preview ? [tool.preview.src, tool.preview.poster] : []))
+      .reduce((sum, file) => sum + statSync(path.join(publicDirectory, file)).size, 0);
+    expect(total).toBeLessThan(4 * 1024 * 1024);
+  });
 });
 
 it('finds the right downloader by the name of the site', () => {

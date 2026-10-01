@@ -21,7 +21,8 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-
 </style></head><body><div id="stage"></div>
 <script>
 const ID = new URLSearchParams(location.search).get("id");
-const HUE = { ffmpeg: 255, qpdf: 285, jq: 322, qr: 215 }[ID];
+// The group hue of each tool (catalog.ts rowDefinitions).
+const HUE = { ffmpeg: 255, qpdf: 285, jq: 322, qr: 215, "yt-dlp": 165, tesseract: 285, imagemagick: 78, "text-tools": 215, "code-formatting": 215 }[ID];
 const D = 6; // seconds; every clip is a seamless 6 s loop
 const stage = document.getElementById("stage");
 stage.style.cssText = `--bg:oklch(0.27 0.09 ${HUE});--panel:oklch(0.985 0.006 ${HUE});--ink:oklch(0.26 0.06 ${HUE});--acc:oklch(0.82 0.14 ${HUE});--soft:oklch(0.4 0.1 ${HUE});--line:oklch(0.88 0.03 ${HUE})`;
@@ -38,8 +39,10 @@ function mk(html = "", cls = "abs", css = "", parent = stage) { const d = docume
 function put(el, { x = 0, y = 0, r = 0, s = 1, sx = s, sy = s, o = 1 } = {}) {
   el.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) rotate(${r}deg) scale(${sx}, ${sy})`; el.style.opacity = o;
 }
-const CAPS = { ffmpeg: ["Convert.", "Compress.", "Trim."], qpdf: ["Merge.", "Split.", "Rotate."], jq: ["Format.", "Query.", "Validate."], qr: ["Encode.", "Style.", "Save."] }[ID];
-const TAG = { ffmpeg: "FFMPEG", qpdf: "QPDF", jq: "JQ", qr: "QR CODES" }[ID];
+const CAPS = { ffmpeg: ["Convert.", "Compress.", "Trim."], qpdf: ["Merge.", "Split.", "Rotate."], jq: ["Format.", "Query.", "Validate."], qr: ["Encode.", "Style.", "Save."],
+  "yt-dlp": ["Paste.", "Download.", "Extract."], tesseract: ["Scan.", "Read.", "Search."], imagemagick: ["Convert.", "Grey.", "Inspect."],
+  "text-tools": ["Case.", "Sort.", "Count."], "code-formatting": ["Minify.", "Format.", "Indent."] }[ID];
+const TAG = { ffmpeg: "FFMPEG", qpdf: "QPDF", jq: "JQ", qr: "QR CODES", "yt-dlp": "YT-DLP", tesseract: "TESSERACT", imagemagick: "IMAGEMAGICK", "text-tools": "TEXT", "code-formatting": "CODE" }[ID];
 const SW = [2.1, 4.2]; // scene switch times (hidden behind the wipes)
 mk(TAG, "tag", "", stage);
 const capbox = mk("", "capbox", "", stage);
@@ -210,6 +213,180 @@ CLIPS.qr = () => {
     if (t >= 2.1) inp.style.opacity = t < 4.2 ? 1 : sO;
     if (t >= 4.2) inp.style.opacity = sO;
     if (t >= 5.9) grid.style.opacity = 1 - seg(t, 5.9, 6.0);
+  };
+};
+
+/* ---- batch 1 (stage 6): the most used tools after the first four ---- */
+const fileCard = (icon, name, meta, extra = "") => `<div class="card" style="width:150px;height:108px">${ic(icon, 34, "color:var(--soft)")}${extra}<b style="font-size:13px">${name}</b><small>${meta}</small></div>`;
+const audioBars = (n = 9) => Array.from({ length: n }, () => '<i style="display:block;width:5px;height:6px;border-radius:3px;background:var(--soft)"></i>').join("");
+const arrowSvg = (id) => `<svg width="80" height="20" viewBox="0 0 80 20" style="overflow:visible"><path id="${id}" d="M2 10 H72 M62 2 L74 10 L62 18" fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="120" stroke-dashoffset="120"/></svg>`;
+const codeWin = (w, h) => `<div style="width:${w}px;height:${h}px;border-radius:16px;background:oklch(0.19 0.05 ${HUE});box-shadow:0 22px 50px -14px rgb(0 0 0/.55)"><div style="display:flex;gap:6px;padding:12px 14px"><i style="width:9px;height:9px;border-radius:50%;background:oklch(0.5 0.1 25)"></i><i style="width:9px;height:9px;border-radius:50%;background:oklch(0.7 0.12 90)"></i><i style="width:9px;height:9px;border-radius:50%;background:oklch(0.65 0.13 150)"></i></div></div>`;
+const photo = (w, h) => `<div style="width:${w}px;height:${h}px;border-radius:10px;overflow:hidden;position:relative;background:linear-gradient(oklch(0.8 0.1 230),oklch(0.92 0.06 80))"><i style="position:absolute;right:14%;top:14%;width:18%;aspect-ratio:1;border-radius:50%;background:oklch(0.9 0.15 85)"></i><i style="position:absolute;left:-12%;bottom:-38%;width:76%;height:80%;border-radius:50%;background:oklch(0.64 0.13 150)"></i><i style="position:absolute;right:-20%;bottom:-46%;width:80%;height:84%;border-radius:50%;background:oklch(0.55 0.12 165)"></i></div>`;
+// Typing with a blinking caret, the way the other clips type.
+const typed = (text, t, a, b) => text.slice(0, Math.floor(text.length * seg(t, a, b))) + (t % 0.6 < 0.3 && t < b + 0.1 ? "▌" : "");
+
+CLIPS["yt-dlp"] = () => {
+  const field = inG(0, `<div class="card" style="width:380px;height:52px;flex-direction:row;justify-content:flex-start;padding:0 18px;gap:10px;border-radius:14px"><span style="color:var(--soft)">${ic("link", 18)}</span><span class="mono qtxt" style="font-size:14px"></span></div>`);
+  const qtxt = field.querySelector(".qtxt");
+  const meta = inG(0, `<div class="pill">1080p · 4:12</div>`);
+  const vid = inG(1, fileCard("file-video", "talk.mp4", ".MP4 · 212 MB"));
+  const pct = inG(1, `<div style="font:800 56px/1 'Inter Variable';letter-spacing:-.04em">0%</div>`);
+  const track = inG(1, `<div class="track" style="width:240px;height:10px"><div class="fill" style="width:0%"></div></div>`);
+  const fill = track.querySelector(".fill");
+  const done = inG(1, `<div class="pill" style="display:flex;gap:6px;align-items:center">${ic("check", 16)} saved</div>`);
+  const A = inG(2, fileCard("file-video", "talk.mp4", ".MP4 · 212 MB"));
+  const arrow = inG(2, arrowSvg("yt-ar"));
+  const B = inG(2, `<div class="card" style="width:150px;height:108px"><div class="bars" style="display:flex;gap:4px;align-items:center;height:38px">${audioBars()}</div><b style="font-size:13px">talk.m4a</b><small>.M4A · 6 MB</small></div>`);
+  const barEls = [...B.querySelectorAll(".bars i")];
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    qtxt.textContent = typed("youtube.com/watch?v=4f2x", s, 0.2, 1.0);
+    const k0 = E.out(seg(s, 0, 0.4));
+    put(field, { y: -34, sx: lerp(0.92, 1, k0), sy: lerp(0.92, 1, k0), o: seg(s, 0, 0.2) * (1 - xo) });
+    put(meta, { y: 34, s: E.back(seg(s, 1.15, 1.5)), o: seg(s, 1.15, 1.3) * (1 - xo) });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95), k = E.inout(seg(u, 0.4, 1.4));
+    put(vid, { x: -150, y: -20, s: lerp(0.8, 1, E.back(seg(u, 0, 0.45))), o: seg(u, 0, 0.15) * (1 - xo2) });
+    pct.firstChild.textContent = Math.round(k * 100) + "%";
+    put(pct, { x: 90, y: -44, o: seg(u, 0.1, 0.3) * (1 - xo2) });
+    fill.style.width = k * 100 + "%";
+    put(track, { x: 90, y: 6, o: seg(u, 0.1, 0.3) * (1 - xo2) });
+    put(done, { x: 90, y: 50, s: E.back(seg(u, 1.45, 1.75)), o: seg(u, 1.45, 1.6) * (1 - xo2) });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    put(A, { x: lerp(-270, -96, E.back(seg(w, 0.05, 0.6))), y: -20, r: lerp(-8, 0, E.out(seg(w, 0.05, 0.6))), o: seg(w, 0.02, 0.2) * sO });
+    document.getElementById("yt-ar").style.strokeDashoffset = 120 * (1 - E.out(seg(w, 0.65, 1.0)));
+    put(arrow, { y: -20, o: sO });
+    put(B, { x: lerp(270, 96, E.back(seg(w, 0.85, 1.4))), y: -20, r: lerp(8, 0, E.out(seg(w, 0.85, 1.4))), o: seg(w, 0.83, 1.0) * sO });
+    barEls.forEach((b, i) => (b.style.height = 6 + 32 * Math.abs(Math.sin(w * 7 + i * 0.85)) * seg(w, 1.0, 1.3) + "px"));
+  };
+};
+
+CLIPS.tesseract = () => {
+  const widths = [88, 70, 92, 54, 80, 66, 90];
+  const sheet = (n) => `<div class="card" style="width:150px;height:190px;align-items:stretch;justify-content:flex-start;padding:22px 16px;gap:11px;border-radius:12px">${widths.slice(0, n).map((w) => `<i class="ln" style="display:block;height:6px;border-radius:3px;background:var(--line);width:${w}%"></i>`).join("")}</div>`;
+  const page0 = inG(0, sheet(7));
+  const lines0 = [...page0.querySelectorAll(".ln")];
+  const scan = inG(0, `<div style="width:186px;height:3px;border-radius:2px;background:var(--acc);box-shadow:0 0 18px 4px oklch(0.82 0.14 ${HUE}/.55)"></div>`);
+  const page1 = inG(1, sheet(7));
+  const text = ["Invoice 2026-114", "Total due 1,280.00", "Pay by 15 October"];
+  const out = text.map(() => inG(1, `<div class="mono" style="font-size:17px;white-space:nowrap;color:#fff;width:250px"></div>`));
+  const page2 = inG(2, sheet(7));
+  const lines2 = [...page2.querySelectorAll(".ln")];
+  const find = inG(2, `<div class="card" style="width:210px;height:44px;flex-direction:row;justify-content:flex-start;padding:0 14px;gap:10px;border-radius:12px"><span style="color:var(--soft)">${ic("search", 18)}</span><span class="mono qtxt" style="font-size:14px"></span></div>`);
+  const ftxt = find.querySelector(".qtxt");
+  const hit = inG(2, `<div style="width:132px;height:14px;border-radius:4px;background:oklch(0.82 0.14 ${HUE}/.45)"></div>`);
+  const found = inG(2, `<div class="pill">1 match</div>`);
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    put(page0, { s: lerp(0.9, 1, E.out(seg(s, 0, 0.4))), o: seg(s, 0, 0.2) * (1 - xo) });
+    const y = lerp(-95, 95, E.inout(seg(s, 0.35, 1.55)));
+    put(scan, { y, o: seg(s, 0.3, 0.4) * (1 - seg(s, 1.55, 1.7)) * (1 - xo) });
+    lines0.forEach((l, i) => (l.style.background = y > -70 + i * 17 ? "var(--acc)" : "var(--line)"));
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95);
+    put(page1, { x: -170, s: 0.8, o: seg(u, 0, 0.15) * (1 - xo2) });
+    out.forEach((el, i) => {
+      el.firstChild.textContent = typed(text[i], u, 0.2 + i * 0.45, 0.6 + i * 0.45);
+      put(el, { x: 70, y: -34 + i * 34, o: seg(u, 0.15 + i * 0.45, 0.25 + i * 0.45) * (1 - xo2) });
+    });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    put(page2, { x: -60, y: 0, o: seg(w, 0, 0.15) * sO });
+    lines2.forEach((l) => (l.style.background = "var(--line)"));
+    ftxt.textContent = typed("total", w, 0.25, 0.75);
+    put(find, { x: 140, y: -40, s: E.back(seg(w, 0.05, 0.4)), o: seg(w, 0.05, 0.2) * sO });
+    // "total" is the second line of the sheet.
+    put(hit, { x: -60, y: -53, o: seg(w, 0.85, 1.0) * sO, sx: E.out(seg(w, 0.85, 1.1)) });
+    put(found, { x: 140, y: 20, s: E.back(seg(w, 1.05, 1.4)), o: seg(w, 1.05, 1.2) * sO });
+  };
+};
+
+CLIPS.imagemagick = () => {
+  const card = (name, meta) => `<div class="card" style="width:160px;height:150px;padding:10px">${photo(140, 92)}<b style="font-size:13px">${name}</b><small>${meta}</small></div>`;
+  const A = inG(0, card("trip.heic", ".HEIC · 3.1 MB"));
+  const arrow = inG(0, arrowSvg("im-ar"));
+  const B = inG(0, card("trip.png", ".PNG · 7.4 MB"));
+  const colour = inG(1, `<div style="border-radius:14px;overflow:hidden;box-shadow:0 22px 50px -14px rgb(0 0 0/.55)">${photo(300, 190)}</div>`);
+  const grey = inG(1, `<div style="width:300px;height:190px;border-radius:14px;overflow:hidden"><div class="gw" style="width:0;height:190px;overflow:hidden;filter:grayscale(1)">${photo(300, 190)}</div></div>`);
+  const gw = grey.querySelector(".gw");
+  const edge = inG(1, `<div style="width:3px;height:206px;border-radius:2px;background:var(--acc)"></div>`);
+  const small = inG(2, `<div style="border-radius:12px;overflow:hidden;box-shadow:0 22px 50px -14px rgb(0 0 0/.55)">${photo(190, 130)}</div>`);
+  const facts = [["Format", "PNG"], ["Size", "4032 × 3024"], ["Colour", "sRGB"], ["Depth", "8-bit RGBA"]];
+  const rows = facts.map(([k, v]) => inG(2, `<div style="width:220px;display:flex;justify-content:space-between;font-size:15px"><span style="opacity:.65">${k}</span><b class="mono" style="font-weight:500">${v}</b></div>`));
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    put(A, { x: lerp(-270, -110, E.back(seg(s, 0.15, 0.75))) - xo * 260, y: -16, r: lerp(-8, 0, E.out(seg(s, 0.15, 0.75))), o: seg(s, 0.12, 0.3) * (1 - xo) });
+    document.getElementById("im-ar").style.strokeDashoffset = 120 * (1 - E.out(seg(s, 0.8, 1.15)));
+    put(arrow, { y: -16, o: 1 - xo });
+    put(B, { x: lerp(270, 110, E.back(seg(s, 1.0, 1.6))) + xo * 260, y: -16, r: lerp(8, 0, E.out(seg(s, 1.0, 1.6))), o: seg(s, 0.98, 1.15) * (1 - xo) });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95), k = E.inout(seg(u, 0.4, 1.4));
+    put(colour, { y: -20, s: lerp(0.9, 1, E.out(seg(u, 0, 0.4))), o: seg(u, 0, 0.15) * (1 - xo2) });
+    gw.style.width = 300 * k + "px";
+    put(grey, { y: -20, o: (1 - xo2) * seg(u, 0, 0.15) });
+    put(edge, { x: -150 + 300 * k, y: -20, o: seg(u, 0.35, 0.45) * (1 - seg(u, 1.4, 1.55)) * (1 - xo2) });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    put(small, { x: -120, y: -20, s: lerp(0.85, 1, E.out(seg(w, 0, 0.4))), o: seg(w, 0, 0.15) * sO });
+    rows.forEach((r, i) => put(r, { x: lerp(140, 120, E.out(seg(w, 0.4 + i * 0.18, 0.7 + i * 0.18))), y: -62 + i * 30, o: seg(w, 0.4 + i * 0.18, 0.55 + i * 0.18) * sO }));
+  };
+};
+
+CLIPS["text-tools"] = () => {
+  const box = inG(0, `<div class="card" style="width:420px;height:84px;border-radius:14px"><span class="tt" style="font:600 28px 'Inter Variable';letter-spacing:-.01em"></span></div>`);
+  const tt = box.querySelector(".tt");
+  const words = ["the", "quick", "brown", "fox"];
+  const fruit = ["pear", "apple", "fig", "banana", "cherry"];
+  const sorted = [...fruit].sort();
+  const list = inG(1, `<div class="card" style="width:220px;height:216px;border-radius:14px"></div>`);
+  const items = fruit.map((f) => inG(1, `<div style="width:180px;height:30px;border-radius:8px;background:var(--line);color:var(--ink);display:flex;align-items:center;padding:0 12px;font:600 15px 'Inter Variable'">${f}</div>`));
+  const doc = inG(2, `<div class="card" style="width:170px;height:190px;align-items:stretch;justify-content:flex-start;padding:22px 16px;gap:11px;border-radius:12px">${[88, 70, 92, 54, 80, 66, 90].map((w) => `<i style="display:block;height:6px;border-radius:3px;background:var(--line);width:${w}%"></i>`).join("")}</div>`);
+  const counts = [["words", 128], ["lines", 9], ["characters", 742]];
+  const rows = counts.map(([k]) => inG(2, `<div style="width:230px;display:flex;justify-content:space-between;align-items:baseline"><span style="opacity:.65;font-size:15px">${k}</span><b class="n" style="font:800 30px 'Inter Variable';letter-spacing:-.02em">0</b></div>`));
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    const capped = Math.floor(words.length * seg(s, 0.6, 1.3) + 0.0001);
+    tt.textContent = words.map((w, i) => (i < capped ? w[0].toUpperCase() + w.slice(1) : w)).join(" ");
+    put(box, { y: -24, s: lerp(0.9, 1, E.out(seg(s, 0, 0.4))), o: seg(s, 0, 0.2) * (1 - xo) });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95), k = E.inout(seg(u, 0.5, 1.3));
+    put(list, { y: -20, o: seg(u, 0, 0.15) * (1 - xo2) });
+    items.forEach((el, i) => put(el, { y: -20 - 76 + 38 * lerp(i, sorted.indexOf(fruit[i]), k), o: seg(u, 0.05, 0.2) * (1 - xo2) }));
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    put(doc, { x: -130, y: -20, o: seg(w, 0, 0.15) * sO });
+    rows.forEach((r, i) => {
+      r.querySelector(".n").textContent = Math.round(counts[i][1] * E.out(seg(w, 0.3 + i * 0.15, 1.2 + i * 0.15)));
+      put(r, { x: 110, y: -60 + i * 44, o: seg(w, 0.2 + i * 0.15, 0.35 + i * 0.15) * sO });
+    });
+  };
+};
+
+CLIPS["code-formatting"] = () => {
+  const P = (s) => `<span style="opacity:.55">${s}</span>`, S = (s) => `<span style="color:oklch(0.8 0.12 ${HUE})">${s}</span>`, V = (s) => `<span style="color:oklch(0.82 0.13 60)">${s}</span>`;
+  const css = [[0, S(".card") + P(" {")], [1, "padding" + P(": ") + V("16px") + P(";")], [1, "border-radius" + P(": ") + V("12px") + P(";")], [1, "color" + P(": ") + V("#0b1220") + P(";")], [0, P("}")]];
+  const line = (ind, h, i) => `<div class="mono" style="font-size:14px;white-space:nowrap;color:#fff;display:flex;width:440px"><span style="width:26px;opacity:.3">${i + 1}</span><span class="pad" style="padding-left:${ind * 16}px">${h}</span></div>`;
+  const win0 = inG(0, codeWin(500, 210));
+  const L0 = css.map(([ind, h], i) => inG(0, line(ind, h, i)));
+  const mini = inG(0, `<div class="mono" style="font-size:14px;white-space:nowrap;color:#fff;width:480px;overflow:hidden;padding-left:26px">${S(".card")}${P("{")}padding${P(":")}${V("16px")}${P(";")}border-radius${P(":")}${V("12px")}${P(";")}color${P(":")}${V("#0b1220")}${P("}")}</div>`);
+  const saved = inG(0, `<div class="pill">−38%</div>`);
+  const html = [[0, S("&lt;ul&gt;")], [1, S("&lt;li&gt;") + "Docs" + S("&lt;/li&gt;")], [1, S("&lt;li&gt;") + "Blog" + S("&lt;/li&gt;")], [0, S("&lt;/ul&gt;")]];
+  const win1 = inG(1, codeWin(500, 210));
+  const one = inG(1, `<div class="mono" style="font-size:14px;white-space:nowrap;color:#fff;width:440px;padding-left:26px">${html.map(([, h]) => h).join("")}</div>`);
+  const L1 = html.map(([ind, h], i) => inG(1, line(ind, h, i)));
+  const win2 = inG(2, codeWin(500, 210));
+  const L2 = html.map(([ind, h], i) => inG(2, line(ind, h, i)));
+  const pads = L2.map((el) => el.querySelector(".pad"));
+  const indent = inG(2, `<div class="pill">2 → 4 spaces</div>`);
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0), squeeze = E.inout(seg(s, 0.7, 1.15));
+    put(win0, { y: -20, sx: lerp(0.94, 1, E.out(seg(s, 0, 0.4))), o: seg(s, 0, 0.2) * (1 - xo) });
+    L0.forEach((el, i) => put(el, { x: -10, y: lerp(-62 + i * 22, -62, squeeze), o: seg(s, 0.05, 0.2) * (1 - squeeze) * (1 - xo) }));
+    mini.firstChild.style.width = 480 * E.lin(seg(s, 0.95, 1.4)) + "px";
+    put(mini, { x: 0, y: -62, o: seg(s, 0.95, 1.05) * (1 - xo) });
+    put(saved, { x: 170, y: 50, s: E.back(seg(s, 1.4, 1.7)), o: seg(s, 1.4, 1.55) * (1 - xo) });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95);
+    put(win1, { y: -20, o: seg(u, 0, 0.15) * (1 - xo2) });
+    put(one, { x: -10, y: -62, o: seg(u, 0.05, 0.2) * (1 - seg(u, 0.45, 0.6)) * (1 - xo2) });
+    L1.forEach((el, i) => put(el, { x: -10, y: lerp(-62, -62 + i * 24, E.out(seg(u, 0.6 + i * 0.08, 1.05 + i * 0.08))), o: seg(u, 0.6 + i * 0.08, 0.75 + i * 0.08) * (1 - xo2) }));
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85), wide = E.inout(seg(w, 0.5, 1.0));
+    put(win2, { y: -20, o: seg(w, 0, 0.15) * sO });
+    L2.forEach((el, i) => put(el, { x: -10, y: -62 + i * 24, o: seg(w, 0.05, 0.2) * sO }));
+    pads.forEach((p, i) => (p.style.paddingLeft = html[i][0] * lerp(16, 32, wide) + "px"));
+    put(indent, { x: 160, y: 56, s: E.back(seg(w, 1.0, 1.35)), o: seg(w, 1.0, 1.15) * sO });
   };
 };
 

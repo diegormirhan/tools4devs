@@ -153,6 +153,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "text-tools",
     icon: Type,
+    preview: { src: "/previews/text-tools.webm", poster: "/previews/text-tools.jpg" },
     title: "Work on text",
     description: "Case, order, duplicates, replacements and counts — as you type.",
     keywords: [
@@ -1315,6 +1316,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "code-formatting",
     icon: Code,
+    preview: { src: "/previews/code-formatting.webm", poster: "/previews/code-formatting.jpg" },
     title: "Minify and format",
     description: "CSS and HTML, compacted for shipping or spread out to read.",
     keywords: [

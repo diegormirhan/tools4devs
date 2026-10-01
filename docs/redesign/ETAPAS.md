@@ -19,7 +19,7 @@ Regras que valem para toda etapa:
 | 3 | Shell, sidebar em árvore e Ctrl+K | G | 2 | UC-01, 03, 10, 11 | ☑ |
 | 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ◐ falta o layout dos utilitários (aguarda aprovação) |
 | 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☑ |
-| 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ☐ |
+| 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ◐ 9 de 39 |
 | 7 | Primitivos restantes e limpeza do CSS | M | 4, 5 | UC-07, 08 | ☐ |
 | 8 | Testes finais, docs e entrega | M | 1–7 | todos | ☐ |
 
@@ -157,11 +157,11 @@ Resultado (2026-10-01): 46 testes de domínio e 372 de interface verdes; `tsc` e
 
 Detalhes: §8 Fase 6. Motor em `previews/clip.html`.
 
-- [ ] `scripts/previews.mjs`: renderiza e codifica (6 s, 30 fps, 960×540, VP9 `-crf 36`, poster do quadro de 1,6 s).
-- [ ] Teste: cada `preview.src` existe e pesa < 200 KB; total ≤ 4 MB.
+- [x] ~~`scripts/previews.mjs`~~: o `previews/render.mjs` já renderiza e codifica (6 s, 30 fps, 960×540, VP9 `-crf 36`, poster do quadro de 1,6 s). Ganhou `OUT` (aponte para `apps/desktop/public/previews`) e passou a abrir o `clip.html` por `pathToFileURL`, o que faz funcionar no Windows. Usado com o Chrome local (`CHROMIUM`), o `ffmpeg` do WinGet (`FFMPEG`) e `playwright-core` instalado com `--no-save`.
+- [x] Teste: cada `preview.src` existe e pesa < 200 KB (etapa 2); clipes e posters somam < 4 MB (`catalog.test.ts`).
 - [x] Copiar os 4 prontos (`ffmpeg`, `qpdf`, `jq`, `qr` → `qr-barcode`) para `apps/desktop/public/previews/` (feito na etapa 2).
-- [ ] Lote 1 (mais usados): yt-dlp, Tesseract, ImageMagick, utilitários de texto e de código.
-- [ ] Lote 2: o restante até 39.
+- [x] Lote 1 (2026-10-01): yt-dlp (Paste · Download · Extract), Tesseract (Scan · Read · Search), ImageMagick (Convert · Grey · Inspect), Work on text (Case · Sort · Count), Minify and format (Minify · Format · Indent). 61 a 96 KB cada; 9 ferramentas com clipe somam 1,2 MB. Conferidos em folhas de quadros antes de entrar.
+- [ ] Lote 2: as 30 ferramentas restantes (hoje mostram o ícone e a lista de ações no hover).
 
 **Pronto quando**: cada card tem clipe ou poster; nenhum clipe passa de 200 KB; loop sem salto.
 

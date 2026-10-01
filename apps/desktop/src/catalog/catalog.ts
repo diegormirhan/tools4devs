@@ -220,6 +220,7 @@ const presentationById: Record<string, ToolPresentation> = {
   imagemagick: {
     id: "imagemagick",
     icon: WandSparkles,
+    preview: { src: "/previews/imagemagick.webm", poster: "/previews/imagemagick.jpg" },
     title: "Image formats",
     description: "Convert between formats the other tools do not reach, and inspect the details.",
     category: "images",
@@ -265,6 +266,7 @@ const presentationById: Record<string, ToolPresentation> = {
   "yt-dlp": {
     id: "yt-dlp",
     icon: Download,
+    preview: { src: "/previews/yt-dlp.webm", poster: "/previews/yt-dlp.jpg" },
     title: "Download media",
     description: "Save video or audio from a supported URL.",
     category: "downloads",
@@ -512,6 +514,7 @@ const presentationById: Record<string, ToolPresentation> = {
   tesseract: {
     id: "tesseract",
     icon: ScanText,
+    preview: { src: "/previews/tesseract.webm", poster: "/previews/tesseract.jpg" },
     title: "Read text from images",
     description: "Pull the words out of a scan or a photograph.",
     category: "documents",
