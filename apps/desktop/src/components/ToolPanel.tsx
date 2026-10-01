@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertTriangle, Check, CircleSlash, FilePlus2, FolderOpen, Play } from "lucide-react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import type { CatalogTool } from "../catalog/catalog";
@@ -8,9 +8,9 @@ import { FilePreview, previewKind } from "./FilePreview";
 import { defaultCrop, type CropRect } from "./CropOverlay";
 import { Select } from "./Select";
 import { NumberField } from "./NumberField";
+import { ToolPage } from "./ToolPage";
 import { acceptsFile, operationFormats } from "../catalog/formats";
 import { useT, type Translate } from "../i18n/language";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -58,7 +58,6 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [formError, setFormError] = useState("");
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
-  const pageRef = useRef<HTMLElement>(null);
 
   const selectedOperation = tool.operations.find((operation) => operation.id === selectedOperationId);
   /**
@@ -157,9 +156,6 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
   const resultMessage = formError || (currentJob && currentJob.status !== "running" ? jobResultText(currentJob) : "");
   const resultIsError = Boolean(formError) || currentJob?.status === "failed";
 
-  // Arriving from the keyboard lands on the page, not back at the top of the sidebar.
-  useEffect(() => pageRef.current?.focus({ preventScroll: true }), []);
-
   // The files stay; the options and the destination belong to the operation that is left.
   function showOperation(id: string) {
     setSelectedOperationId(id);
@@ -186,25 +182,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
   }, [droppedPaths, tool.id]);
 
   return (
-    <section
-      ref={pageRef}
-      tabIndex={-1}
-      data-slot="page"
-      className="grid gap-6 px-6 pt-4 pb-16 outline-none lg:px-8"
-      aria-labelledby="tool-panel-title"
-    >
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="grid gap-1.5">
-          <h1 id="tool-panel-title" className="font-heading text-3xl font-semibold tracking-tight">
-            {t(tool.title)}
-          </h1>
-          <p className="text-muted-foreground">{t(tool.description)}</p>
-        </div>
-        <Badge variant="outline" className="font-mono uppercase">
-          {tool.integrationName}
-        </Badge>
-      </header>
-
+    <ToolPage tool={tool}>
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="grid min-w-0 gap-4">
           {previewable && (
@@ -412,7 +390,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
           )}
         </section>
       </div>
-    </section>
+    </ToolPage>
   );
 
   function FileField() {

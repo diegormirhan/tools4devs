@@ -264,7 +264,7 @@ it('draws the sound the host reports while it is still recording', async () => {
   await screen.findByRole('combobox', { name: 'Listen to' });
 
   const bars = () =>
-    Array.from(container.querySelectorAll<HTMLElement>('.meter__bar')).map(
+    Array.from(container.querySelectorAll<HTMLElement>('[data-meter-bar]')).map(
       (bar) => bar.style.getPropertyValue('--level'),
     );
 
