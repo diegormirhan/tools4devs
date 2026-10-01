@@ -116,7 +116,19 @@ describe("the hover preview", () => {
   });
 
   it("falls back to the icon and the actions for a tool with no clip", () => {
-    renderCard("ffprobe", available, { previewing: true });
+    // Every card ships a clip today; one added later may not, and must still preview.
+    const [tool, row] = find("ffprobe");
+    render(
+      <ToolCard
+        tool={{ ...tool, preview: undefined }}
+        row={row}
+        installation={available}
+        onOpen={vi.fn()}
+        onInstall={vi.fn()}
+        previewing
+        onPreviewChange={vi.fn()}
+      />,
+    );
     expect(document.querySelector("video")).toBeNull();
     expect(screen.getByText("What you can do")).toBeVisible();
   });
