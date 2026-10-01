@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="apps/desktop/src-tauri/icons/tools4devs.svg" alt="" width="96" height="96">
+<img src="apps/desktop/src-tauri/icons/128x128@2x.png" alt="" width="96" height="96">
 
 # Tools4Devs
 
