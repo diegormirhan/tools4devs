@@ -66,7 +66,7 @@ fn cli(executable: &str, args: &[&str]) -> String {
 /// sweep, the test verifies what is installed and names what it could not check.
 fn tool_available(tool_id: &str) -> bool {
     executable_name(tool_id)
-        .and_then(|name| resolve_executable(&name))
+        .and_then(|name| resolve_suite_executable(tool_id, &name))
         .is_ok()
 }
 
@@ -276,18 +276,20 @@ fn every_catalog_operation_executes_on_generated_fixtures() {
             "-t",
             "1",
             "-c:v",
-            "libx264",
+            "mpeg4",
             "-c:a",
             "aac",
             video.to_str().unwrap(),
         ],
     );
-    for (operation, extension) in [
-        ("convert", "mkv"),
-        ("extract-audio", "mp3"),
-        ("compress", "mp4"),
-        ("trim", "mp4"),
-    ] {
+    let mut skipped: Vec<&str> = Vec::new();
+    let ffmpeg_operations: &[(&str, &str)] = if tool_available("ffmpeg") {
+        &[("convert", "mkv"), ("extract-audio", "mp3"), ("compress", "mp4"), ("trim", "mp4")]
+    } else {
+        skipped.push("ffmpeg");
+        &[]
+    };
+    for &(operation, extension) in ffmpeg_operations {
         let output = root.join(format!("{operation}.{extension}"));
         run(request(
             "ffmpeg",
@@ -318,7 +320,6 @@ fn every_catalog_operation_executes_on_generated_fixtures() {
             assert!(serde_json::from_str::<serde_json::Value>(&result.stdout).is_ok());
         }
     }
-    let mut skipped: Vec<&str> = Vec::new();
 
     if tool_available("exiftool") {
         let photo = root.join("compress.jpg");

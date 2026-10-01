@@ -18,6 +18,7 @@ test.describe("running an operation", () => {
     await tool.getByRole("button", { name: "Run" }).click();
 
     await expect(tool.getByText("Done, and recorded in the history.")).toBeVisible();
+    await expect(tool.getByRole("button", { name: "Run" })).toBeEnabled();
     const [call] = await hostCalls(page, "execute_operation");
     expect(call?.args).toMatchObject({
       request: { toolId: "qpdf", operationId: "rotate", inputPaths: ["C:/docs/contract.pdf"] },

@@ -1,6 +1,7 @@
 mod audio;
 mod components;
 mod data_migration;
+mod ffmpeg_build;
 mod recognize;
 mod running;
 mod search;
@@ -473,7 +474,7 @@ fn detect_available_tools() -> Vec<String> {
             return true;
         }
         executable_name(tool_id)
-            .and_then(|name| resolve_executable(&name))
+            .and_then(|name| resolve_suite_executable(tool_id, &name))
             .is_ok()
     })
     .map(str::to_string)
@@ -1003,6 +1004,16 @@ fn resolve_suite_executable(tool_id: &str, executable: &str) -> Result<std::path
         if candidate.is_file() {
             return Ok(candidate);
         }
+    }
+    if tool_id == "ffmpeg" {
+        let found = resolve_executable(executable)?;
+        if !ffmpeg_build::can_run_the_app_operations(&found) {
+            return Err(format!(
+                "The FFmpeg at {} lacks encoders tools4devs uses. Install FFmpeg from the app.",
+                found.display()
+            ));
+        }
+        return Ok(found);
     }
     if tool_id != "poppler" {
         return resolve_executable(executable);
