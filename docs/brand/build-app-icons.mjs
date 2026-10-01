@@ -61,7 +61,9 @@ writeFileSync(at(`${icons}tools4devs.svg`), relief);
 for (const [file, size] of [["32x32.png", 32], ["64x64.png", 64], ["128x128.png", 128], ["128x128@2x.png", 256], ["icon.png", 512]]) {
   writeFileSync(at(icons + file), await png(forSize(size), size));
 }
-writeFileSync(at(`${icons}icon.ico`), ico(await sized([16, 20, 24, 32, 40, 48, 64, 96, 128, 256])));
+// Tauri makes the first entry the window's own icon, the one the taskbar shows; 32 px is
+// that icon's size at 100%, so it goes first, or Windows enlarges a 16 px one into a blur.
+writeFileSync(at(`${icons}icon.ico`), ico(await sized([32, 16, 20, 24, 40, 48, 64, 96, 128, 256])));
 writeFileSync(at(`${brand}favicon.svg`), flat);
 writeFileSync(at(`${brand}tools4devs-mark.svg`), flat);
 writeFileSync(at(`${brand}favicon-32.png`), await png(flat, 32));

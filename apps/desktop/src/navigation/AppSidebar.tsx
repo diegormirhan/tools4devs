@@ -55,8 +55,15 @@ export function AppSidebar({
         {/* Collapsed, the mark loses its wordmark and sits right on the search icon without this. */}
         <SidebarMenu className="group-data-[collapsible=icon]:gap-3">
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" onClick={() => go({ view: "catalog" })} tooltip={t("Tools")}>
-              <img src="/brand/tools4devs-mark.svg" alt="" width="32" height="32" className="size-8 rounded-lg" />
+            <SidebarMenuButton size="lg" className="h-14" onClick={() => go({ view: "catalog" })} tooltip={t("Tools")}>
+              {/* As tall as the two lines beside it; the rail's 32 px when the sidebar is folded. */}
+              <img
+                src="/brand/tools4devs-mark.svg"
+                alt=""
+                width="40"
+                height="40"
+                className="size-10 group-data-[collapsible=icon]:size-8"
+              />
               <span className="grid leading-tight">
                 <img src={wordmarkSrc} alt="Tools4Devs" width="96" height="22" className="h-[22px] w-auto" />
                 <small className="text-xs text-sidebar-foreground/70">{t("Local tools")}</small>
