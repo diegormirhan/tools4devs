@@ -2,44 +2,35 @@
 
 All notable changes to tools4devs. Versions follow [semantic versioning](https://semver.org/).
 
-## Unreleased
+## 5.0.0 (2026-10-01)
 
-### Changed
+A new interface. Every tool is one click or one search away, opens as a page instead of a dialog, and shows what it does before you open it.
 
-- Redesign the interface on Tailwind CSS 4 and shadcn/ui, with embedded Inter and JetBrains Mono, in light and dark.
-- Replace the category tabs with a sidebar tree of every tool and each of its actions. Pin the tools you use. The sidebar folds to icons in a narrow window and remembers your choice.
+### Added
+
+- A sidebar tree of every tool and each of its actions, one group open at a time. Pin the tools you use.
 - Search everything with Ctrl+K: actions first, then tools, in English or Portuguese, ignoring accents and word order.
-- Open tools as pages in the main window instead of a dialog. The sidebar and the path above the page follow the action you choose, and leaving unsaved work asks first.
-- Show every tool as a card with its group's colour, its engine and its actions. Hovering or focusing a card plays a six-second clip of the tool at work, or shows a still with reduced motion.
+- A six-second clip of each tool at work when you hover or focus its card, or a still with reduced motion.
 - Drop or choose a file on the home page to see the tools that can open it.
-- Rebuild the queue, history, settings, install dialog, update notice, quick tools and chat and post mockups to match. A quick tool page is named after the tool and shows input and result side by side.
-- Clearing the history asks for confirmation.
-- Replace the app icon with the D4 mark: in relief from 48 px up, flat up to 32 px, where the relief would blur. The .ico carries both, so Windows picks the right one for each place.
-- Write the name as Tools4Devs wherever it is shown: window title, logo, About page and messages. The executable, installer keys, saved settings and update channel keep the lowercase identifier, so installed copies keep updating.
-- Drop the Windows title bar: minimise, maximise and close sit in the page header, drawn with the system's own icons. The header moves the window, a double click maximises it, and a pause over maximise opens the Windows 11 snap layouts.
-- Add a Back button (Alt+Left) and make the path above each page clickable, starting from Home.
-- Add an About page, from Settings, listing every bundled or downloadable tool with its version, licence, hash and project.
-- Open and close the sidebar smoothly; labels fade instead of shrinking. Groups and tools in the tree slide open and shut.
-
-### Fixed
-
-- The CSS generators' box sample now has a size of its own; box shadow and border radius previews used to draw nothing.
-- An FFmpeg found on PATH without the encoders the app uses (Gyan's build has libx264, not libopenh264) counts as missing, so the app offers its own instead of failing to convert or compress video.
-- Buttons and the sidebar tree show the hand cursor again, tool names in the tree no longer run under the pin star, and the settings drop-downs open below their field instead of over it.
-
-
+- A Back button (Alt+Left), and a clickable path above each page, starting from Home.
+- An About page, from Settings, listing every bundled or downloadable tool with its version, licence, hash and project.
+- Calculators and CSS generators get their own layouts: your numbers beside the answer, or options beside a live preview and the CSS to copy.
 
 ### Changed
 
-- Use tools4devs for the Windows application identity, publisher, installer registry keys, installation directory, component store and saved preference keys.
-- Migrate existing profiles, settings, history and downloaded tools automatically. Keep the previous profile as a recovery copy and preserve downloaded components in the new tools4devs directory; never overwrite an existing tools4devs profile. The previous component directory may be removed with the old installation.
-- Retarget existing shortcuts to the new installation and remove the previous app registration after the replacement installer has completed.
-- Keep the legacy update channel pinned to the signed 3.4.0 bridge. The tools4devs channel advertises 4.0.0 and future releases.
+- The interface is rebuilt on Tailwind CSS 4 and shadcn/ui, with embedded Inter and JetBrains Mono, in light and dark.
+- Tools open as pages in the main window instead of a dialog. Leaving unsaved work asks first.
+- The window has no title bar: minimise, maximise and close sit in the page header, drawn with the system's own icons. The header moves the window, a double click maximises it, and a pause over maximise opens the Windows 11 snap layouts.
+- A new icon, the D4 mark: in relief from 48 px up, flat at the sizes where relief would blur.
+- The name is written Tools4Devs wherever it is shown. The executable, installer keys, saved settings and update channel keep the lowercase identifier, so installed copies keep updating.
+- The queue, history, settings, install dialog, update notice and mockups are rebuilt to match. Clearing the history asks for confirmation.
+- Secondary text reaches 7:1 contrast in both themes; scrollbars are thin and follow the theme.
 
 ### Fixed
 
-- Stop migration before opening the new profile if data cannot be copied safely. Existing data remains intact, and migration can be retried.
-- Preserve the original updater signing key and MSI upgrade family across the identity change.
+- An FFmpeg found on PATH without the encoders the app uses (Gyan's build has libx264, not libopenh264) counts as missing, so the app offers its own instead of failing to convert or compress video.
+- The CSS generators' box sample has a size of its own; box shadow and border radius previews used to draw nothing.
+- Clicking a card quickly could be lost when its preview opened between press and release.
 
 ## 3.4.0 (2026-09-27)
 

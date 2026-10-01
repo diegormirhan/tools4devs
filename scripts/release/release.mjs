@@ -127,7 +127,7 @@ run(`node scripts/release/build-update-manifest.mjs "${out}"`);
 
 writeFileSync(
   path.join(out, "RELEASE-NOTES.md"),
-  `# tools4devs ${version}
+  `# Tools4Devs ${version}
 
 ${notes}
 
