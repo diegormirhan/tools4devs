@@ -95,7 +95,7 @@ export function NavTree({ rows, openGroupId, onOpenGroupChange, pinnedIds, onTog
               >
                 <Icon className="text-group-icon" style={{ "--hue": row.hue } as React.CSSProperties} />
                 <span className="truncate">{t(row.title)}</span>
-                <span className="ml-auto text-xs text-sidebar-foreground/60 tabular-nums">{row.tools.length}</span>
+                <span className="ml-auto text-xs text-sidebar-foreground/70 tabular-nums">{row.tools.length}</span>
                 <ChevronRight className={cn("transition-transform", open && "rotate-90")} />
               </div>
             </SidebarMenuButton>
@@ -230,7 +230,7 @@ function ToolItem({
                   aria-level={3}
                   data-tree-parent={tool.id}
                   tabIndex={-1}
-                  className="italic text-sidebar-foreground/60"
+                  className="italic text-sidebar-foreground/70"
                   onClick={onShowAll}
                   onKeyDown={(event) => handleItemKeys(event, { activate: onShowAll })}
                 >
