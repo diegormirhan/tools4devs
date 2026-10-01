@@ -995,4 +995,6 @@ export const portuguese: Record<string, string> = {
   "Open the {name} project": "Abrir o projeto {name}",
   "The interface's own libraries and fonts, with their licence texts, are in FRONTEND-NOTICES.txt, in the tools folder beside the app.": "As bibliotecas e fontes da interface, com os textos das licenças, estão em FRONTEND-NOTICES.txt, na pasta tools ao lado do app.",
   "The tools inside, their versions and their licences.": "As ferramentas incluídas, suas versões e licenças.",
+  "Back": "Voltar",
+  "Home": "Início",
 };

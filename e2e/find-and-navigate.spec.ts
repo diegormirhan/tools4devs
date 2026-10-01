@@ -77,3 +77,40 @@ test.describe("UC-11: a small window", () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(800);
   });
 });
+
+test("the path above the page leads back up, and Back retraces the way", async ({ page }) => {
+  await page.goto("/");
+  const back = page.getByRole("button", { name: "Back" });
+  await expect(back).toBeDisabled();
+
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await search(page, "split pages");
+  const path = page.getByRole("navigation", { name: "Where you are" });
+  // The group is not a page, so the path skips it.
+  await expect(path.locator("a[href]")).toHaveText(["Home", "Organise PDFs"]);
+  await expect(path).not.toContainText("PDFs and documents");
+  await expect(path.locator('[aria-current="page"]')).toHaveText("Split pages");
+
+  await path.getByRole("link", { name: "Organise PDFs" }).click();
+  await expect(path.locator('[aria-current="page"]')).toHaveText("Organise PDFs");
+
+  await back.click();
+  await expect(path.locator('[aria-current="page"]')).toHaveText("Split pages");
+  await page.keyboard.press("Alt+ArrowLeft");
+  await expect(page.getByRole("heading", { level: 1, name: "Settings" })).toBeVisible();
+
+  await path.getByRole("link", { name: "Home" }).click();
+  await expect(page.getByRole("heading", { name: "What do you want to do?" })).toBeVisible();
+});
+
+test("Back from unsaved work asks first, like any other way out", async ({ page }) => {
+  await page.goto("/");
+  await search(page, "change case");
+  await page.getByRole("textbox", { name: "Your text" }).fill("draft");
+  await page.getByRole("button", { name: "Back" }).click();
+
+  const ask = page.getByRole("alertdialog");
+  await expect(ask).toBeVisible();
+  await ask.getByRole("button", { name: "Keep editing" }).click();
+  await expect(page.getByRole("textbox", { name: "Your text" })).toHaveValue("draft");
+});

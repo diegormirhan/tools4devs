@@ -1,11 +1,12 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
-import { PanelLeft } from "lucide-react";
+import { ArrowLeft, PanelLeft } from "lucide-react";
 import type { CatalogRow, CatalogTool } from "../catalog/catalog";
 import { useT } from "../i18n/language";
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -18,7 +19,7 @@ import { DiscardDialog } from "./DiscardDialog";
 import { useNavigation, type Location, type View } from "./navigation";
 
 const pageTitles: Record<Exclude<View, "tool">, string> = {
-  catalog: "Tools",
+  catalog: "Home",
   queue: "Queue",
   history: "History",
   settings: "Settings",
@@ -112,9 +113,20 @@ export function AppShell({
 
 function ShellHeader({ rows }: { rows: CatalogRow[] }) {
   const t = useT();
-  const { location } = useNavigation();
+  const { location, go, back, canGoBack } = useNavigation();
   const { open, toggleSidebar } = useSidebar();
   const label = t(open ? "Hide the sidebar" : "Show the sidebar");
+
+  useEffect(() => {
+    function goBack(event: KeyboardEvent) {
+      if (event.altKey && event.key === "ArrowLeft") {
+        event.preventDefault();
+        back();
+      }
+    }
+    window.addEventListener("keydown", goBack);
+    return () => window.removeEventListener("keydown", goBack);
+  }, [back]);
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 px-4">
@@ -128,14 +140,37 @@ function ShellHeader({ rows }: { rows: CatalogRow[] }) {
       >
         <PanelLeft />
       </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="size-7"
+        onClick={back}
+        disabled={!canGoBack}
+        aria-label={t("Back")}
+        title={`${t("Back")} (Alt+←)`}
+      >
+        <ArrowLeft />
+      </Button>
       <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
       <Breadcrumb aria-label={t("Where you are")}>
         <BreadcrumbList>
           {trail(location, rows).map((crumb, index, crumbs) => (
-            <Fragment key={crumb}>
+            <Fragment key={crumb.label}>
               {index > 0 && <BreadcrumbSeparator />}
               <BreadcrumbItem>
-                {index === crumbs.length - 1 ? <BreadcrumbPage>{t(crumb)}</BreadcrumbPage> : t(crumb)}
+                {index === crumbs.length - 1 ? (
+                  <BreadcrumbPage>{t(crumb.label)}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink
+                    href="#"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      go(crumb.to);
+                    }}
+                  >
+                    {t(crumb.label)}
+                  </BreadcrumbLink>
+                )}
               </BreadcrumbItem>
             </Fragment>
           ))}
@@ -145,11 +180,21 @@ function ShellHeader({ rows }: { rows: CatalogRow[] }) {
   );
 }
 
-/** Group › tool › sub-tool for a tool; the page's own name otherwise. English, translated where shown. */
-function trail(location: Location, rows: CatalogRow[]): string[] {
-  if (location.view !== "tool") return [pageTitles[location.view]];
-  const row = rows.find((candidate) => candidate.tools.some((tool) => tool.id === location.toolId));
-  const tool = row?.tools.find((candidate) => candidate.id === location.toolId);
+type Crumb = { label: string; to: Location };
+
+/**
+ * Home › tool › sub-tool, or Home › page; every step but the last leads somewhere.
+ * The group a tool sits in has no page of its own, so it is left out. English, translated where shown.
+ */
+function trail(location: Location, rows: CatalogRow[]): Crumb[] {
+  const home: Crumb = { label: pageTitles.catalog, to: { view: "catalog" } };
+  if (location.view === "catalog") return [home];
+  if (location.view !== "tool") return [home, { label: pageTitles[location.view], to: location }];
+  const tool = rows.flatMap((row) => row.tools).find((candidate) => candidate.id === location.toolId);
   const operation = tool?.operations.find((candidate) => candidate.id === location.subId);
-  return [row?.title, tool?.title, operation?.label].filter((crumb): crumb is string => Boolean(crumb));
+  return [
+    home,
+    ...(tool ? [{ label: tool.title, to: { view: "tool" as const, toolId: tool.id } }] : []),
+    ...(operation ? [{ label: operation.label, to: location }] : []),
+  ];
 }
