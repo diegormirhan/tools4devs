@@ -143,6 +143,7 @@ const presentationById: Record<string, ToolPresentation> = {
   libvips: {
     id: "libvips",
     icon: Image,
+    preview: { src: "/previews/libvips.webm", poster: "/previews/libvips.jpg" },
     title: "Adjust images",
     description: "Resize, crop, compress, convert — and enlarge with a model.",
     category: "images",
@@ -169,6 +170,7 @@ const presentationById: Record<string, ToolPresentation> = {
   "image-search": {
     id: "image-search",
     icon: Search,
+    preview: { src: "/previews/image-search.webm", poster: "/previews/image-search.jpg" },
     title: "Find where a picture came from",
     description: "Search the web by picture: the original, bigger copies, and pages using it.",
     category: "images",
@@ -237,6 +239,7 @@ const presentationById: Record<string, ToolPresentation> = {
   oxipng: {
     id: "oxipng",
     icon: Minimize2,
+    preview: { src: "/previews/oxipng.webm", poster: "/previews/oxipng.jpg" },
     title: "Optimise PNG",
     description: "Make PNGs smaller without losing a pixel.",
     category: "images",
@@ -250,6 +253,7 @@ const presentationById: Record<string, ToolPresentation> = {
   exiftool: {
     id: "exiftool",
     icon: Tag,
+    preview: { src: "/previews/exiftool.webm", poster: "/previews/exiftool.jpg" },
     title: "Metadata",
     description: "Read, strip or edit the metadata in photos, video and documents.",
     category: "files",
@@ -287,6 +291,7 @@ const presentationById: Record<string, ToolPresentation> = {
   "gallery-dl": {
     id: "gallery-dl",
     icon: Images,
+    preview: { src: "/previews/gallery-dl.webm", poster: "/previews/gallery-dl.jpg" },
     title: "Download galleries",
     description: "Save images and albums from a post, profile or gallery URL.",
     category: "downloads",
@@ -339,6 +344,7 @@ const presentationById: Record<string, ToolPresentation> = {
   songrec: {
     id: "songrec",
     icon: Music,
+    preview: { src: "/previews/songrec.webm", poster: "/previews/songrec.jpg" },
     title: "Name the music",
     description: "Identify what is playing, from the speakers or the room.",
     category: "video",
@@ -356,6 +362,7 @@ const presentationById: Record<string, ToolPresentation> = {
   mkvtoolnix: {
     id: "mkvtoolnix",
     icon: Layers,
+    preview: { src: "/previews/mkvtoolnix.webm", poster: "/previews/mkvtoolnix.jpg" },
     title: "Package Matroska",
     description: "Convert to MKV and inspect tracks without re-encoding.",
     category: "downloads",
@@ -371,6 +378,7 @@ const presentationById: Record<string, ToolPresentation> = {
   ffprobe: {
     id: "ffprobe",
     icon: ScanSearch,
+    preview: { src: "/previews/ffprobe.webm", poster: "/previews/ffprobe.jpg" },
     title: "Inspect media",
     description: "See codecs, tracks, dimensions and technical metadata.",
     category: "downloads",
