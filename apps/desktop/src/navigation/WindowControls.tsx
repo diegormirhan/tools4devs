@@ -60,7 +60,7 @@ function CaptionButton({
       tabIndex={-1}
       className={cn(
         "grid h-full w-[46px] place-items-center text-[10px] text-foreground/80 transition-colors hover:text-foreground",
-        close ? "rounded-tr-xl hover:bg-[#c42b1c] hover:text-white active:bg-[#c42b1c]/85" : "hover:bg-foreground/8 active:bg-foreground/12",
+        close ? "rounded-tr-md hover:bg-[#c42b1c] hover:text-white active:bg-[#c42b1c]/85" : "hover:bg-foreground/8 active:bg-foreground/12",
       )}
       {...props}
     >

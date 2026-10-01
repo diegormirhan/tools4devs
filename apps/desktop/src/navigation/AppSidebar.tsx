@@ -78,7 +78,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="[scrollbar-width:thin]">
+      <SidebarContent>
         {pinned.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel>{t("Pinned")}</SidebarGroupLabel>
