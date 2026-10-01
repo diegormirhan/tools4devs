@@ -1,13 +1,17 @@
 import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { Check, Copy, Download, Eraser, ExternalLink, RefreshCw, Upload } from "lucide-react";
 import type { CatalogTool } from "../catalog/catalog";
-import { utilityById, utilityGroup, type Utility } from "../utilities/registry";
+import { utilityById, utilityGroup, type Utility, type UtilityField } from "../utilities/registry";
+import type { Preview } from "../utilities/css";
 import { OutboundNotice, PageCard, ToolPage } from "./ToolPage";
 import { Select } from "./Select";
 import { NumberField } from "./NumberField";
 import { useT } from "../i18n/language";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/cn";
 
 /**
@@ -136,112 +140,215 @@ export function UtilityPanel({
     setTouched(true);
   };
 
+  // The shape of the page follows the utility, not a list of ids: a generator
+  // draws a sample, a calculator takes only numbers, everything else is text in
+  // and text out.
+  const shape: "generator" | "calculator" | "text" = utility.preview
+    ? "generator"
+    : utility.input === "none" && utility.outputKind !== "image"
+      ? "calculator"
+      : "text";
+
+  const copyButton = (text: string, className?: string, variant?: "default" | "outline") => (
+    <Button
+      size="sm"
+      variant={variant}
+      className={className}
+      disabled={!text || Boolean(failure)}
+      onClick={() => {
+        void navigator.clipboard
+          ?.writeText(text)
+          .then(() => {
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+          })
+          .catch(() => undefined);
+      }}
+    >
+      {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+      {t(copied ? "Copied" : "Copy")}
+    </Button>
+  );
+
+  const failureAlert = failure && (
+    <p className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+      {failure}
+    </p>
+  );
+
+  const fields = (columns: boolean) => (
+    <div className={cn("grid gap-5", columns && "sm:grid-cols-2")} aria-label={t("Options")}>
+      {visibleFields.map((field) => (
+        <FieldControl
+          key={field.key}
+          field={field}
+          value={values[field.key] ?? ""}
+          slider={shape === "generator"}
+          onChange={(next) => setOption(field.key, next)}
+        />
+      ))}
+    </div>
+  );
+
+  const footer = (
+    <div className="flex flex-wrap items-center gap-3">
+      <p className="text-sm text-muted-foreground" aria-live="polite">
+        {failure ? t("Nothing to copy while that is being fixed.") : t("It runs here, as you type.")}
+      </p>
+      {takesText && (
+        <Button variant="ghost" size="sm" onClick={() => setInput("")} disabled={!input}>
+          <Eraser aria-hidden="true" /> {t("Clear")}
+        </Button>
+      )}
+      {shape === "calculator" && visibleFields.length > 0 && (
+        <Button variant="ghost" size="sm" onClick={() => setOptions({})} disabled={Object.keys(options).length === 0}>
+          <Eraser aria-hidden="true" /> {t("Clear")}
+        </Button>
+      )}
+      {showRegenerate && (
+        <Button variant="outline" size="sm" onClick={() => setSeed((value) => value + 1)}>
+          <RefreshCw aria-hidden="true" /> {t(isGenerating ? "Generate" : "Regenerate")}
+        </Button>
+      )}
+    </div>
+  );
+
+  const outbound = utility.outbound && (
+    <OutboundNotice icon={<ExternalLink aria-hidden="true" />}>{t(utility.outbound)}</OutboundNotice>
+  );
+
+  if (shape === "generator" && preview) {
+    return (
+      <ToolPage tool={tool} title={t(utility.label)} description={t(utility.description)} showEngine={false}>
+        <div className="grid items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+          <PageCard title={t("Options")}>{fields(false)}</PageCard>
+
+          <div className="grid min-w-0 gap-6">
+            <PageCard>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="font-heading text-lg font-semibold">{t("Preview")}</h2>
+                {preview.kind === "box" && (
+                  <ToggleGroup
+                    type="single"
+                    variant="outline"
+                    size="sm"
+                    aria-label={t("Preview on")}
+                    value={previewSurface}
+                    onValueChange={(next) => {
+                      if (next) setPreviewSurface(next as typeof previewSurface);
+                    }}
+                  >
+                    {(
+                      [
+                        ["box", t("Box")],
+                        ["text", t("Text")],
+                        ["button", t("Button")],
+                        ["card", t("Card")],
+                      ] as const
+                    ).map(([surface, label]) => (
+                      <ToggleGroupItem key={surface} value={surface} className="px-3 text-xs">
+                        {label}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                )}
+              </div>
+              {failure ? failureAlert : <PreviewSample preview={preview} surface={previewSurface} />}
+            </PageCard>
+
+            <section
+              aria-labelledby={resultLabelId}
+              className="grid gap-4 rounded-xl border bg-card p-6 text-card-foreground shadow-xs"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <h2 id={resultLabelId} className="text-sm font-medium">{t("CSS")}</h2>
+                {copyButton(output)}
+              </div>
+              <pre className="overflow-x-auto rounded-lg border bg-muted/50 p-4 font-mono text-sm whitespace-pre-wrap break-words">
+                {output}
+              </pre>
+            </section>
+          </div>
+        </div>
+        {footer}
+      </ToolPage>
+    );
+  }
+
+  if (shape === "calculator") {
+    // The first named answer leads, as the one the person came for; the rest
+    // follow as a list. Without names, the whole result is the answer.
+    const [lead, ...rest] = facts ?? [];
+    const headlineName = lead ? t(lead[0]) : t("Result");
+    const longOutput = !lead && (output.includes("\n") || output.length > 60);
+    return (
+      <ToolPage tool={tool} title={t(utility.label)} description={t(utility.description)} showEngine={false}>
+        {outbound}
+        <div className={cn("grid items-start gap-6", visibleFields.length > 0 && "lg:grid-cols-[minmax(0,1fr)_360px]")}>
+          {visibleFields.length > 0 && (
+            <PageCard>
+              <div className="grid gap-1">
+                <h2 className="font-heading text-lg font-semibold">{t("Your numbers")}</h2>
+                <p className="text-sm text-muted-foreground">{t("Change any of them; the answer follows.")}</p>
+              </div>
+              {fields(true)}
+            </PageCard>
+          )}
+
+          <section
+            aria-labelledby={resultLabelId}
+            className={cn(
+              "grid min-w-0 gap-4 rounded-xl border bg-card p-6 text-card-foreground shadow-xs lg:sticky lg:top-4",
+              visibleFields.length === 0 && "max-w-xl",
+            )}
+          >
+            <div className="grid gap-1">
+              <h2 id={resultLabelId} className="font-heading text-lg font-semibold">{headlineName}</h2>
+              {!utility.outbound && (
+                <p className="text-sm text-muted-foreground">{t("Nothing leaves your computer.")}</p>
+              )}
+            </div>
+            {failure ? (
+              failureAlert
+            ) : (
+              <>
+                <div
+                  data-testid="headline"
+                  aria-live="polite"
+                  className={cn(
+                    "break-words",
+                    longOutput
+                      ? "max-h-80 overflow-auto rounded-lg border bg-muted/50 p-4 font-mono text-sm whitespace-pre-wrap"
+                      : "font-heading text-4xl font-semibold tracking-tight tabular-nums",
+                  )}
+                >
+                  {lead ? lead[1] : output}
+                </div>
+                {rest.length > 0 && (
+                  <dl className="grid gap-2">
+                    {rest.map(([name, value]) => (
+                      <div key={name} className="flex items-baseline justify-between gap-4 text-sm">
+                        <dt className="text-muted-foreground">{t(name)}</dt>
+                        <dd className="text-right font-medium break-all tabular-nums">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+              </>
+            )}
+            {copyButton(result, "w-full", "outline")}
+          </section>
+        </div>
+        {footer}
+      </ToolPage>
+    );
+  }
+
   return (
     <ToolPage tool={tool} title={t(utility.label)} description={t(utility.description)} showEngine={false}>
-      {utility.outbound && (
-        <OutboundNotice icon={<ExternalLink aria-hidden="true" />}>{t(utility.outbound)}</OutboundNotice>
-      )}
+      {outbound}
 
-      {visibleFields.length > 0 && (
-        <PageCard title={t("Options")}>
-          <div className="grid gap-5 sm:grid-cols-2" aria-label={t("Options")}>
-            {visibleFields.map((field) => (
-              <label key={field.key} className="grid content-start gap-2">
-                <span className="text-sm font-medium">{t(field.label)}</span>
-                {field.type === "select" ? (
-                  <Select
-                    label={t(field.label)}
-                    value={values[field.key] ?? ""}
-                    choices={(field.choices ?? []).map((choice) => ({
-                      value: choice.value,
-                      label: t(choice.label),
-                    }))}
-                    onChange={(next) => setOption(field.key, next)}
-                  />
-                ) : field.type === "color" ? (
-                  <span className="flex gap-2">
-                    <input
-                      aria-label={t(field.label)}
-                      type="color"
-                      className="h-9 w-12 shrink-0 cursor-pointer rounded-md border bg-transparent p-1 shadow-xs"
-                      value={/^#[0-9a-fA-F]{6}$/.test(values[field.key] ?? "") ? values[field.key] : "#000000"}
-                      onChange={(event) => setOption(field.key, event.target.value)}
-                    />
-                    <Input
-                      aria-label={t(field.label)}
-                      className="font-mono"
-                      value={values[field.key] ?? ""}
-                      placeholder={field.placeholder && t(field.placeholder)}
-                      onChange={(event) => setOption(field.key, event.target.value)}
-                    />
-                  </span>
-                ) : field.type === "number" ? (
-                  <NumberField
-                    label={t(field.label)}
-                    value={values[field.key] ?? ""}
-                    min={field.min}
-                    max={field.max}
-                    onChange={(next) => setOption(field.key, next)}
-                  />
-                ) : (
-                  <Input
-                    aria-label={t(field.label)}
-                    value={values[field.key] ?? ""}
-                    placeholder={field.placeholder && t(field.placeholder)}
-                    onChange={(event) => setOption(field.key, event.target.value)}
-                  />
-                )}
-                {field.hint && <small className="text-xs text-muted-foreground">{t(field.hint)}</small>}
-              </label>
-            ))}
-          </div>
-        </PageCard>
-      )}
-
-      {preview && !failure && (
-        <PageCard>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-heading text-lg font-semibold">{t("Preview")}</h2>
-            {preview.kind === "box" && (
-              <label className="flex items-center gap-2">
-                <span className="text-sm whitespace-nowrap text-muted-foreground">{t("Preview on")}</span>
-                <Select
-                  label={t("Preview on")}
-                  value={previewSurface}
-                  choices={[
-                    { value: "box", label: t("Box") },
-                    { value: "text", label: t("Text") },
-                    { value: "button", label: t("Button") },
-                    { value: "card", label: t("Card") },
-                  ]}
-                  onChange={(next) => setPreviewSurface(next as typeof previewSurface)}
-                />
-              </label>
-            )}
-          </div>
-          {/* The sample is drawn by utility-previews.css and the generator's own inline style. */}
-          <div className="flex min-h-32 items-center justify-center rounded-lg border bg-muted/50 p-6" aria-hidden="true">
-            {preview.kind !== "box" || previewSurface === "box" ? (
-              <span className={`utility-preview utility-preview--${preview.kind}`} style={preview.style as CSSProperties}>
-                {preview.label}
-              </span>
-            ) : previewSurface === "text" ? (
-              <p className="utility-preview utility-preview--surface-text" style={preview.style as CSSProperties}>
-                {t("The quick brown fox jumps over the lazy dog.")}
-              </p>
-            ) : previewSurface === "button" ? (
-              <button type="button" tabIndex={-1} className="utility-preview utility-preview--surface-button" style={preview.style as CSSProperties}>
-                {t("Sample button")}
-              </button>
-            ) : (
-              <div className="utility-preview utility-preview--surface-card" style={preview.style as CSSProperties}>
-                <strong>{t("Card title")}</strong>
-                <p>{t("Supporting text for the card.")}</p>
-              </div>
-            )}
-          </div>
-        </PageCard>
-      )}
+      {visibleFields.length > 0 && <PageCard title={t("Options")}>{fields(true)}</PageCard>}
 
       <div className={cn("grid items-stretch gap-4", takesText && "md:grid-cols-2")}>
         {takesText && (
@@ -297,29 +404,12 @@ export function UtilityPanel({
                 <Download aria-hidden="true" /> {t("Save image")}
               </Button>
             ) : (
-              <Button
-                size="sm"
-                disabled={!result || Boolean(failure)}
-                onClick={() => {
-                  void navigator.clipboard
-                    ?.writeText(result)
-                    .then(() => {
-                      setCopied(true);
-                      window.setTimeout(() => setCopied(false), 2000);
-                    })
-                    .catch(() => undefined);
-                }}
-              >
-                {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-                {t(copied ? "Copied" : "Copy")}
-              </Button>
+              copyButton(result)
             )
           }
         >
           {failure ? (
-            <p className="m-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
-              {failure}
-            </p>
+            <div className="m-4">{failureAlert}</div>
           ) : facts ? (
             <dl className="divide-y">
               {facts.map(([name, value]) => (
@@ -347,22 +437,134 @@ export function UtilityPanel({
         </IoCard>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <p className="text-sm text-muted-foreground" aria-live="polite">
-          {failure ? t("Nothing to copy while that is being fixed.") : t("It runs here, as you type.")}
-        </p>
-        {takesText && (
-          <Button variant="ghost" size="sm" onClick={() => setInput("")} disabled={!input}>
-            <Eraser aria-hidden="true" /> {t("Clear")}
-          </Button>
-        )}
-        {showRegenerate && (
-          <Button variant="outline" size="sm" onClick={() => setSeed((value) => value + 1)}>
-            <RefreshCw aria-hidden="true" /> {t(isGenerating ? "Generate" : "Regenerate")}
-          </Button>
-        )}
-      </div>
+      {footer}
     </ToolPage>
+  );
+}
+
+/** A choice that is only ever yes or no reads as a switch, not as a list of two. */
+function isYesNo(field: UtilityField): boolean {
+  const values = (field.choices ?? []).map((choice) => choice.value).sort();
+  return field.type === "select" && values.length === 2 && values[0] === "no" && values[1] === "yes";
+}
+
+/** One option, drawn by its kind: a switch, a slider, a list, a colour, a number or text. */
+function FieldControl({
+  field,
+  value,
+  slider,
+  onChange,
+}: {
+  field: UtilityField;
+  value: string;
+  /** Bounded numbers as sliders, where moving and watching is the point (the generators). */
+  slider: boolean;
+  onChange: (value: string) => void;
+}) {
+  const t = useT();
+  const label = t(field.label);
+  const hint = field.hint && <small className="text-xs text-muted-foreground">{t(field.hint)}</small>;
+
+  if (isYesNo(field)) {
+    return (
+      <div className="grid content-start gap-2">
+        <label className="flex items-center justify-between gap-3">
+          <span className="text-sm font-medium">{label}</span>
+          <Switch aria-label={label} checked={value === "yes"} onCheckedChange={(on) => onChange(on ? "yes" : "no")} />
+        </label>
+        {hint}
+      </div>
+    );
+  }
+
+  if (slider && field.type === "number" && field.min != null && field.max != null) {
+    const number = Number(value);
+    return (
+      <div className="grid content-start gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm font-medium">{label}</span>
+          <output className="font-mono text-sm text-muted-foreground tabular-nums">{value}</output>
+        </div>
+        <Slider
+          aria-label={label}
+          min={field.min}
+          max={field.max}
+          step={1}
+          value={[Number.isFinite(number) ? number : field.min]}
+          onValueChange={([next]) => onChange(String(next))}
+        />
+        {hint}
+      </div>
+    );
+  }
+
+  return (
+    <label className="grid content-start gap-2">
+      <span className="text-sm font-medium">{label}</span>
+      {field.type === "select" ? (
+        <Select
+          label={label}
+          value={value}
+          choices={(field.choices ?? []).map((choice) => ({ value: choice.value, label: t(choice.label) }))}
+          onChange={onChange}
+        />
+      ) : field.type === "color" ? (
+        <span className="flex gap-2">
+          <input
+            aria-label={label}
+            type="color"
+            className="h-9 w-12 shrink-0 cursor-pointer rounded-md border bg-transparent p-1 shadow-xs"
+            value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : "#000000"}
+            onChange={(event) => onChange(event.target.value)}
+          />
+          <Input
+            aria-label={label}
+            className="font-mono"
+            value={value}
+            placeholder={field.placeholder && t(field.placeholder)}
+            onChange={(event) => onChange(event.target.value)}
+          />
+        </span>
+      ) : field.type === "number" ? (
+        <NumberField label={label} value={value} min={field.min} max={field.max} onChange={onChange} />
+      ) : (
+        <Input
+          aria-label={label}
+          value={value}
+          placeholder={field.placeholder && t(field.placeholder)}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      )}
+      {hint}
+    </label>
+  );
+}
+
+/** The generator's sample, on the surface chosen. Drawn by utility-previews.css and the generator's inline style. */
+function PreviewSample({ preview, surface }: { preview: Preview; surface: "box" | "text" | "button" | "card" }) {
+  const t = useT();
+  const style = preview.style as CSSProperties;
+  return (
+    <div className="flex min-h-48 items-center justify-center rounded-lg bg-muted/60 p-8" aria-hidden="true">
+      {preview.kind !== "box" || surface === "box" ? (
+        <span className={`utility-preview utility-preview--${preview.kind}`} style={style}>
+          {preview.label}
+        </span>
+      ) : surface === "text" ? (
+        <p className="utility-preview utility-preview--surface-text" style={style}>
+          {t("The quick brown fox jumps over the lazy dog.")}
+        </p>
+      ) : surface === "button" ? (
+        <button type="button" tabIndex={-1} className="utility-preview utility-preview--surface-button" style={style}>
+          {t("Sample button")}
+        </button>
+      ) : (
+        <div className="utility-preview utility-preview--surface-card" style={style}>
+          <strong>{t("Card title")}</strong>
+          <p>{t("Supporting text for the card.")}</p>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -17,7 +17,7 @@ Regras que valem para toda etapa:
 | 1 | Fundação Tailwind + shadcn | M | 0 | — | ☑ |
 | 2 | Modelo de dados (ícone, preview, árvore) | P | 1 | — | ☑ |
 | 3 | Shell, sidebar em árvore e Ctrl+K | G | 2 | UC-01, 03, 10, 11 | ☑ |
-| 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ◐ faltam as três formas de vários campos (aguardam aprovação) |
+| 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ☑ |
 | 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☑ |
 | 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ☑ |
 | 7 | Primitivos restantes e limpeza do CSS | M | 4, 5 | UC-07, 08 | ☑ |
@@ -127,8 +127,8 @@ Detalhes: §8 Fase 4.
 8. [ ] Utilitários de vários campos (§12.5):
    - [x] Levantamento: 49 dos 88 utilitários, em três formas. **Calculadora** (números → resposta e fatos): math-finance 9, everyday 7, dates-time 4, e test-card, color-mixer. **Gerador com prévia** (campos → prévia e código): css-tools 12. **Texto com opções** (texto + campos → resultado): text-tools 5, codes-hashes 4, qr-barcode 3, random-picks 3.
    - [x] Mockups claro/escuro das três formas: `screens/png/b3-*-calc.png` (Financing), `b3-*-css.png` (Box shadow) e `b3-*-textopts.png` (Find and replace). Nas três, a fileira de abas do painel sai: os outros utilitários do grupo estão na árvore.
-   - [ ] **Aprovação dos mockups antes de implementar.**
-   - [ ] Implementar só a apresentação; a lógica e os testes dela continuam iguais.
+   - [x] **Aprovação dos mockups antes de implementar** (2026-10-01).
+   - [x] Implementado só na apresentação, escolhendo a forma pelos dados: com `preview` é gerador (opções com sliders à esquerda, prévia com Box/Text/Button/Card e card do CSS); sem entrada de texto e sem imagem é calculadora ("Your numbers" à esquerda, a primeira resposta em destaque à direita, as outras em lista); o resto é texto com opções. Escolhas sim/não viram chaves em todas. A contagem "2 replaced" do mockup ficou de fora: pediria mudar a lógica do utilitário.
 9. [x] Testes atualizados: painéis procurados como `region`, não `dialog`; 5 novos (foco na página, operação refletida na árvore, troca sem perder texto, diálogo em português, sugestões de arquivo).
 
 Não verificado: a operação real de ponta a ponta no `tauri:dev` (exige compilar o host Rust). Os testes nativos cobrem o fluxo com o host simulado.
