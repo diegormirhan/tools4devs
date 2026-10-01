@@ -81,7 +81,7 @@ export function PageCard({
 /** Says, before the fact, that something leaves this machine. */
 export function OutboundNotice({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
-    <p className="flex items-start gap-2.5 rounded-lg border bg-muted/50 p-3 text-sm text-muted-foreground [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-primary">
+    <p className="flex items-start gap-2.5 rounded-lg border bg-muted/50 p-3 text-sm text-foreground [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-primary">
       {icon}
       <span>{children}</span>
     </p>
