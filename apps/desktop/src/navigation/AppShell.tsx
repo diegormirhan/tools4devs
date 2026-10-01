@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, type ReactNode } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { PanelLeft } from "lucide-react";
 import type { CatalogRow, CatalogTool } from "../catalog/catalog";
 import { useT } from "../i18n/language";
@@ -60,6 +60,24 @@ export function AppShell({
   useEffect(() => {
     if (pageRef.current) pageRef.current.scrollTop = 0;
   }, [location.view, location.toolId]);
+
+  // Marks the few hundred milliseconds the sidebar spends opening or closing, so the
+  // stylesheet can hold back what would otherwise appear squeezed into a narrow rail.
+  const mounted = useRef(false);
+  // Before paint, or the first frame of the opening shows them squeezed.
+  useLayoutEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    const root = document.documentElement;
+    root.dataset.sidebarMoving = "true";
+    const timer = window.setTimeout(() => delete root.dataset.sidebarMoving, 450);
+    return () => {
+      window.clearTimeout(timer);
+      delete root.dataset.sidebarMoving;
+    };
+  }, [collapsed]);
 
   return (
     <SidebarProvider

@@ -92,6 +92,7 @@
 }
 
 @theme inline {
+  --ease-sidebar: cubic-bezier(0.32, 0.72, 0, 1);
   --font-sans: "Inter Variable", system-ui, sans-serif;
   --font-heading: "Fraunces Variable", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -168,5 +169,40 @@
   [role="switch"],
   label:has(input[type="file"]) {
     cursor: pointer;
+  }
+}
+
+/* Outside any layer on purpose: utilities such as transition-transform on the
+   chevrons would otherwise override these transitions. */
+/*
+ * Opening or closing the sidebar: the labels beside each icon fade out at once
+ * when it closes, instead of shrinking into "Vi…" as the width goes, and fade
+ * back in only once it has mostly opened.
+ */
+[data-sidebar="menu-button"] > :not(:first-child) {
+  transition: opacity 180ms ease-out 120ms, transform 200ms ease;
+}
+[data-collapsible="icon"] [data-sidebar="menu-button"] > :not(:first-child) {
+  opacity: 0;
+  transition: opacity 90ms ease-in;
+}
+/* Sub-lists and pin stars only exist in the open sidebar; they wait for it to open. */
+[data-sidebar-moving] [data-sidebar="menu-sub"],
+[data-sidebar-moving] [data-sidebar="menu-action"] {
+  animation: sidebar-reveal 200ms ease-out 180ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-sidebar="menu-button"] > :not(:first-child) {
+    transition: none;
+  }
+  [data-sidebar-moving] [data-sidebar="menu-sub"],
+  [data-sidebar-moving] [data-sidebar="menu-action"] {
+    animation: none;
+  }
+}
+
+@keyframes sidebar-reveal {
+  from {
+    opacity: 0;
   }
 }
