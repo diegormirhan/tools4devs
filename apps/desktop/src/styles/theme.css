@@ -23,6 +23,9 @@
 @source "../views";
 @source "../components/ThemeSwitch.tsx";
 @source "../components/UpdateCard.tsx";
+@source "../components/Select.tsx";
+@source "../components/NumberField.tsx";
+@source "../components/ToolPanel.tsx";
 @source "../components/InstallDialog.tsx";
 
 @custom-variant dark (&:is(.dark *));

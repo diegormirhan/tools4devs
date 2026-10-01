@@ -768,6 +768,8 @@ export const portuguese: Record<string, string> = {
   "Dependency": "Dependência",
   "Depth": "Profundidade",
   "Destination": "Destino",
+  "Summary": "Resumo",
+  "Nothing leaves your computer.": "Nada sai do seu computador.",
   "Dismiss": "Dispensar",
   "Done, and recorded in the history.": "Pronto, e registrado no histórico.",
   "Download and install": "Baixar e instalar",

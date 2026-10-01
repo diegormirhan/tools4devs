@@ -198,6 +198,7 @@ function Shell() {
       }
     >
       {openedTool ? (
+        legacyPanel(openedTool.id) ? (
         <div data-legacy>
         {utilityGroupIds.includes(openedTool.id) ? (
           <UtilityPanel
@@ -221,6 +222,8 @@ function Shell() {
           <ChatMockupPanel key={openedTool.id} tool={openedTool} onDirtyChange={navigation.setDirty} />
         ) : openedTool.id === "post-mockup" ? (
           <PostMockupPanel key={openedTool.id} tool={openedTool} onDirtyChange={navigation.setDirty} />
+        ) : null}
+        </div>
         ) : (
           <ToolPanel
             key={openedTool.id}
@@ -235,8 +238,7 @@ function Shell() {
             onRun={runToolOperation}
             onCancel={runner.cancelOperation}
           />
-        )}
-        </div>
+        )
       ) : location.view === "catalog" ? (
         <CatalogView
           rows={catalogRows}
@@ -282,6 +284,11 @@ function Shell() {
       )}
     </AppShell>
   );
+}
+
+/** Pages still drawn by app.css; each moves out of this list as it is rebuilt. */
+function legacyPanel(toolId: string): boolean {
+  return utilityGroupIds.includes(toolId) || ["image-search", "songrec", "chat-mockup", "post-mockup"].includes(toolId);
 }
 
 /** The sidebar used to be remembered as expanded on every launch; only "collapsed" was ever a choice. */
