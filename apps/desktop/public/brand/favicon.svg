@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 1024 1024">
-  <title>Tools4Devs</title>
-  <rect width="1024" height="1024" rx="224" fill="#15171c"/>
-  <path d="M316 684 L316 414 A196 196 0 0 1 708 414 L708 684" fill="none" stroke="#88afff" stroke-linecap="round" stroke-linejoin="round" stroke-width="104"/>
-  <path d="M250 800 H774" fill="none" stroke="#d8a64f" stroke-linecap="round" stroke-width="56"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title"><title id="title">Tools4Devs</title><rect width="128" height="128" rx="28" fill="#172133"/><g transform="translate(14 12) scale(0.9636363636363636)"><defs><mask id="cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="white"/><g fill="black"><path d="M44 26H57L38 53H53V39L65 23V53H75V65H65V78H53V65H25V53Z"/></g></mask></defs><path d="M13 10H48C76 10 91 25 91 50S76 90 48 90H13Z" fill="#3979CA" mask="url(#cutout)"/></g></svg>

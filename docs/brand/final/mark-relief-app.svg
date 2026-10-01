@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title"><title id="title">Tools4Devs</title><rect width="128" height="128" rx="28" fill="#172133"/><g transform="translate(14 12) scale(0.9636363636363636)"><defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title"><title id="title">Tools4Devs app icon, relief</title><rect width="128" height="128" rx="28" fill="#172133"/><g transform="translate(14 12) scale(0.9636363636363636)"><defs>
     <linearGradient id="app-front" x1="0" y1="0" x2="0.75" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#689FF0"/><stop offset="0.5" stop-color="#3E7BD0"/><stop offset="1" stop-color="#245CB1"/></linearGradient>
     <linearGradient id="app-side" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3C6EB1"/><stop offset="0.6" stop-color="#204C8B"/><stop offset="1" stop-color="#102F63"/></linearGradient>
     <clipPath id="app-clip"><path d="M13 10H48C76 10 91 25 91 50S76 90 48 90H13Z M44 26H57L38 53H53V39L65 23V53H75V65H65V78H53V65H25V53Z" clip-rule="evenodd"/></clipPath>
