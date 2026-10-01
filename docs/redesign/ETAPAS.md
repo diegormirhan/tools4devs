@@ -21,7 +21,7 @@ Regras que valem para toda etapa:
 | 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☑ |
 | 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ☑ |
 | 7 | Primitivos restantes e limpeza do CSS | M | 4, 5 | UC-07, 08 | ☑ |
-| 8 | Testes finais, docs e entrega | M | 1–7 | todos | ◐ falta o que é local ou do Windows |
+| 8 | Testes finais, docs e entrega | M | 1–7 | todos | ☑ |
 
 ```
 0 ─► 1 ─► 2 ─► 3 ─► 4 ─┬─► 7 ─► 8
@@ -181,7 +181,7 @@ Detalhes: §8 Fase 7. Feita em sete fatias, um commit cada.
 - [x] 7f. Mockups de chat e post: formulário com os primitivos novos (quem enviou como alternância de duas posições). O telefone e o post imitam cada app e continuam no `app.css`. `MockupPanels.test.tsx` traz 7 testes, onde não havia nenhum.
 - [x] 7g. `app.css` de 1.412 linhas para 176: só o quadro da janela e as imitações de chat e post. A prévia de arquivo usa utilitários; o retângulo de recorte foi para `styles/crop-overlay.css`. O preflight do Tailwind entra inteiro e o `@scope` com `data-legacy` sai; `@source` por pastas. `useTheme` deixou de gravar `data-theme`.
 
-Fica para a etapa 4.8: as três formas de vários campos (calculadora, gerador com prévia, texto com opções). Até a aprovação, esses utilitários usam a página genérica da 7e.
+As três formas de vários campos (calculadora, gerador com prévia, texto com opções) entraram depois, na etapa 4.8.
 
 Resultado (2026-10-01): 42 testes de domínio e 392 de interface verdes; `tsc` e `vite build` verdes (o `npm run build` completo baixa binários do Windows por PowerShell e não roda num contêiner Linux). Conferido no navegador em claro e escuro, 1440×900 e 800×600, sem rolagem horizontal; recorte conferido com o host simulado. CSS de 136,9 kB para 110,1 kB.
 
@@ -193,8 +193,10 @@ Resultado (2026-10-01): 42 testes de domínio e 392 de interface verdes; `tsc` e
 - [x] Acessibilidade. Contraste medido no navegador, texto a texto contra o fundo pintado, em 13 telas (início, preview, paleta, instalação, descarte, ferramenta, utilitário, música, busca por imagem, chat, Fila, Histórico, Configurações) nos dois temas: só o aviso de envio para fora ficava abaixo (4,33:1) e foi corrigido. Teclado: Tab por 7 páginas, ~75 paradas cada; as caixas de texto dos utilitários não tinham anel de foco e passaram a ter. A leitura da árvore está coberta pelos testes de `NavTree`.
 - [x] Orçamento: clipes e posters 3,76 MB (teto 4 MB); `dist/` 5,3 MB; JS 808 kB (era 604 kB antes da etapa 1), CSS 111 kB.
 - [x] `README.md` (busca, árvore, preview no hover; stack) e `CHANGELOG.md` (seção Unreleased).
-- [ ] ADR-0007 revisado com o que mudou na execução: o arquivo é local (`docs/decisions/` fica fora do git). Pontos a registrar: `sonner` saiu; preflight inteiro no lugar do escopado; `Select`, `NumberField` e `ThemeSwitch` continuaram próprios.
+- [x] ADR-0007 revisado (local, `docs/decisions/` fica fora do git): seção "Amendments after execution" com a saída do `sonner`, o preflight inteiro, os primitivos próprios, a forma dos utilitários escolhida pelos dados e a suíte E2E.
 - [x] Checklist de `PLANO.md` §10 marcado, com o que falta dito em cada item.
-- [x] Status no topo do `PLANO.md`. `docs/PROGRESS.md` é local e fica para atualizar fora do git.
+- [x] Status no topo do `PLANO.md`. `docs/PROGRESS.md` (local) ganhou a entrada do redesign.
 
-Falta, e não dá para fazer daqui: `npm run build` completo e uma operação real no `tauri:dev`, ambos no Windows; a aprovação dos mockups da etapa 4.8.
+Conferido no Windows (2026-10-01): `npm test` (285 de interface), `tsc`, `npm run build` completo, os 23 testes E2E com o Chrome local, `cargo build` e `cargo test` do host (70). O teste opcional `runtime_smoke`, que roda o catálogo contra os executáveis reais, passou em 21 operações (jq, yq, ripgrep, fd, deno, 7zip, pandoc, qpdf, libvips) e parou no `ffmpeg/convert`: o ffmpeg achado no PATH é o do WinGet (Gyan, GPL), que não tem o `libopenh264` que o app pede para H.264; o build que o app instala (BtbN LGPL) tem. Não é do redesign, mas vale para quem tem outro ffmpeg no PATH e não instalou o do app: o host usa o do PATH, e converter para H.264 falha.
+
+Não conferido: a interface no `tauri:dev` clicada à mão; a suíte E2E cobre a interface sobre o host simulado.
