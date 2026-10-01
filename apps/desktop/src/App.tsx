@@ -26,6 +26,7 @@ import { AppShell } from "./navigation/AppShell";
 import { NavigationProvider, useNavigation } from "./navigation/navigation";
 import { JobView } from "./views/JobView";
 import { SettingsView } from "./views/SettingsView";
+import { AboutView } from "./views/AboutView";
 import "./styles/theme.css";
 import "./styles/utility-previews.css";
 import "./styles/crop-overlay.css";
@@ -270,7 +271,10 @@ function Shell() {
           onCheckForUpdates={update.checkNow}
           finishedCount={runner.finishedJobs.length}
           onClearHistory={runner.clearHistory}
+          onShowAbout={() => go({ view: "about" })}
         />
+      ) : location.view === "about" ? (
+        <AboutView version={update.version} />
       ) : (
         <JobView
           activeNavigation={location.view === "history" ? "history" : "queue"}

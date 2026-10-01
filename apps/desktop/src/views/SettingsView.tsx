@@ -42,6 +42,7 @@ export function SettingsView({
   onCheckForUpdates,
   finishedCount,
   onClearHistory,
+  onShowAbout,
 }: {
   preference: ThemePreference;
   onThemeChange: (preference: ThemePreference) => void;
@@ -60,6 +61,7 @@ export function SettingsView({
   onCheckForUpdates: () => Promise<void>;
   finishedCount: number;
   onClearHistory: () => void;
+  onShowAbout: () => void;
 }) {
   const t = useT();
   const [confirmingClear, setConfirmingClear] = useState(false);
@@ -168,6 +170,12 @@ export function SettingsView({
           <li>{t("Pausing an operation, rather than stopping it")}</li>
           <li>{t("Scheduling one for later")}</li>
         </ul>
+      </SettingRow>
+
+      <SettingRow title={t("About")} description={t("The tools inside, their versions and their licences.")}>
+        <Button variant="outline" onClick={onShowAbout}>
+          {t("Components and licences")}
+        </Button>
       </SettingRow>
 
       <ClearHistoryDialog open={confirmingClear} onOpenChange={setConfirmingClear} onConfirm={onClearHistory} />

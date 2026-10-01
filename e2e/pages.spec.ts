@@ -154,3 +154,26 @@ test.describe("reverse image search", () => {
     expect(call?.args).toMatchObject({ request: { engine: "google", path: "C:/pictures/cat.png", imageUrl: null } });
   });
 });
+
+test("About lists every component with its version, licence and hash, and opens its project", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "Components and licences" }).click();
+
+  await expect(page.getByRole("heading", { level: 1, name: "About tools4devs" })).toBeVisible();
+  await expect(page.getByText("MIT", { exact: true }).first()).toBeVisible();
+  const components = page.getByRole("list", { name: "Components" }).getByRole("listitem");
+  await expect(components).toHaveCount(26);
+
+  const ffmpeg = components.filter({ hasText: "FFmpeg" }).first();
+  await expect(ffmpeg).toContainText("9.0.1");
+  await expect(ffmpeg).toContainText("LGPL-2.1-or-later OR GPL-2.0-or-later");
+  await expect(ffmpeg).toContainText("Downloaded when you ask");
+  await expect(ffmpeg).toContainText("2484854ad698");
+  await ffmpeg.getByRole("button", { name: "Open the FFmpeg project" }).click();
+  const [call] = await hostCalls(page, "open_link");
+  expect(call?.args).toEqual({ url: "https://github.com/FFmpeg/FFmpeg" });
+
+  await expect(components.filter({ hasText: "jq" }).first()).toContainText("In the installer");
+  await expect(page.getByText(/FRONTEND-NOTICES\.txt/)).toBeVisible();
+});

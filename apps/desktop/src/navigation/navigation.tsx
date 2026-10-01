@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 
-export type View = "catalog" | "tool" | "queue" | "history" | "settings";
+export type View = "catalog" | "tool" | "queue" | "history" | "settings" | "about";
 
 /** Where the window is: a page, or a tool and one of its sub-tools. No router, no URL. */
 export type Location = { view: View; toolId?: string; subId?: string };

@@ -22,6 +22,7 @@ const pageTitles: Record<Exclude<View, "tool">, string> = {
   queue: "Queue",
   history: "History",
   settings: "Settings",
+  about: "About",
 };
 
 /**
