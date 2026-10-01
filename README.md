@@ -98,17 +98,17 @@ npm run tauri:build   # installer, MSI and portable build
 > A release that clients can update to must be signed. Set both variables, even if the key has no password. Without the second one the build waits for a password prompt and produces no signature.
 >
 > ```bash
-> TAURI_SIGNING_PRIVATE_KEY="$(cat ~/.toolhaven/updater.key)" \
+> TAURI_SIGNING_PRIVATE_KEY="$(cat ~/.tools4devs/updater.key)" \
 > TAURI_SIGNING_PRIVATE_KEY_PASSWORD="" npm run tauri:build
 > ```
 
 To cut a release, run one command:
 
 ```bash
-npm run release -- 3.2.2
+npm run release -- 5.0.1
 ```
 
-It sets the version everywhere, adds a [CHANGELOG.md](CHANGELOG.md) section from the commits since the last tag (unless you already wrote one), runs the tests, builds and signs, and puts the installer, MSI, portable zip, signatures, `checksums.txt`, `latest.json` and `RELEASE-NOTES.md` in `Releases/<version>/`. It signs with `~/.toolhaven/updater.key` unless `TAURI_SIGNING_PRIVATE_KEY` is set. It doesn't commit, tag or publish.
+It sets the version everywhere, adds a [CHANGELOG.md](CHANGELOG.md) section from the commits since the last tag (unless you already wrote one), runs the tests, builds and signs, and puts the installer, MSI, portable zip, signatures, `checksums.txt`, the three update manifests and `RELEASE-NOTES.md` in `Releases/<version>/`. It signs with `~/.tools4devs/updater.key` unless `TAURI_SIGNING_PRIVATE_KEY` is set. That key replaced the original one, lost on 2026-10-01; copies live in `Backups\tools4devs-updater-key` on each local drive, and one should also be kept off this machine. It doesn't commit, tag or publish.
 
 Before a release, check that every pinned download still installs and runs (about 900 MB):
 

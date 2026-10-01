@@ -9,4 +9,6 @@ $env:TOOLS4DEVS_RELEASE_DIR = (Resolve-Path Releases/4.0.0).Path
 cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --test update_release -- --ignored --nocapture
 ```
 
+It applies to releases signed with the original key, up to 4.0.0. From 5.0.0 the installers are signed with a new key that older clients reject by design, so the check fails for them.
+
 This check needs the historical tags from 2.1.0 through 3.3.0 and the retained Releases/3.4.0 installer. It verifies the exact signed artifacts and frozen bridge metadata, rejects a tampered current installer, checks version ordering and parses both channels with the Tauri updater. It does not execute all historical clients or replace an installation.

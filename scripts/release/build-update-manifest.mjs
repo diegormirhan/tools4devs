@@ -1,5 +1,7 @@
 /**
- * Writes tools4devs.json for current clients and latest.json for legacy clients.
+ * Writes the update manifests: tools4devs-updates.json for clients of the current
+ * signing key, tools4devs.json frozen at 4.0.0 for clients of the lost original key,
+ * and latest.json frozen at the 3.4.0 bridge for the oldest clients.
  *
  * The updater asks one address for a small document naming the newest version
  * and where to get it, and refuses anything whose signature does not match the
@@ -11,8 +13,8 @@
  * With no argument it writes into `Releases/<version>`, which is where every
  * version's artifacts are staged. A path can still be given to override it.
  *
- * Both files belong in every GitHub release. From 4.0.0, latest.json is frozen
- * at the signed 3.4.0 bridge while tools4devs.json names the current version.
+ * Every file belongs in every GitHub release: each installed version reads one of
+ * them from the latest release, and must keep finding it there.
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -42,10 +44,26 @@ if (!existsSync(path.join(directory, installer)) || !existsSync(signaturePath)) 
 // for the updater, and the one that can replace a running installation.
 const bridgePath = path.join(root, "scripts/release/bridge-3.4.0.json");
 const bridge = version === "3.4.0" ? undefined : JSON.parse(readFileSync(bridgePath, "utf8"));
-const manifests = releaseManifests(version, readFileSync(signaturePath, "utf8").trim(), new Date().toISOString(), bridge);
+const lastOldKey = JSON.parse(readFileSync(path.join(root, "scripts/release/old-key-4.0.0.json"), "utf8"));
+const manifests = releaseManifests(
+  version,
+  readFileSync(signaturePath, "utf8").trim(),
+  new Date().toISOString(),
+  bridge,
+  lastOldKey,
+);
 const serialize = (manifest) => `${JSON.stringify(manifest, null, 2)}\n`;
 writeFileSync(path.join(directory, "latest.json"), serialize(manifests.legacy), "utf8");
-writeFileSync(path.join(directory, "tools4devs.json"), serialize(manifests.current), "utf8");
+if (manifests.oldKey) {
+  writeFileSync(path.join(directory, "tools4devs.json"), serialize(manifests.oldKey), "utf8");
+  writeFileSync(path.join(directory, "tools4devs-updates.json"), serialize(manifests.current), "utf8");
+} else {
+  writeFileSync(path.join(directory, "tools4devs.json"), serialize(manifests.current), "utf8");
+}
 if (version === "3.4.0") writeFileSync(bridgePath, serialize(manifests.current), "utf8");
-console.log(`tools4devs.json: ${manifests.current.version}; latest.json: ${manifests.legacy.version}`);
+console.log(
+  manifests.oldKey
+    ? `tools4devs-updates.json: ${manifests.current.version}; tools4devs.json: ${manifests.oldKey.version}; latest.json: ${manifests.legacy.version}`
+    : `tools4devs.json: ${manifests.current.version}; latest.json: ${manifests.legacy.version}`,
+);
 console.log(`  url: ${manifests.current.platforms["windows-x86_64"].url}`);

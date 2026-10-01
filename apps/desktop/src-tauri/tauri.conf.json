@@ -57,9 +57,9 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/diegormirhan/tools4devs/releases/latest/download/tools4devs.json"
+        "https://github.com/diegormirhan/tools4devs/releases/latest/download/tools4devs-updates.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkxNUIzNDgzMDg4RUNCNzkKUldSNXk0NElnelJia1pvYjcvbDJLUXlFVFlHaE82ZzNFR0U3S1U5WnkycGIvemxSVGJ4SC8wY3UK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk1MDdDQjgxMDlCQzkyMDEKUldRQmtyd0pnY3NIbGZmMUYxWHdVdzVBZEYxU2MxWUdnR2RWTXBpNFVQUEZjdG9KQnVKZ3JwNUsK",
       "windows": {
         "installMode": "passive"
       }

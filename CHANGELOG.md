@@ -6,6 +6,8 @@ All notable changes to tools4devs. Versions follow [semantic versioning](https:/
 
 A new interface. Every tool is one click or one search away, opens as a page instead of a dialog, and shows what it does before you open it.
 
+**Install this version by hand once.** Updates are now signed with a new key, because the original one was lost. Version 4.0.0 and older cannot verify it and will not offer it; download the installer and run it. Preferences, history and installed tools are kept, and automatic updates work again from 5.0.0 on.
+
 ### Added
 
 - A sidebar tree of every tool and each of its actions, one group open at a time. Pin the tools you use.

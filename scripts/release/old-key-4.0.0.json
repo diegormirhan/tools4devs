@@ -1,0 +1,11 @@
+{
+  "version": "4.0.0",
+  "notes": "See the release notes for 4.0.0.",
+  "pub_date": "2026-09-27T15:22:04.421Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSNXk0NElnelJia1kxQkhNZ1ZnTEJCNERrZE81NnFLZG5LNmdpU1ZQeXFyK0lBNmdEakMyTTFIYmZiMEJ4eW5xOEJaK3lqZ2gxc1V3TkN3Rkg0UElFWlFlZVVhVEZFQ0FBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwNTIyNTE5CWZpbGU6dG9vbHM0ZGV2c180LjAuMF94NjQtc2V0dXAuZXhlCkxyTzF3VURxYnBFWUhrQkpCS3R2dW5iR0JOVEg4RzQ1V3RMc1g1NkJ0RjZ1MXpyMGVxQ1NUSzVaVzltRXZvWmtuM0hoc0drekFOY1EvZy9hclY5dER3PT0K",
+      "url": "https://github.com/diegormirhan/tools4devs/releases/download/v4.0.0/tools4devs_4.0.0_x64-setup.exe"
+    }
+  }
+}
