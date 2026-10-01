@@ -66,7 +66,8 @@ export function AppSidebar({
               />
               <span className="grid leading-tight">
                 <img src={wordmarkSrc} alt="Tools4Devs" width="96" height="22" className="h-[22px] w-auto" />
-                <small className="text-xs text-sidebar-foreground/70">{t("Local tools")}</small>
+                {/* Starts under the T's stem, which the eye follows, rather than under its crossbar. */}
+                <small className="pl-[5.5px] text-xs text-sidebar-foreground/70">{t("Local tools")}</small>
               </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
