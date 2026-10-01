@@ -433,6 +433,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "codes-hashes",
     icon: Hash,
+    preview: { src: "/previews/codes-hashes.webm", poster: "/previews/codes-hashes.jpg" },
     title: "Codes and hashes",
     description: "Base64, URL, hashes, JWT, UUID, passwords and number bases.",
     keywords: [
@@ -603,6 +604,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "dates-time",
     icon: Calendar,
+    preview: { src: "/previews/dates-time.webm", poster: "/previews/dates-time.jpg" },
     title: "Dates and time",
     description: "Day counts, business days, age, zodiac, moon phase and more.",
     keywords: [
@@ -721,6 +723,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "math-finance",
     icon: Calculator,
+    preview: { src: "/previews/math-finance.webm", poster: "/previews/math-finance.jpg" },
     title: "Math, finance and health",
     description: "Percentages, fractions, units, loans, BMI and pregnancy dates.",
     keywords: [
@@ -879,6 +882,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "test-data",
     icon: FlaskConical,
+    preview: { src: "/previews/test-data.webm", poster: "/previews/test-data.jpg" },
     title: "Test data",
     description: "CPF, CNPJ, CEP, card numbers and UUIDs — sandbox-only, never real.",
     keywords: [
@@ -961,6 +965,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "colors",
     icon: Palette,
+    preview: { src: "/previews/colors.webm", poster: "/previews/colors.jpg" },
     title: "Colour tools",
     description: "HEX, RGBA, shades and mixing two colours together.",
     keywords: ["color", "colour", "hex", "rgba", "rgb", "hsl", "shades", "mix", "palette"],
@@ -1009,6 +1014,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "css-tools",
     icon: Paintbrush,
+    preview: { src: "/previews/css-tools.webm", poster: "/previews/css-tools.jpg" },
     title: "CSS generators",
     description: "Copy the CSS, or just watch the preview change.",
     keywords: [
@@ -1267,6 +1273,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "network",
     icon: Globe,
+    preview: { src: "/previews/network.webm", poster: "/previews/network.jpg" },
     title: "Network lookups",
     description: "Your IP, a domain's DNS records, and where an address is.",
     keywords: [
@@ -1464,6 +1471,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "everyday",
     icon: Sparkles,
+    preview: { src: "/previews/everyday.webm", poster: "/previews/everyday.jpg" },
     title: "Everyday calculators",
     description: "Fuel, a barbecue, and symbols worth copying.",
     keywords: [
@@ -1572,6 +1580,7 @@ export const utilityGroups: UtilityGroup[] = [
   {
     id: "random-picks",
     icon: Dices,
+    preview: { src: "/previews/random-picks.webm", poster: "/previews/random-picks.jpg" },
     title: "Random picks",
     description: "Dice, roulette, the lottery, a raffle, and plain random picks.",
     keywords: ["random", "dice", "roulette", "lottery", "raffle", "sorteio", "dado", "loteria"],
