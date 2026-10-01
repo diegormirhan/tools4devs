@@ -70,29 +70,17 @@ test("UC-08: theme and language change at once and survive a restart", async ({ 
   await expect(page.getByRole("tree", { name: "Todas as ferramentas" })).toBeVisible();
 });
 
-test("the window's title bar takes the sidebar's colour, and follows the theme", async ({ page }) => {
+test("the window controls sit in the header and drive the window", async ({ page }) => {
   await page.goto("/");
-  const lastPaint = async () => (await hostCalls(page, "paint_title_bar")).at(-1)?.args as
-    | { background: number[]; text: number[] }
-    | undefined;
-  const brightness = (rgb: number[]) => rgb.reduce((sum, channel) => sum + channel, 0) / 3;
+  const header = page.locator("header").filter({ has: page.getByRole("navigation", { name: "Where you are" }) });
+  // Dragging the header's empty space moves the window, and a double click maximises it.
+  await expect(header.locator("[data-tauri-drag-region]").first()).toBeAttached();
 
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
-  await page.getByRole("radio", { name: "Light theme" }).click();
-  await expect.poll(async () => brightness((await lastPaint())?.background ?? [0, 0, 0])).toBeGreaterThan(200);
-
-  await page.getByRole("radio", { name: "Dark theme" }).click();
-  await expect.poll(async () => brightness((await lastPaint())?.background ?? [255, 255, 255])).toBeLessThan(50);
-  expect(brightness((await lastPaint())!.text)).toBeGreaterThan(200);
-
-  // What is painted around the main area, read as pixels.
-  const sidebar = await page.evaluate(() => {
-    const context = document.createElement("canvas").getContext("2d")!;
-    context.fillStyle = getComputedStyle(document.querySelector("[data-slot=sidebar-wrapper]")!).backgroundColor;
-    context.fillRect(0, 0, 1, 1);
-    return Array.from(context.getImageData(0, 0, 1, 1).data.slice(0, 3));
-  });
-  expect((await lastPaint())!.background).toEqual(sidebar);
+  await header.getByRole("button", { name: "Minimise" }).click();
+  await header.getByRole("button", { name: "Maximise" }).click();
+  await header.getByRole("button", { name: "Close" }).click();
+  const calls = (await hostCalls(page)).map((call) => call.cmd).filter((cmd) => cmd.startsWith("plugin:window|"));
+  expect(calls).toEqual(expect.arrayContaining(["plugin:window|minimize", "plugin:window|toggle_maximize", "plugin:window|close"]));
 });
 
 test("UC-09: leaving unsaved work asks first, and the safe answer is the default", async ({ page }) => {

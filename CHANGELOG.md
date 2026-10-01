@@ -15,7 +15,8 @@ All notable changes to tools4devs. Versions follow [semantic versioning](https:/
 - Rebuild the queue, history, settings, install dialog, update notice, quick tools and chat and post mockups to match. A quick tool page is named after the tool and shows input and result side by side.
 - Clearing the history asks for confirmation.
 - Write the name as Tools4Devs wherever it is shown: window title, logo, About page and messages. The executable, installer keys, saved settings and update channel keep the lowercase identifier, so installed copies keep updating.
-- Paint the window's title bar in the sidebar's colours on Windows 11.
+- Drop the Windows title bar: minimise, maximise and close sit in the page header, drawn with the system's own icons. The header moves the window, a double click maximises it, and a pause over maximise opens the Windows 11 snap layouts.
+- Add a Back button (Alt+Left) and make the path above each page clickable, starting from Home.
 - Add an About page, from Settings, listing every bundled or downloadable tool with its version, licence, hash and project.
 - Open and close the sidebar smoothly; labels fade instead of shrinking.
 

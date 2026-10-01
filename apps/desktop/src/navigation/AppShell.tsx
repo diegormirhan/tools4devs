@@ -16,6 +16,7 @@ import { SidebarInset, SidebarProvider, useSidebar } from "@/components/ui/sideb
 import { AppSidebar } from "./AppSidebar";
 import { CommandPalette } from "./CommandPalette";
 import { DiscardDialog } from "./DiscardDialog";
+import { WindowControls } from "./WindowControls";
 import { useNavigation, type Location, type View } from "./navigation";
 
 const pageTitles: Record<Exclude<View, "tool">, string> = {
@@ -129,7 +130,7 @@ function ShellHeader({ rows }: { rows: CatalogRow[] }) {
   }, [back]);
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 px-4">
+    <header data-tauri-drag-region className="flex h-14 shrink-0 items-center gap-2 px-4">
       <Button
         variant="ghost"
         size="icon"
@@ -176,6 +177,9 @@ function ShellHeader({ rows }: { rows: CatalogRow[] }) {
           ))}
         </BreadcrumbList>
       </Breadcrumb>
+      {/* The window has no title bar; this is where it is held to move it. */}
+      <div data-tauri-drag-region className="h-full flex-1" />
+      <WindowControls />
     </header>
   );
 }

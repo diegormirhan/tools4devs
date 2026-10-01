@@ -43,7 +43,7 @@ pub fn run() {
             open_link,
             reveal_path,
             cancel_operation,
-            title_bar::paint_title_bar
+            title_bar::show_snap_layouts
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

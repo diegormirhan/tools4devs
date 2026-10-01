@@ -997,4 +997,7 @@ export const portuguese: Record<string, string> = {
   "The tools inside, their versions and their licences.": "As ferramentas incluídas, suas versões e licenças.",
   "Back": "Voltar",
   "Home": "Início",
+  "Minimise": "Minimizar",
+  "Maximise": "Maximizar",
+  "Restore": "Restaurar",
 };
