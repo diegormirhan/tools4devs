@@ -15,9 +15,12 @@ import { toPng } from "html-to-image";
 import { withTimeout } from "../utilities/mockup";
 import type { CatalogTool } from "../catalog/catalog";
 import { avatarColor, initials, POST_PLATFORMS, type PostPlatform } from "../utilities/mockup";
-import { PanelShell } from "./PanelShell";
+import { PageCard, PageResult, ToolPage } from "./ToolPage";
 import { Select } from "./Select";
 import { useT } from "../i18n/language";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const PLATFORM_LABELS: Record<PostPlatform, string> = {
   tweet: "Tweet",
@@ -31,19 +34,12 @@ const PLATFORM_LABELS: Record<PostPlatform, string> = {
  */
 export function PostMockupPanel({
   tool,
-  leaving = false,
-  onClose,
-  onExited,
   onDirtyChange,
 }: {
   tool: CatalogTool;
-  leaving?: boolean;
-  onClose: () => void;
-  onExited?: () => void;
   onDirtyChange?: (dirty: boolean) => void;
 }) {
   const t = useT();
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const [platform, setPlatform] = useState<PostPlatform>("tweet");
@@ -87,106 +83,74 @@ export function PostMockupPanel({
     }
   }
 
+  const stat = (label: string, value: string, setter: (value: string) => void) => (
+    <label className="grid gap-2">
+      <span className="text-sm font-medium">{label}</span>
+      <Input value={value} onChange={(event) => mark(setter)(event.target.value)} />
+    </label>
+  );
+
   return (
-    <PanelShell
-      ref={closeButtonRef}
-      title={tool.integrationName}
-      leaving={leaving}
-      onClose={onClose}
-      onExited={onExited}
-      wide
-      bodyClassName="mockup-panel__body"
-    >
-      <section className="tool-panel__controls mockup-panel__form">
-        <h2 id="tool-panel-title">{t(tool.title)}</h2>
-        <p>{t(tool.description)}</p>
+    <ToolPage tool={tool} showEngine={false}>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid min-w-0 gap-4">
+          <PageCard title={t("Post")}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="grid gap-2 sm:col-span-2">
+                <span className="text-sm font-medium">{t("App")}</span>
+                <Select
+                  label={t("App")}
+                  value={platform}
+                  choices={POST_PLATFORMS.map((value) => ({ value, label: PLATFORM_LABELS[value] }))}
+                  onChange={(value) => setPlatform(value as PostPlatform)}
+                />
+              </label>
+              {stat(t("Display name"), name, setName)}
+              {stat(t("Username"), handle, setHandle)}
+            </div>
 
-        <label className="operation-select">
-          <span>{t("App")}</span>
-          <Select
-            label={t("App")}
-            value={platform}
-            choices={POST_PLATFORMS.map((value) => ({ value, label: PLATFORM_LABELS[value] }))}
-            onChange={(value) => setPlatform(value as PostPlatform)}
-          />
-        </label>
+            {platform === "tweet" && (
+              <label className="flex cursor-pointer items-center gap-2.5 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4 accent-primary"
+                  checked={verified}
+                  onChange={(event) => {
+                    setVerified(event.target.checked);
+                    onDirtyChange?.(true);
+                  }}
+                />
+                {t("Verified badge")}
+              </label>
+            )}
 
-        <label className="mockup-field">
-          <span>{t("Display name")}</span>
-          <input type="text" value={name} onChange={(event) => mark(setName)(event.target.value)} />
-        </label>
-
-        <label className="mockup-field">
-          <span>{t("Username")}</span>
-          <input type="text" value={handle} onChange={(event) => mark(setHandle)(event.target.value)} />
-        </label>
-
-        {platform === "tweet" && (
-          <label className="mockup-checkbox">
-            <input
-              type="checkbox"
-              checked={verified}
-              onChange={(event) => {
-                setVerified(event.target.checked);
-                onDirtyChange?.(true);
-              }}
-            />
-            <span>{t("Verified badge")}</span>
-          </label>
-        )}
-
-        <label className="mockup-field">
-          <span>{t("Post text")}</span>
-          <textarea
-            className="utility-input"
-            value={text}
-            onChange={(event) => mark(setText)(event.target.value)}
-          />
-        </label>
-
-        <div className="mockup-message-row mockup-message-row--stats">
-          <label className="mockup-field">
-            <span>{platform === "tweet" ? t("Replies") : t("Comments")}</span>
-            <input type="text" value={comments} onChange={(event) => mark(setComments)(event.target.value)} />
-          </label>
-          {platform === "tweet" && (
-            <label className="mockup-field">
-              <span>{t("Reposts")}</span>
-              <input type="text" value={shares} onChange={(event) => mark(setShares)(event.target.value)} />
+            <label className="grid gap-2">
+              <span className="text-sm font-medium">{t("Post text")}</span>
+              <Textarea className="min-h-28" value={text} onChange={(event) => mark(setText)(event.target.value)} />
             </label>
-          )}
-          <label className="mockup-field">
-            <span>{t("Likes")}</span>
-            <input type="text" value={likes} onChange={(event) => mark(setLikes)(event.target.value)} />
-          </label>
-          {platform === "tweet" && (
-            <label className="mockup-field">
-              <span>{t("Bookmarks")}</span>
-              <input type="text" value={bookmarks} onChange={(event) => mark(setBookmarks)(event.target.value)} />
-            </label>
-          )}
-          {platform === "tweet" && (
-            <label className="mockup-field">
-              <span>{t("Views")}</span>
-              <input type="text" value={views} onChange={(event) => mark(setViews)(event.target.value)} />
-            </label>
-          )}
-          {platform === "tweet" && (
-            <label className="mockup-field">
-              <span>{t("Time")}</span>
-              <input type="text" value={time} onChange={(event) => mark(setTime)(event.target.value)} />
-            </label>
+          </PageCard>
+
+          <PageCard title={t("Numbers")}>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {stat(platform === "tweet" ? t("Replies") : t("Comments"), comments, setComments)}
+              {platform === "tweet" && stat(t("Reposts"), shares, setShares)}
+              {stat(t("Likes"), likes, setLikes)}
+              {platform === "tweet" && stat(t("Bookmarks"), bookmarks, setBookmarks)}
+              {platform === "tweet" && stat(t("Views"), views, setViews)}
+              {platform === "tweet" && stat(t("Time"), time, setTime)}
+            </div>
+          </PageCard>
+
+          {error && (
+            <PageResult error icon={<AlertTriangle aria-hidden="true" />}>
+              {error}
+            </PageResult>
           )}
         </div>
 
-        {error && (
-          <p className="run-message run-message--error" role="alert">
-            <AlertTriangle size={14} aria-hidden="true" /> {error}
-          </p>
-        )}
-      </section>
-
-      <section className="mockup-panel__preview">
+        <div className="grid justify-items-center gap-4 lg:sticky lg:top-4">
+          {/* The post imitates each app, in its own colours (app.css). */}
+          <div className="grid w-full justify-items-center">
         {platform === "tweet" ? (
           <div className="mockup-post mockup-post--tweet" ref={previewRef}>
             <div className="mockup-tweet__grid">
@@ -251,10 +215,12 @@ export function PostMockupPanel({
           </div>
         )}
 
-        <button className="button button--primary" type="button" onClick={() => void saveImage()} disabled={saving}>
-          <Download size={16} aria-hidden="true" /> {t(saving ? "Saving…" : "Save as image")}
-        </button>
-      </section>
-    </PanelShell>
+          </div>
+          <Button className="w-full max-w-[340px]" onClick={() => void saveImage()} disabled={saving}>
+            <Download aria-hidden="true" /> {t(saving ? "Saving…" : "Save as image")}
+          </Button>
+        </div>
+      </div>
+    </ToolPage>
   );
 }

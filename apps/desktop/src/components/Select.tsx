@@ -130,11 +130,11 @@ export function Select({
   }
 
   return (
-    <div className="select" ref={root}>
+    <div data-slot="select" className="relative w-full" ref={root}>
       <button
         ref={triggerRef}
         type="button"
-        className={`select__trigger${open ? " is-open" : ""}`}
+        className="flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-expanded:border-ring dark:bg-input/30"
         role="combobox"
         aria-expanded={open}
         aria-controls={listId}
@@ -147,15 +147,15 @@ export function Select({
         }}
         onKeyDown={onKeyDown}
       >
-        <span className="select__value">{selected?.label ?? ""}</span>
-        <ChevronDown size={15} aria-hidden="true" className="select__chevron" />
+        <span className="truncate text-left">{selected?.label ?? ""}</span>
+        <ChevronDown aria-hidden="true" className={`size-4 shrink-0 opacity-50 transition-transform${open ? " rotate-180" : ""}`} />
       </button>
 
       {open && (
         <ul
           id={listId}
           ref={listRef}
-          className="select__list"
+          className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
           role="listbox"
           aria-label={label}
           tabIndex={-1}
@@ -165,9 +165,9 @@ export function Select({
               key={choice.value}
               role="option"
               aria-selected={choice.value === value}
-              className={`select__option${index === active ? " is-active" : ""}${
-                choice.value === value ? " is-selected" : ""
-              }`}
+              className={`flex cursor-default items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-sm${
+                index === active ? " bg-accent text-accent-foreground" : ""
+              }${choice.value === value ? " font-medium" : ""}`}
               onPointerEnter={() => setActive(index)}
               onPointerDown={(event) => {
                 event.preventDefault();
@@ -175,7 +175,7 @@ export function Select({
               }}
             >
               <span>{choice.label}</span>
-              {choice.value === value && <Check size={14} aria-hidden="true" />}
+              {choice.value === value && <Check className="size-4 text-primary" aria-hidden="true" />}
             </li>
           ))}
         </ul>

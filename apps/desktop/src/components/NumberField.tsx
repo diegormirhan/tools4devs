@@ -47,7 +47,10 @@ export function NumberField({
     // The input comes first in the source although the minus sits to its left:
     // a label wrapping this field labels its first form control, and that has
     // to be the number rather than a button nobody needs to hear named.
-    <span className="number-field">
+    <span
+      data-slot="number-field"
+      className="flex h-9 w-full items-stretch overflow-hidden rounded-md border border-input bg-background shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30"
+    >
       <input
         aria-label={label}
         type="number"
@@ -58,26 +61,27 @@ export function NumberField({
         max={max}
         step={step}
         onChange={(event) => onChange(event.target.value)}
+        className="order-2 min-w-0 flex-1 bg-transparent px-2 text-center text-sm outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
       <button
         type="button"
-        className="number-field__step number-field__step--down"
+        className="order-1 grid w-9 shrink-0 place-items-center border-r text-muted-foreground hover:bg-accent disabled:opacity-40"
         tabIndex={-1}
         aria-hidden="true"
         disabled={atFloor}
         onClick={() => nudge(-1)}
       >
-        <Minus size={15} />
+        <Minus className="size-4" />
       </button>
       <button
         type="button"
-        className="number-field__step number-field__step--up"
+        className="order-3 grid w-9 shrink-0 place-items-center border-l text-muted-foreground hover:bg-accent disabled:opacity-40"
         tabIndex={-1}
         aria-hidden="true"
         disabled={atCeiling}
         onClick={() => nudge(1)}
       >
-        <Plus size={15} />
+        <Plus className="size-4" />
       </button>
     </span>
   );

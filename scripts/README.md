@@ -4,6 +4,8 @@
   cross-entry rules the schema cannot express, and audits the capabilities each
   tool claims.
 - `tools/`: stages the tools that ship inside the installer.
+- `notices/`: writes `FRONTEND-NOTICES.txt` for the npm packages and fonts compiled
+  into the interface, and stops the build if one of them is not permissive.
 - `component-installation/`: resolves what a tool still needs, and reads back
   what is already installed.
 - `execution/`: turns a typed operation request into an executable name and an

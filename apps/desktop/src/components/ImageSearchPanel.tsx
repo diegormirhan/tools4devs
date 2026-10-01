@@ -6,9 +6,11 @@ import type { CatalogTool } from "../catalog/catalog";
 import { isNativeHost } from "../hooks/useOperationRunner";
 import { acceptsFile } from "../catalog/formats";
 import { FilePreview } from "./FilePreview";
-import { PanelShell } from "./PanelShell";
+import { OutboundNotice, PageCard, PageResult, ToolPage } from "./ToolPage";
 import { useT } from "../i18n/language";
 import { Select } from "./Select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Engine = { id: string; label: string; uploads: boolean };
 
@@ -32,17 +34,11 @@ export function ImageSearchPanel({
   tool,
   initialPath,
   droppedPaths,
-  leaving = false,
-  onClose,
-  onExited,
   onDirtyChange,
 }: {
   tool: CatalogTool;
   initialPath?: string | null;
   droppedPaths?: string[];
-  leaving?: boolean;
-  onClose: () => void;
-  onExited?: () => void;
   onDirtyChange?: (dirty: boolean) => void;
 }) {
   const t = useT();
@@ -53,7 +49,6 @@ export function ImageSearchPanel({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [opened, setOpened] = useState("");
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const resultRef = useRef<HTMLParagraphElement>(null);
 
   const engine = engines.find((candidate) => candidate.id === engineId) ?? engines[0];
@@ -70,8 +65,6 @@ export function ImageSearchPanel({
   useEffect(() => {
     onDirtyChange?.(canSearch && !opened);
   }, [canSearch, opened, onDirtyChange]);
-
-  useEffect(() => closeButtonRef.current?.focus(), []);
 
   useEffect(() => {
     // Optional call: jsdom has the element but not the method.
@@ -129,99 +122,96 @@ export function ImageSearchPanel({
     if (!choices.some((choice) => choice.value === engineId)) setEngineId(choices[0]?.value ?? "google");
   }, [choices, engineId]);
 
+  const showsPicture = Boolean(path) && !usingUrl;
+
   return (
-    <PanelShell
-      ref={closeButtonRef}
-      title={tool.integrationName}
-      wide={Boolean(path) && !usingUrl}
-      leaving={leaving}
-      onClose={onClose}
-      onExited={onExited}
-      bodyClassName={path && !usingUrl ? "tool-panel__body--split" : ""}
-    >
-      {path && !usingUrl && (
-        <section className="tool-panel__workspace" aria-label={t("Picture preview")}>
-          <FilePreview path={path} />
-        </section>
-      )}
+    <ToolPage tool={tool}>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid min-w-0 gap-4">
+          {showsPicture && (
+            <section aria-label={t("Picture preview")}>
+              <FilePreview path={path} />
+            </section>
+          )}
 
-      <section className="tool-panel__controls">
-        <h2 id="tool-panel-title">{tool.title}</h2>
-        <p>{tool.description}</p>
+          <PageCard title={t("Picture")}>
+            <div className="flex items-center justify-between gap-4">
+              <span className="grid min-w-0 gap-0.5">
+                <strong className="text-sm font-medium">{t("Picture on this machine")}</strong>
+                <small className="truncate text-xs text-muted-foreground">
+                  {path ? fileNameOnly(path) : t("No picture chosen.")}
+                </small>
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label={t("Choose a picture")}
+                onClick={() =>
+                  void open({ multiple: false })
+                    .then((selected) => {
+                      if (typeof selected === "string") admit(selected);
+                    })
+                    .catch((reason: unknown) => setError(String(reason)))
+                }
+              >
+                <FilePlus2 />
+              </Button>
+            </div>
 
-        <p className="notice notice--outbound">
-          <ExternalLink size={14} aria-hidden="true" />
-          <span>
-            This is the one tool here that leaves your machine. {engine?.uploads
+            <label className="grid gap-2">
+              <span className="text-sm font-medium">{t("Or the address of a picture online")}</span>
+              <Input
+                aria-label={t("Picture address")}
+                type="url"
+                placeholder="https://..."
+                value={imageUrl}
+                onChange={(event) => {
+                  setImageUrl(event.target.value);
+                  setError("");
+                  setOpened("");
+                }}
+              />
+              <small className="text-xs text-muted-foreground">
+                {t("An address is searched without uploading anything, and every engine accepts one.")}
+              </small>
+            </label>
+          </PageCard>
+
+          {(error || opened) && (
+            <PageResult
+              ref={resultRef}
+              error={Boolean(error)}
+              icon={error ? <AlertTriangle aria-hidden="true" /> : <ExternalLink aria-hidden="true" />}
+            >
+              {error || t("Opened in your browser.")}
+            </PageResult>
+          )}
+        </div>
+
+        <PageCard aria-labelledby="tool-summary-title" className="gap-4 lg:sticky lg:top-4">
+          <h2 id="tool-summary-title" className="font-heading text-lg font-semibold">{t("Search")}</h2>
+          <OutboundNotice icon={<ExternalLink aria-hidden="true" />}>
+            {t("This is the one tool here that leaves your machine.")}{" "}
+            {engine?.uploads
               ? t("The picture is uploaded to the search engine, and the results open in your browser.")
               : t("Only the address you paste is sent; the picture is never uploaded by this app.")}
-          </span>
-        </p>
-
-        <label className="operation-select">
-          <span>{t("Search with")}</span>
-          <Select label={t("Search with")} value={engineId} choices={choices} onChange={setEngineId} />
-          <small>
-            {path && !usingUrl
-              ? t("A picture from this machine has to be uploaded, and Google Lens is the engine that accepts one.")
-              : t("Paste a link and any of these will take it.")}
-          </small>
-        </label>
-
-        <div className="tool-option">
-          <span>
-            <strong>{t("Picture on this machine")}</strong>
-            <small>{path ? fileNameOnly(path) : t("No picture chosen.")}</small>
-          </span>
-          <button
-            className="icon-button"
-            type="button"
-            aria-label={t("Choose a picture")}
-            onClick={() =>
-              void open({ multiple: false })
-                .then((selected) => {
-                  if (typeof selected === "string") admit(selected);
-                })
-                .catch((reason: unknown) => setError(String(reason)))
-            }
-          >
-            <FilePlus2 size={18} />
-          </button>
-        </div>
-
-        <label className="source-url">
-          <span>{t("Or the address of a picture online")}</span>
-          <input
-            aria-label={t("Picture address")}
-            type="url"
-            placeholder="https://..."
-            value={imageUrl}
-            onChange={(event) => {
-              setImageUrl(event.target.value);
-              setError("");
-              setOpened("");
-            }}
-          />
-          <small className="source-url__hint">
-            An address is searched without uploading anything, and every engine accepts one.
-          </small>
-        </label>
-
-        {(error || opened) && (
-          <p ref={resultRef} className={`panel-result${error ? " panel-result--error" : ""}`} role="status">
-            {error ? <AlertTriangle size={15} aria-hidden="true" /> : <ExternalLink size={15} aria-hidden="true" />}
-            <span>{error || t("Opened in your browser.")}</span>
-          </p>
-        )}
-
-        <div className="panel-actions">
-          <button className="button button--primary" type="button" disabled={!canSearch || busy} onClick={search}>
-            <Search size={16} aria-hidden="true" />
+          </OutboundNotice>
+          <label className="grid gap-2">
+            <span className="text-sm font-medium">{t("Search with")}</span>
+            <Select label={t("Search with")} value={engineId} choices={choices} onChange={setEngineId} />
+            <small className="text-xs text-muted-foreground">
+              {showsPicture
+                ? t("A picture from this machine has to be uploaded, and Google Lens is the engine that accepts one.")
+                : t("Paste a link and any of these will take it.")}
+            </small>
+          </label>
+          <Button className="w-full" disabled={!canSearch || busy} onClick={search}>
+            <Search aria-hidden="true" />
             {t(busy ? "Searching…" : "Search")}
-          </button>
-        </div>
-      </section>
-    </PanelShell>
+          </Button>
+        </PageCard>
+      </div>
+    </ToolPage>
   );
 }
 

@@ -60,6 +60,8 @@ const ffSubs = ["Convert format", "Compress media", "Trim a section", "Extract a
 const subsFor = {
   ffmpeg: { items: ffSubs, more: "9 more…" },
   "text-tools": { items: ["Change case", "Count words", "Find and replace", "Remove duplicate lines", "Sort lines"], more: "10 more…" },
+  "math-finance": { items: ["Percentage", "Rule of three", "Fractions", "Unit converter", "Financing"], more: "4 more…" },
+  "css-tools": { items: ["Border radius", "Box shadow", "Gradient", "Glassmorphism", "Clip path"], more: "7 more…" },
 };
 const homeNav = { pinned: true, open: "video" };
 const toolNav = { pinned: false, open: "video", tool: "ffmpeg", sub: "Extract audio" };
@@ -69,6 +71,9 @@ const nav = {
   queue: { pinned: true, open: null, footer: "Queue" }, history: { pinned: true, open: null, footer: "History" }, settings: { pinned: true, open: null, footer: "Settings" },
   utility: { pinned: false, open: "utilities", tool: "text-tools", sub: "Change case" },
   chat: { pinned: false, open: "mockups", tool: "chat-mockup", activeTool: true },
+  calc: { pinned: false, open: "calculators", tool: "math-finance", sub: "Financing" },
+  css: { pinned: false, open: "utilities", tool: "css-tools", sub: "Box shadow" },
+  textopts: { pinned: false, open: "utilities", tool: "text-tools", sub: "Find and replace" },
 };
 
 const sidebar = (v, screen) => {
@@ -247,6 +252,40 @@ const utilityMain = () => `<div class="page"><div class="ptitle"><div><h1>Change
     ${textArea("Result", "The Quick Brown Fox Jumps Over The Lazy Dog", `<button class="btn sm">${icon("copy")} Copy</button>`)}</div>
   <p class="hint">It runs here, as you type. <button class="btn ghost sm">${icon("eraser")} Clear</button></p></div>`;
 
+/* ---------- Multi-field quick tools (stage 4) ----------
+   Three shapes cover the 49 utilities with more than one field: a calculator
+   (numbers in, an answer and its facts out), a generator with a live preview
+   and the code it writes, and a text transform with options. The group's other
+   utilities live in the sidebar tree, so the page no longer carries a tab row. */
+const field = (label, value, extra = "") => `<div class="field"><label>${label}${extra}</label><div class="sel">${value}</div></div>`;
+const calcMain = () => `<div class="page"><div class="ptitle"><div><h1>Financing</h1><p>What a loan costs each month and in total, with fixed instalments.</p></div></div>
+  <div class="tgrid" style="grid-template-columns:1fr 360px"><article class="card"><div class="ch2"><h3>Your numbers</h3><p>Change any of them; the answer follows.</p></div>
+    <div class="cb"><div class="two-col tight">${field("Amount borrowed", "30,000.00")}${field("Interest", "1.5", " <em>% a month</em>")}</div>
+      <div class="two-col tight">${field("Instalments", "48")}${field("First payment", "In one month" + icon("chevron-down"))}</div></div></article>
+    <article class="card"><div class="ch2"><h3>Each month</h3><p>Nothing leaves your computer.</p></div>
+      <div class="cb"><div style="font:600 36px/1.1 var(--font-heading);letter-spacing:-.02em">881.25</div></div>
+      <dl class="cb"><dt>Total paid</dt><dd>42,300.00</dd><dt>Total interest</dt><dd>12,300.00</dd><dt>Interest share</dt><dd>29%</dd><dt>Last payment</dt><dd>In 48 months</dd></dl>
+      <div class="cf col"><button class="btn outline block">${icon("copy")} Copy the result</button></div></article></div>
+  <p class="hint">It runs here, as you type. <button class="btn ghost sm">${icon("eraser")} Clear</button></p></div>`;
+
+const slide = (label, value, pct) => `<div class="field"><label>${label} <em>${value}</em></label><div class="slider"><i style="width:${pct}%"></i><b style="left:${pct}%"></b></div></div>`;
+const cssMain = () => `<div class="page"><div class="ptitle"><div><h1>Box shadow</h1><p>Shape a shadow and copy the CSS that draws it.</p></div></div>
+  <div class="tgrid" style="grid-template-columns:340px 1fr"><article class="card"><div class="ch2"><h3>Options</h3></div>
+    <div class="cb">${slide("Horizontal offset", "0 px", 50)}${slide("Vertical offset", "12 px", 62)}${slide("Blur", "32 px", 40)}${slide("Spread", "−8 px", 42)}${slide("Opacity", "18%", 18)}
+      <div class="field"><label>Colour</label><div class="sel"><span style="display:flex;align-items:center;gap:8px"><i style="width:16px;height:16px;border-radius:4px;background:#0b1220;display:inline-block"></i>#0b1220</span></div></div>
+      <div class="field swr"><label>Inset</label><div class="switch"><i></i></div></div></div></article>
+    <div class="stack"><article class="card"><div class="ch2" style="display:flex;justify-content:space-between;align-items:center"><h3>Preview</h3><span class="tg mini"><span class="on">Box</span><span>Text</span><span>Button</span><span>Card</span></span></div>
+      <div class="cb"><div style="height:260px;border-radius:var(--rl);background:var(--muted);display:grid;place-items:center"><div style="width:180px;height:120px;border-radius:14px;background:var(--card);box-shadow:0 12px 32px -8px rgb(0 0 0/.18)"></div></div></div></article>
+    <article class="card ta"><div class="tah" style="padding:0 24px"><b>CSS</b><button class="btn sm">${icon("copy")} Copy</button></div><div class="tbox" style="margin:0 24px;min-height:0">box-shadow: 0 12px 32px -8px rgb(11 18 32 / 18%);</div></article></div></div></div>`;
+
+const textOptsMain = () => `<div class="page"><div class="ptitle"><div><h1>Find and replace</h1><p>Swap every match in the text, with or without a pattern.</p></div></div>
+  <article class="card" style="margin-bottom:16px"><div class="ch2"><h3>Options</h3></div><div class="cb">
+    <div class="two-col tight">${field("Find", "colour")}${field("Replace with", "color")}</div>
+    <div class="two-col tight"><div class="field swr"><label>Match case</label><div class="switch"><i></i></div></div><div class="field swr"><label>Regular expression</label><div class="switch"><i></i></div></div></div></div></article>
+  <div class="two-col">${textArea("Input", "The colour of the sky, and the colour of the sea.", `<button class="btn ghost sm">${icon("upload")} Upload a file</button>`)}
+    ${textArea("Result <em style=\"font-style:normal;font-weight:400;color:var(--muted-foreground)\">· 2 replaced</em>", "The color of the sky, and the color of the sea.", `<button class="btn sm">${icon("copy")} Copy</button>`)}</div>
+  <p class="hint">It runs here, as you type. <button class="btn ghost sm">${icon("eraser")} Clear</button></p></div>`;
+
 const bubble = (side, text, time) => `<div class="bub ${side}"><span>${text}</span><small>${time}</small></div>`;
 const chatMain = () => `<div class="page"><div class="ptitle"><div><h1>Chat mockup</h1><p>Type messages, then save the chat as a picture.</p></div></div>
   <div class="tgrid" style="grid-template-columns:1fr 360px"><article class="card"><div class="ch2"><h3>Conversation</h3><p>Who is talking, and what they say.</p></div>
@@ -387,9 +426,11 @@ const page = (key, theme, screen) => {
   curHue = v.hue ?? hue;
   const [W, H] = size[screen] ?? [1440, 900];
   const crumbs = { tool: ["Video and audio", "Convert media", "Extract audio"], discard: ["Video and audio", "Convert media", "Extract audio"], queue: ["Queue"], history: ["History"], settings: ["Settings"],
-    utility: ["Quick tools", "Work on text", "Change case"], chat: ["Mockups", "Chat mockup"] }[screen] ?? ["Tools"];
+    utility: ["Quick tools", "Work on text", "Change case"], chat: ["Mockups", "Chat mockup"],
+    calc: ["Calculators", "Math, finance and health", "Financing"], css: ["Quick tools", "CSS generators", "Box shadow"], textopts: ["Quick tools", "Work on text", "Find and replace"] }[screen] ?? ["Tools"];
   const mains = { home: () => homeMain(v, false), hover: () => homeMain(v, true), tool: toolMain, discard: toolMain, queue: queueMain, history: historyMain, settings: settingsMain,
-    palette: () => homeMain(v, false), install: () => homeMain(v, false), utility: utilityMain, chat: chatMain, narrow: narrowMain };
+    palette: () => homeMain(v, false), install: () => homeMain(v, false), utility: utilityMain, chat: chatMain, narrow: narrowMain,
+    calc: calcMain, css: cssMain, textopts: textOptsMain };
   const overlay = { palette: paletteOverlay, install: installOverlay, discard: discardOverlay }[screen]?.() ?? "";
   const side = screen === "narrow" ? rail(v) : sidebar(v, screen);
   return `<!doctype html><html lang="en" class="${theme}"><head><meta charset="utf-8"><title>${v.title} · ${theme} · ${screen}</title><style>${css(v, theme, W, H)}</style></head>
@@ -400,7 +441,7 @@ const outDir = process.argv[2] ?? "screens";
 const only = process.argv[3];
 mkdirSync(join(here, outDir, "html"), { recursive: true });
 let n = 0;
-for (const key of Object.keys(variants).filter((k) => (only ? k === only : k === "b3"))) for (const theme of ["light", "dark"]) for (const screen of (process.argv[4] ? process.argv[4].split(",") : ["home", "hover", "tool", "queue", "history", "settings", "palette", "install", "utility", "chat", "narrow", "discard"])) {
+for (const key of Object.keys(variants).filter((k) => (only ? k === only : k === "b3"))) for (const theme of ["light", "dark"]) for (const screen of (process.argv[4] ? process.argv[4].split(",") : ["home", "hover", "tool", "queue", "history", "settings", "palette", "install", "utility", "chat", "narrow", "discard", "calc", "css", "textopts"])) {
   writeFileSync(join(here, outDir, "html", `${key}-${theme}-${screen}.html`), page(key, theme, screen)); n++;
 }
 console.log(`built ${n} pages`);

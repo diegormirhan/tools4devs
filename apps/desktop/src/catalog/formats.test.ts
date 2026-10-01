@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { acceptsFile, operationFormats, toolAccepts } from "./formats";
+import { acceptsFile, operationFormats, suggestToolsFor, toolAccepts } from "./formats";
 import { createCatalogRows } from "./catalog";
 
 describe("file types", () => {
@@ -26,6 +26,18 @@ describe("file types", () => {
     for (const toolId of ["7zip", "hexyl", "difftastic"]) {
       expect(acceptsFile(toolId, "whatever.bin").ok).toBe(true);
     }
+  });
+
+  it("suggests the tools made for a dropped file, and not the ones that take anything", () => {
+    const video = suggestToolsFor("C:/clips/Holiday.MP4");
+    expect(video).toEqual(expect.arrayContaining(["ffmpeg", "ffprobe", "mkvtoolnix", "songrec", "exiftool"]));
+    // A hex viewer or an archiver reads it too, but naming them for every file tells nobody anything.
+    expect(video).not.toContain("7zip");
+    expect(video).not.toContain("hexyl");
+    expect(video).not.toContain("qpdf");
+
+    expect(suggestToolsFor("contrato.pdf")).toEqual(expect.arrayContaining(["qpdf", "poppler", "tesseract"]));
+    expect(suggestToolsFor("notes.xyz")).toEqual([]);
   });
 
   it("is case-insensitive about the extension", () => {

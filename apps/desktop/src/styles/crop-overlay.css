@@ -1,0 +1,80 @@
+/*
+ * The crop rectangle over a picture or a video frame.
+ *
+ * It sits exactly on the media box, which is measured rather than assumed:
+ * object-fit letterboxes the media inside the stage, and the stage centres
+ * this overlay the same way it centres the media.
+ */
+.crop-overlay { position: absolute; touch-action: none; }
+
+/* Everything outside the rectangle is dimmed, so the crop reads as the part
+   that survives rather than one more box on top of the picture. */
+.crop-overlay__shade {
+  position: absolute;
+  pointer-events: none;
+  outline: 9999px solid rgb(0 0 0 / 0.55);
+}
+.crop-overlay__rect {
+  position: absolute;
+  cursor: move;
+  border: 1px solid var(--primary);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--background) 60%, transparent);
+}
+
+/* Thirds, the guide every photo editor draws, and the reason the rectangle
+   reads as a frame rather than a selection box. */
+.crop-overlay__rect::before,
+.crop-overlay__rect::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  --third: color-mix(in oklab, var(--primary) 45%, transparent);
+}
+.crop-overlay__rect::before {
+  background-image:
+    linear-gradient(to right, var(--third) 1px, transparent 1px),
+    linear-gradient(to right, var(--third) 1px, transparent 1px);
+  background-position: 33.33% 0, 66.66% 0;
+  background-size: 1px 100%, 1px 100%;
+}
+.crop-overlay__rect::after {
+  background-image:
+    linear-gradient(to bottom, var(--third) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--third) 1px, transparent 1px);
+  background-position: 0 33.33%, 0 66.66%;
+  background-size: 100% 1px, 100% 1px;
+}
+
+.crop-overlay__size {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.crop-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: var(--primary);
+  border: 2px solid var(--background);
+  border-radius: 50%;
+}
+.crop-handle--nw { top: -7px; left: -7px; cursor: nwse-resize; }
+.crop-handle--n { top: -7px; left: 50%; margin-left: -7px; cursor: ns-resize; }
+.crop-handle--ne { top: -7px; right: -7px; cursor: nesw-resize; }
+.crop-handle--e { top: 50%; right: -7px; margin-top: -7px; cursor: ew-resize; }
+.crop-handle--se { bottom: -7px; right: -7px; cursor: nwse-resize; }
+.crop-handle--s { bottom: -7px; left: 50%; margin-left: -7px; cursor: ns-resize; }
+.crop-handle--sw { bottom: -7px; left: -7px; cursor: nesw-resize; }
+.crop-handle--w { top: 50%; left: -7px; margin-top: -7px; cursor: ew-resize; }

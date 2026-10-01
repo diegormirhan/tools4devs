@@ -96,11 +96,11 @@ export function FilePreview({
   const canCrop = crop && onCropChange && natural.width > 0 && (kind === "image" || kind === "video");
 
   return (
-    <figure className="file-preview">
-      <div className="file-preview__stage">
+    <figure className="grid overflow-hidden rounded-xl border bg-card text-card-foreground shadow-xs">
+      <div className="relative grid min-h-24 place-items-center overflow-hidden bg-muted/50 [&_img]:max-h-[min(62vh,520px)] [&_img]:object-contain [&_video]:block [&_video]:max-h-[min(62vh,520px)] [&_video]:max-w-full [&_video]:object-contain">
         {failed || !source ? (
-          <div className="file-preview__fallback">
-            <FileQuestion size={22} aria-hidden="true" />
+          <div className="grid justify-items-center gap-2 px-5 py-8 text-center text-xs text-muted-foreground">
+            <FileQuestion className="size-5" aria-hidden="true" />
             <span>{t(failed ? "This format cannot be shown here" : "Opening preview…")}</span>
           </div>
         ) : kind === "image" ? (
@@ -130,17 +130,17 @@ export function FilePreview({
             onError={() => setFailed(true)}
           />
         ) : (
-          <audio src={source} controls preload="metadata" onError={() => setFailed(true)} />
+          <audio className="w-full p-4" src={source} controls preload="metadata" onError={() => setFailed(true)} />
         )}
 
         {canCrop && (
           <CropOverlay media={media} natural={natural} value={crop} onChange={onCropChange} />
         )}
       </div>
-      <figcaption>
-        <span className="file-preview__name">{name}</span>
+      <figcaption className="flex justify-between gap-3 border-t px-4 py-2 text-xs text-muted-foreground">
+        <span className="truncate">{name}</span>
         {natural.width > 0 && (
-          <span className="file-preview__meta">
+          <span className="shrink-0 font-mono tabular-nums">
             {natural.width} × {natural.height}
           </span>
         )}

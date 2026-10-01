@@ -24,7 +24,7 @@ export function useTheme() {
     // Surfaces animate their background at different speeds, so a live swap tears the
     // frame. Suppress transitions for the swap itself and restore them right after.
     root.dataset.themeSwitching = "true";
-    root.dataset.theme = resolvedTheme;
+    root.classList.toggle("dark", resolvedTheme === "dark");
     root.style.colorScheme = resolvedTheme;
     const frame = requestAnimationFrame(() =>
       requestAnimationFrame(() => delete root.dataset.themeSwitching),

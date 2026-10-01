@@ -2,6 +2,8 @@
 
 **Plano de implementação, casos de uso e especificação do design: [`PLANO.md`](PLANO.md).**
 
+**Ordem de execução e checklist por etapa: [`ETAPAS.md`](ETAPAS.md).**
+
 Material de referência para a reestruturação do app (sidebar em árvore, cards com preview no hover, shadcn/ui). Nada aqui é importado pelo app: são imagens, vídeos e os scripts que os geram.
 
 ## Direção escolhida
@@ -21,7 +23,7 @@ Material de referência para a reestruturação do app (sidebar em árvore, card
 |---|---|
 | `screens/png/` | 24 telas em 1440×900 (12 telas × claro e escuro), `b3-<tema>-<tela>.png` |
 | `screens/html/` | as mesmas telas em HTML estático |
-| `previews/out/` | 4 clipes de hover em WebM (VP9, 960×540, 6 s, loop) e os posters `.jpg` |
+| `previews/out/` | os 4 primeiros clipes de hover em WebM (VP9, 960×540, 6 s, loop) e os posters `.jpg`; os 39 que o app usa estão em `apps/desktop/public/previews/` |
 | `previews/sheets/` | linha do tempo de cada clipe (1 quadro a cada 0,4 s) |
 | `previews/demo.html` | toca os 4 clipes lado a lado |
 | `previews/clip.html`, `previews/render.mjs` | motor de motion graphics e o renderizador quadro a quadro |
@@ -55,5 +57,5 @@ Tokens e classes dos componentes seguem o repositório oficial `shadcn-ui/ui` (`
 ## Limitações
 
 - São mockups estáticos: o hover de cada card, a rolagem da sidebar e os estados de erro são só ilustrados.
-- Só 4 dos 39 cards têm clipe. Os demais precisam de uma cena cada (o motor já está pronto).
+- Os 39 cards têm clipe (etapa 6); as cenas de todos estão em `previews/clip.html`. Para renderizar no Windows: `OUT=../../../apps/desktop/public/previews CHROMIUM=<chrome.exe> FFMPEG=<ffmpeg.exe> LUCIDE=<lucide-static/icons> FRAMES=<pasta temporária> node render.mjs <ids...>`, com `playwright-core` instalado (`npm i --no-save playwright-core`).
 - Os textos estão em inglês (idioma-base do app); o português entra na implementação.

@@ -4,9 +4,11 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { CatalogTool } from "../catalog/catalog";
 import { isNativeHost } from "../hooks/useOperationRunner";
-import { PanelShell } from "./PanelShell";
+import { OutboundNotice, PageCard, PageResult, ToolPage } from "./ToolPage";
 import { useT } from "../i18n/language";
 import { Select } from "./Select";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/cn";
 
 type AudioSource = { id: string; label: string; kind: "microphone" | "playback"; isDefault: boolean };
 
@@ -41,15 +43,9 @@ const BAR_COUNT = 40;
  */
 export function MusicPanel({
   tool,
-  leaving = false,
-  onClose,
-  onExited,
   onDirtyChange,
 }: {
   tool: CatalogTool;
-  leaving?: boolean;
-  onClose: () => void;
-  onExited?: () => void;
   onDirtyChange?: (dirty: boolean) => void;
 }) {
   const t = useT();
@@ -63,10 +59,7 @@ export function MusicPanel({
   const [tried, setTried] = useState(0);
   const [error, setError] = useState("");
   const [result, setResult] = useState<Recognition | null>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => closeButtonRef.current?.focus(), []);
 
   useEffect(() => {
     if (!isNativeHost()) return;
@@ -170,113 +163,109 @@ export function MusicPanel({
   }
 
   return (
-    <PanelShell
-      ref={closeButtonRef}
-      title={tool.integrationName}
-      leaving={leaving}
-      onClose={onClose}
-      onExited={onExited}
-    >
-      <section className="tool-panel__controls">
-        <h2 id="tool-panel-title">{t(tool.title)}</h2>
-        <p>{t(tool.description)}</p>
+    <ToolPage tool={tool}>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid min-w-0 gap-4">
+          <PageCard className="justify-items-center gap-4 py-10">
+            <button
+              type="button"
+              className={cn(
+                "group relative grid size-[86px] cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground shadow-md outline-none transition-[transform,background-color] duration-200 ease-out",
+                "hover:not-disabled:not-aria-busy:scale-104 hover:not-disabled:not-aria-busy:bg-primary/90 active:not-disabled:scale-97",
+                "focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-default disabled:opacity-45 aria-busy:cursor-default",
+                busy && "animate-listen-pulse motion-reduce:animate-none",
+              )}
+              // Not `disabled` while listening: that greys it out, and a button
+              // that is working is not a button that is unavailable. The click is
+              // ignored in the handler instead.
+              disabled={!deviceId}
+              aria-busy={busy}
+              onClick={listenNow}
+              aria-label={t(busy ? "Listening" : "Listen and identify")}
+            >
+              {/* A conic sweep masked to a band, so it reads as progress rather
+                  than as a pie chart: from the top, clockwise. */}
+              <span
+                className="absolute -inset-2.5 rounded-full bg-[conic-gradient(from_-90deg,var(--primary)_calc(var(--through,0)*360deg),var(--muted)_0)] opacity-0 transition-opacity duration-300 [mask:radial-gradient(farthest-side,transparent_calc(100%-5px),currentColor_calc(100%-4px))] group-aria-busy:opacity-100 motion-reduce:transition-none"
+                style={{ "--through": through } as React.CSSProperties}
+              />
+              {kind === "playback" ? (
+                <Speaker className="relative size-[30px]" aria-hidden="true" />
+              ) : (
+                <Mic className="relative size-[30px]" aria-hidden="true" />
+              )}
+            </button>
+            <Meter levels={levels} active={busy} />
+            <p className="text-sm text-muted-foreground" role="status" data-tried={tried}>
+              {t(
+                busy
+                  ? tried > 0
+                    ? "Still listening…"
+                    : "Listening…"
+                  : deviceId
+                    ? "Tap to identify what is playing."
+                    : "No sound device found.",
+              )}
+            </p>
+          </PageCard>
 
-        <p className="notice notice--outbound">
-          <ExternalLink size={14} aria-hidden="true" />
-          <span>
+          {error && (
+            <PageResult error icon={<AlertTriangle aria-hidden="true" />}>
+              {error}
+            </PageResult>
+          )}
+
+          <div ref={resultRef}>{result && <RecognitionCard result={result} />}</div>
+        </div>
+
+        <PageCard title={t("Options")} className="gap-4 lg:sticky lg:top-4">
+          <OutboundNotice icon={<ExternalLink aria-hidden="true" />}>
             {t(
               "The clip is fingerprinted on this machine and deleted straight after. Only the fingerprint is sent — never the recording itself.",
             )}
-          </span>
-        </p>
+          </OutboundNotice>
 
-        <label className="operation-select">
-          <span>{t("Listen to")}</span>
-          <Select
-            label={t("Listen to")}
-            value={kind}
-            choices={[
-              { value: "playback", label: t("What this PC is playing") },
-              { value: "microphone", label: t("The microphone") },
-            ]}
-            onChange={(next) => {
-              setKind(next as "playback" | "microphone");
-              setError("");
-              setResult(null);
-            }}
-          />
-          <small>
-            {kind === "playback"
-              ? t("Records the machine's own sound, without a cable or a virtual device.")
-              : chosen
-                ? t("Records the room through {name}.", { name: chosen.label })
-                : t("Records the room.")}
-          </small>
-        </label>
-
-        {kind === "playback" && playback.length > 1 && (
-          <label className="operation-select">
-            <span>{t("Sound source")}</span>
+          <label className="grid gap-2">
+            <span className="text-sm font-medium">{t("Listen to")}</span>
             <Select
-              label={t("Sound source")}
-              value={deviceId}
-              choices={playback.map((source) => ({ value: source.id, label: source.label }))}
-              onChange={setDeviceId}
+              label={t("Listen to")}
+              value={kind}
+              choices={[
+                { value: "playback", label: t("What this PC is playing") },
+                { value: "microphone", label: t("The microphone") },
+              ]}
+              onChange={(next) => {
+                setKind(next as "playback" | "microphone");
+                setError("");
+                setResult(null);
+              }}
             />
+            <small className="text-xs text-muted-foreground">
+              {kind === "playback"
+                ? t("Records the machine's own sound, without a cable or a virtual device.")
+                : chosen
+                  ? t("Records the room through {name}.", { name: chosen.label })
+                  : t("Records the room.")}
+            </small>
           </label>
-        )}
 
-        {kind === "microphone" && microphones.length > 1 && (
-          <label className="operation-select">
-            <span>{t("Sound source")}</span>
-            <Select
-              label={t("Sound source")}
-              value={deviceId}
-              choices={microphones.map((source) => ({ value: source.id, label: source.label }))}
-              onChange={setDeviceId}
-            />
-          </label>
-        )}
-
-        <div className="listen">
-          <button
-            className={`listen__button${busy ? " listen__button--busy" : ""}`}
-            type="button"
-            // Not `disabled` while listening: that greys it out, and a button
-            // that is working is not a button that is unavailable. The click is
-            // ignored in the handler instead.
-            disabled={!deviceId}
-            aria-busy={busy}
-            onClick={listenNow}
-            aria-label={t(busy ? "Listening" : "Listen and identify")}
-          >
-            <span className="listen__ring" style={{ "--through": through } as React.CSSProperties} />
-            {kind === "playback" ? <Speaker size={30} aria-hidden="true" /> : <Mic size={30} aria-hidden="true" />}
-          </button>
-          <Meter levels={levels} active={busy} />
-          <p className="listen__caption" role="status" data-tried={tried}>
-            {t(
-              busy
-                ? tried > 0
-                  ? "Still listening…"
-                  : "Listening…"
-                : deviceId
-                  ? "Tap to identify what is playing."
-                  : "No sound device found.",
-            )}
-          </p>
-        </div>
-
-        {error && (
-          <p className="panel-result panel-result--error" role="status">
-            <AlertTriangle size={15} aria-hidden="true" />
-            <span>{error}</span>
-          </p>
-        )}
-
-        <div ref={resultRef}>{result && <RecognitionCard result={result} />}</div>
-      </section>
-    </PanelShell>
+          {(kind === "playback" ? playback : microphones).length > 1 && (
+            <label className="grid gap-2">
+              <span className="text-sm font-medium">{t("Sound source")}</span>
+              <Select
+                label={t("Sound source")}
+                value={deviceId}
+                choices={(kind === "playback" ? playback : microphones).map((source) => ({
+                  value: source.id,
+                  label: source.label,
+                }))}
+                onChange={setDeviceId}
+              />
+            </label>
+          )}
+        </PageCard>
+      </div>
+    </ToolPage>
   );
 }
 
@@ -289,11 +278,21 @@ export function MusicPanel({
  */
 function Meter({ levels, active }: { levels: number[]; active: boolean }) {
   return (
-    <div className={`meter${active ? " meter--active" : ""}`} aria-hidden="true">
+    // A baseline behind the bars: silence is a line and sound grows out of it,
+    // in both directions, which is what a waveform is.
+    <div
+      className="relative flex h-[60px] w-full items-center justify-center gap-[3px] before:absolute before:top-1/2 before:left-1/2 before:h-px before:w-[296px] before:-translate-1/2 before:bg-border"
+      aria-hidden="true"
+    >
       {levels.map((level, index) => (
         <span
           key={index}
-          className="meter__bar"
+          data-meter-bar
+          className={cn(
+            "relative w-[3px] rounded-full transition-[height,background-color] duration-100 ease-out motion-reduce:transition-none",
+            // Quiet while nothing is being recorded: the baseline alone carries it.
+            active ? "h-[max(3px,calc(var(--level,0)*60px))] bg-primary" : "h-px bg-border opacity-0",
+          )}
           // A square root opens up the quiet end, where speech and most music
           // actually sit; a linear bar spends its height on peaks nobody hits.
           style={{ "--level": Math.min(1, Math.sqrt(level)) } as React.CSSProperties}
@@ -306,12 +305,7 @@ function Meter({ levels, active }: { levels: number[]; active: boolean }) {
 function RecognitionCard({ result }: { result: Recognition }) {
   const t = useT();
   if (!result.matched) {
-    return (
-      <p className="panel-result" role="status">
-        <Speaker size={15} aria-hidden="true" />
-        <span>{result.message}</span>
-      </p>
-    );
+    return <PageResult icon={<Speaker aria-hidden="true" />}>{result.message}</PageResult>;
   }
   const rows = [
     [t("Album"), result.album],
@@ -320,20 +314,29 @@ function RecognitionCard({ result }: { result: Recognition }) {
     [t("Label"), result.label],
   ].filter(([, value]) => value);
 
+  // Cover art earns its place: it is how anyone confirms at a glance that the
+  // answer is the right one, faster than reading the title.
   return (
-    <article className="recognition" aria-label={t("What was recognised")}>
+    <article
+      className="flex flex-col items-start gap-4 rounded-xl border bg-card p-5 text-card-foreground shadow-xs animate-in fade-in slide-in-from-bottom-2 duration-500 motion-reduce:animate-none sm:flex-row"
+      aria-label={t("What was recognised")}
+    >
       {result.coverUrl && (
-        <img className="recognition__cover" src={result.coverUrl} alt={t("Cover art for {name}", { name: result.title })} />
+        <img
+          className="size-[92px] shrink-0 rounded-lg border object-cover"
+          src={result.coverUrl}
+          alt={t("Cover art for {name}", { name: result.title })}
+        />
       )}
-      <div className="recognition__detail">
-        <h3>{result.title || t("Untitled")}</h3>
-        {result.artist && <p className="recognition__artist">{result.artist}</p>}
+      <div className="grid min-w-0 gap-2">
+        <h3 className="font-heading text-lg font-semibold break-words">{result.title || t("Untitled")}</h3>
+        {result.artist && <p className="text-sm text-muted-foreground">{result.artist}</p>}
         {rows.length > 0 && (
-          <dl className="recognition__rows">
+          <dl className="grid gap-x-4 gap-y-2 sm:grid-cols-2">
             {rows.map(([label, value]) => (
-              <div key={label}>
-                <dt>{label}</dt>
-                <dd>{value}</dd>
+              <div key={label} className="grid min-w-0 gap-px">
+                <dt className="text-[0.65rem] tracking-wider text-muted-foreground uppercase">{label}</dt>
+                <dd className="text-sm break-words">{value}</dd>
               </div>
             ))}
           </dl>
@@ -342,17 +345,18 @@ function RecognitionCard({ result }: { result: Recognition }) {
           // Links would open inside this window, which has no way back, so the
           // host opens the browser after checking each address. The services
           // rather than the recogniser's own page: that page answers 405.
-          <div className="recognition__links">
+          <div className="mt-1 flex flex-wrap gap-2">
             {result.links.map((link) => (
-              <button
+              <Button
                 key={link.url}
-                className="recognition__link"
-                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-full"
                 onClick={() => void invoke("open_link", { url: link.url })}
               >
-                <ExternalLink size={13} aria-hidden="true" />
+                <ExternalLink aria-hidden="true" />
                 {link.label}
-              </button>
+              </Button>
             ))}
           </div>
         )}

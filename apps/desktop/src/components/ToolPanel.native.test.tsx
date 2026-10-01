@@ -51,7 +51,7 @@ function job(overrides: Partial<ToolJob>): ToolJob {
 it('hands the runner the request envelope expected by the native command', async () => {
   vi.mocked(save).mockResolvedValue('C:\\videos\\video.mp4');
   const onRun = vi.fn(() => jobId);
-  render(<ToolPanel tool={catalogTool('yt-dlp')} onClose={vi.fn()} onRun={onRun} />);
+  render(<ToolPanel tool={catalogTool('yt-dlp')} onRun={onRun} />);
 
   await userEvent.type(screen.getByLabelText('Media URL'), 'https://example.com/video');
   await userEvent.click(screen.getByRole('button', { name: 'Run' }));
@@ -70,7 +70,7 @@ it('hands the runner the request envelope expected by the native command', async
 it('mirrors the live progress the queue reports for its own job', async () => {
   vi.mocked(save).mockResolvedValue('video.mp4');
   const running = job({ toolId: 'yt-dlp', operationId: 'download-video', status: 'running', progress: 0.42, message: 'Downloading media…' });
-  render(<ToolPanel tool={catalogTool('yt-dlp')} jobs={[running]} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('yt-dlp')} jobs={[running]} onRun={() => jobId} />);
 
   await userEvent.type(screen.getByLabelText('Media URL'), 'https://example.com/video');
   await userEvent.click(screen.getByRole('button', { name: 'Run' }));
@@ -84,7 +84,7 @@ it('mirrors the live progress the queue reports for its own job', async () => {
 it('reports a failed job as an error instead of a silent success', async () => {
   vi.mocked(save).mockResolvedValue('C:\\videos\\video.mp4');
   const failed = job({ status: 'failed', message: 'yt-dlp.exe not found' });
-  render(<ToolPanel tool={catalogTool('yt-dlp')} jobs={[failed]} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('yt-dlp')} jobs={[failed]} onRun={() => jobId} />);
 
   await userEvent.type(screen.getByLabelText('Media URL'), 'https://example.com/video');
   await userEvent.click(screen.getByRole('button', { name: 'Run' }));
@@ -103,7 +103,7 @@ it('shows the host result and the produced output path', async () => {
     outputPath: 'image-upscale.png',
   });
   vi.mocked(save).mockResolvedValue('image-upscale.png');
-  render(<ToolPanel tool={catalogTool('libvips')} initialPath={'C:\\fixtures\\image.png'} jobs={[succeeded]} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('libvips')} initialPath={'C:\\fixtures\\image.png'} jobs={[succeeded]} onRun={() => jobId} />);
 
   await choose(screen.getByRole('combobox', { name: 'Operation' }), 'Enlarge (plain)');
   await userEvent.click(screen.getByRole('button', { name: 'Run' }));
@@ -115,7 +115,7 @@ it('shows the host result and the produced output path', async () => {
 it('selects a directory for project searches', async () => {
   vi.mocked(open).mockResolvedValue('C:\\fixtures');
   const onRun = vi.fn(() => jobId);
-  render(<ToolPanel tool={catalogTool('ripgrep')} onClose={vi.fn()} onRun={onRun} />);
+  render(<ToolPanel tool={catalogTool('ripgrep')} onRun={onRun} />);
 
   await userEvent.click(screen.getByRole('button', { name: /choose the project folder/i }));
   expect(open).toHaveBeenCalledWith({ directory: true, multiple: false });
@@ -130,7 +130,7 @@ it('selects a directory for project searches', async () => {
 
 it('passes the file selected in the main workspace to the operation', async () => {
   const onRun = vi.fn(() => jobId);
-  render(<ToolPanel tool={catalogTool('jq')} initialPath={'C:\\fixtures\\sample.json'} onClose={vi.fn()} onRun={onRun} />);
+  render(<ToolPanel tool={catalogTool('jq')} initialPath={'C:\\fixtures\\sample.json'} onRun={onRun} />);
 
   await userEvent.click(screen.getByRole('button', { name: 'Run' }));
 
@@ -142,7 +142,7 @@ it('passes the file selected in the main workspace to the operation', async () =
 it('stops before running when the destination dialog is dismissed', async () => {
   vi.mocked(save).mockResolvedValue(null);
   const onRun = vi.fn(() => jobId);
-  render(<ToolPanel tool={catalogTool('qpdf')} initialPath={'C:\\fixtures\\contrato.pdf'} onClose={vi.fn()} onRun={onRun} />);
+  render(<ToolPanel tool={catalogTool('qpdf')} initialPath={'C:\\fixtures\\contrato.pdf'} onRun={onRun} />);
 
   await userEvent.click(screen.getByRole('button', { name: 'Run' }));
 
@@ -162,7 +162,7 @@ it.each([
 it('never lets a metadata edit touch the original file', async () => {
   vi.mocked(save).mockResolvedValue('C:\fotos\foto-set-title.jpg');
   const onRun = vi.fn(() => jobId);
-  render(<ToolPanel tool={catalogTool('exiftool')} initialPath={'C:\fotos\foto.jpg'} onClose={vi.fn()} onRun={onRun} />);
+  render(<ToolPanel tool={catalogTool('exiftool')} initialPath={'C:\fotos\foto.jpg'} onRun={onRun} />);
 
   await choose(screen.getByRole('combobox', { name: 'Operation' }), /set title/i);
   await userEvent.type(screen.getByLabelText('Title'), 'Contrato');
@@ -180,7 +180,7 @@ it('never lets a metadata edit touch the original file', async () => {
 });
 
 it('asks for page and resolution before rasterising a PDF', async () => {
-  render(<ToolPanel tool={catalogTool('poppler')} initialPath={'C:\docs\contrato.pdf'} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('poppler')} initialPath={'C:\docs\contrato.pdf'} onRun={() => jobId} />);
 
   await choose(screen.getByRole('combobox', { name: 'Operation' }), /page as image/i);
 
@@ -189,7 +189,7 @@ it('asks for page and resolution before rasterising a PDF', async () => {
 });
 
 it('does not ask for a destination when the operation only reads', async () => {
-  render(<ToolPanel tool={catalogTool('imagemagick')} initialPath={'C:\fotos\foto.png'} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('imagemagick')} initialPath={'C:\fotos\foto.png'} onRun={() => jobId} />);
 
   expect(screen.getByText(/the extension decides the format/i)).toBeVisible();
   await choose(screen.getByRole('combobox', { name: 'Operation' }), /inspect/i);
@@ -209,7 +209,7 @@ it.each([
 it('waits for both files before a structural comparison can run', async () => {
   vi.mocked(open).mockResolvedValue(['C:\src\antes.ts', 'C:\src\depois.ts']);
   const onRun = vi.fn(() => jobId);
-  render(<ToolPanel tool={catalogTool('difftastic')} onClose={vi.fn()} onRun={onRun} />);
+  render(<ToolPanel tool={catalogTool('difftastic')} onRun={onRun} />);
 
   expect(screen.getByRole('button', { name: 'Run' })).toBeDisabled();
 
@@ -224,7 +224,7 @@ it('waits for both files before a structural comparison can run', async () => {
 
 it.each(['tokei', 'dust'])('asks %s for a folder instead of a file', async toolId => {
   vi.mocked(open).mockResolvedValue('C:\projeto');
-  render(<ToolPanel tool={catalogTool(toolId)} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool(toolId)} onRun={() => jobId} />);
 
   await userEvent.click(screen.getByRole('button', { name: /choose the project folder/i }));
 
@@ -232,7 +232,7 @@ it.each(['tokei', 'dust'])('asks %s for a folder instead of a file', async toolI
 });
 
 it('never offers a destination for a read-only dev tool', () => {
-  render(<ToolPanel tool={catalogTool('miller')} initialPath={'C:\dados\vendas.csv'} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('miller')} initialPath={'C:\dados\vendas.csv'} onRun={() => jobId} />);
 
   expect(screen.queryByRole('button', { name: 'Choose destination' })).not.toBeInTheDocument();
 });
@@ -240,7 +240,7 @@ it('never offers a destination for a read-only dev tool', () => {
 it('sends the chosen browser as the cookie source, and nothing else', async () => {
   const onRun = vi.fn(() => jobId);
   vi.mocked(save).mockResolvedValue('C:\videos\video.mp4');
-  render(<ToolPanel tool={catalogTool('yt-dlp')} onClose={vi.fn()} onRun={onRun} />);
+  render(<ToolPanel tool={catalogTool('yt-dlp')} onRun={onRun} />);
 
   await userEvent.type(screen.getByLabelText('Media URL'), 'https://example.com/watch');
   await choose(screen.getByRole('combobox', { name: 'Sign in' }), /cookies from firefox/i);
@@ -256,7 +256,7 @@ it('sends the chosen browser as the cookie source, and nothing else', async () =
 });
 
 it('asks for the cookie file only once that method is chosen', async () => {
-  render(<ToolPanel tool={catalogTool('yt-dlp')} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('yt-dlp')} onRun={() => jobId} />);
 
   expect(screen.queryByLabelText('Cookie file')).not.toBeInTheDocument();
   await choose(screen.getByRole('combobox', { name: 'Sign in' }), /cookie file/i);
@@ -267,7 +267,7 @@ it('asks for the cookie file only once that method is chosen', async () => {
 });
 
 it('offers no sign-in or quality controls for tools that have no account', async () => {
-  render(<ToolPanel tool={catalogTool('oxipng')} initialPath={'C:\fotos\foto.png'} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('oxipng')} initialPath={'C:\fotos\foto.png'} onRun={() => jobId} />);
   expect(screen.queryByRole('combobox', { name: 'Sign in' })).not.toBeInTheDocument();
 });
 
@@ -281,7 +281,7 @@ it.each([
 it('drives gallery-dl from a URL and writes into a folder', async () => {
   const onRun = vi.fn(() => jobId);
   vi.mocked(open).mockResolvedValue('C:\galerias');
-  render(<ToolPanel tool={catalogTool('gallery-dl')} onClose={vi.fn()} onRun={onRun} />);
+  render(<ToolPanel tool={catalogTool('gallery-dl')} onRun={onRun} />);
 
   // A URL-driven tool offers no file picker at all.
   expect(screen.queryByRole('button', { name: /choose file/i })).not.toBeInTheDocument();
@@ -301,7 +301,7 @@ it('drives gallery-dl from a URL and writes into a folder', async () => {
 });
 
 it('offers gallery-dl the same sign-in, but no quality mode', async () => {
-  render(<ToolPanel tool={catalogTool('gallery-dl')} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('gallery-dl')} onRun={() => jobId} />);
 
   expect(screen.getByRole('combobox', { name: 'Sign in' })).toBeVisible();
   // Quality is yt-dlp's: gallery-dl takes whatever the site serves.
@@ -315,7 +315,7 @@ it('opens the save dialog in the folder chosen in settings', async () => {
       tool={catalogTool('oxipng')}
       initialPath={'C:\\fotos\\foto.png'}
       defaultFolder={'D:\\saida'}
-      onClose={vi.fn()}
+     
       onRun={() => jobId}
     />,
   );
@@ -334,7 +334,7 @@ it('saves into the folder chosen in settings without asking again', async () => 
       tool={catalogTool('oxipng')}
       initialPath={'C:\\fotos\\foto.png'}
       defaultFolder={'D:\\saida'}
-      onClose={vi.fn()}
+     
       onRun={onRun}
     />,
   );
@@ -361,7 +361,7 @@ it('still asks where to save when no default folder is set', async () => {
     <ToolPanel
       tool={catalogTool('oxipng')}
       initialPath={'C:\\fotos\\foto.png'}
-      onClose={vi.fn()}
+     
       onRun={onRun}
     />,
   );
@@ -377,7 +377,7 @@ it('sends a gallery straight to the default folder rather than a file inside it'
     <ToolPanel
       tool={catalogTool('gallery-dl')}
       defaultFolder={'D:\\saida'}
-      onClose={vi.fn()}
+     
       onRun={onRun}
     />,
   );
@@ -394,7 +394,7 @@ it('sends a gallery straight to the default folder rather than a file inside it'
 
 it('falls back to the suggested path when no default folder is set', async () => {
   vi.mocked(save).mockResolvedValue('C:\\fotos\\foto-optimize.png');
-  render(<ToolPanel tool={catalogTool('oxipng')} initialPath={'C:\\fotos\\foto.png'} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('oxipng')} initialPath={'C:\\fotos\\foto.png'} onRun={() => jobId} />);
 
   await userEvent.click(screen.getByRole('button', { name: 'Choose destination' }));
 
@@ -404,7 +404,7 @@ it('falls back to the suggested path when no default folder is set', async () =>
 it('only reports work worth a confirmation once there is some', async () => {
   const onDirtyChange = vi.fn();
   vi.mocked(open).mockResolvedValue('C:\fotos\foto.png');
-  render(<ToolPanel tool={catalogTool('libvips')} onClose={vi.fn()} onRun={() => jobId} onDirtyChange={onDirtyChange} />);
+  render(<ToolPanel tool={catalogTool('libvips')} onRun={() => jobId} onDirtyChange={onDirtyChange} />);
 
   // Opening a tool changes nothing, so closing it should ask nothing.
   expect(onDirtyChange).toHaveBeenLastCalledWith(false);
@@ -416,7 +416,7 @@ it('only reports work worth a confirmation once there is some', async () => {
 
 it('counts a typed URL as work, even with no file chosen', async () => {
   const onDirtyChange = vi.fn();
-  render(<ToolPanel tool={catalogTool('yt-dlp')} onClose={vi.fn()} onRun={() => jobId} onDirtyChange={onDirtyChange} />);
+  render(<ToolPanel tool={catalogTool('yt-dlp')} onRun={() => jobId} onDirtyChange={onDirtyChange} />);
 
   expect(onDirtyChange).toHaveBeenLastCalledWith(false);
   await userEvent.type(screen.getByLabelText('Media URL'), 'https://example.com/watch');
@@ -427,7 +427,7 @@ it('says why a file was refused instead of quietly ignoring it', async () => {
   // The refusal used to be wiped by the feedback reset that ran straight
   // after it, so the file vanished and nothing explained why.
   vi.mocked(open).mockResolvedValue('C:\fotos\foto.png');
-  render(<ToolPanel tool={catalogTool('qpdf')} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('qpdf')} onRun={() => jobId} />);
 
   await userEvent.click(screen.getByRole('button', { name: /choose files/i }));
 
@@ -442,7 +442,7 @@ it('sends the factor the panel offered, which the host turns into a second pass'
     <ToolPanel
       tool={catalogTool('libvips')}
       initialPath={'C:\fotos\foto.png'}
-      onClose={vi.fn()}
+     
       onRun={onRun}
     />,
   );
@@ -467,7 +467,7 @@ it('sends the factor the panel offered, which the host turns into a second pass'
 
 it('refuses a TIFF for the model but takes it for every other image operation', async () => {
   vi.mocked(open).mockResolvedValue('C:\scans\scan.tiff');
-  render(<ToolPanel tool={catalogTool('libvips')} onClose={vi.fn()} onRun={() => jobId} />);
+  render(<ToolPanel tool={catalogTool('libvips')} onRun={() => jobId} />);
 
   await choose(screen.getByRole('combobox', { name: 'Operation' }), 'Enlarge (model)');
   await userEvent.click(screen.getByRole('button', { name: /choose files/i }));

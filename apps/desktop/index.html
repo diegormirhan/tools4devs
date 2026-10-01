@@ -7,6 +7,16 @@
     <link rel="icon" href="/brand/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/brand/favicon.ico" sizes="any" />
     <title>tools4devs</title>
+    <script>
+      // The theme tokens key off .dark, which useTheme sets only once React runs.
+      // Setting it here first keeps a dark Windows from flashing light at launch.
+      // Same key and rule as src/hooks/useTheme.ts.
+      try {
+        var preference = localStorage.getItem("tools4devs.theme-preference");
+        var dark = preference === "dark" || (preference !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
+      } catch (error) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

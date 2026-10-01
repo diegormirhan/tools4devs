@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Check, CircleSlash, FilePlus2, FolderOpen, Play, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AlertTriangle, Check, CircleSlash, FilePlus2, FolderOpen, Play } from "lucide-react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import type { CatalogTool } from "../catalog/catalog";
 import { findJob, type ToolJob } from "../domain/job-queue";
@@ -8,8 +8,12 @@ import { FilePreview, previewKind } from "./FilePreview";
 import { defaultCrop, type CropRect } from "./CropOverlay";
 import { Select } from "./Select";
 import { NumberField } from "./NumberField";
+import { ToolPage } from "./ToolPage";
 import { acceptsFile, operationFormats } from "../catalog/formats";
 import { useT, type Translate } from "../i18n/language";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 
 export type RunOperationInput = {
   request: OperationRequest;
@@ -20,6 +24,10 @@ export type RunOperationInput = {
 
 type ToolPanelProps = {
   tool: CatalogTool;
+  /** The operation shown, as the sidebar and the palette name it; the first when absent. */
+  subId?: string;
+  /** Asked to show another operation, so the sidebar and the breadcrumb follow. */
+  onSubChange?: (subId: string) => void;
   initialPath?: string | null;
   droppedPaths?: string[];
   jobs?: ToolJob[];
@@ -27,9 +35,6 @@ type ToolPanelProps = {
   defaultFolder?: string;
   /** Raised when there is work a close would throw away. */
   onDirtyChange?: (dirty: boolean) => void;
-  leaving?: boolean;
-  onClose: () => void;
-  onExited?: () => void;
   onRun?: (input: RunOperationInput) => string;
   /** Stops the job this panel started, without leaving the panel. */
   onCancel?: (jobId: string) => void;
@@ -37,21 +42,22 @@ type ToolPanelProps = {
 
 type SelectedFile = { name: string; path: string };
 
-export function ToolPanel({ tool, initialPath, droppedPaths, jobs = [], defaultFolder = "", leaving = false, onClose, onExited, onRun, onCancel, onDirtyChange }: ToolPanelProps) {
+export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths, jobs = [], defaultFolder = "", onRun, onCancel, onDirtyChange }: ToolPanelProps) {
   const t = useT();
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>(() =>
     initialPath && ![...urlTools, ...folderTools].includes(tool.id)
       ? [{ path: initialPath, name: fileNameOnly(initialPath) }]
       : [],
   );
-  const [selectedOperationId, setSelectedOperationId] = useState(tool.operations[0]?.id ?? "");
+  const pickOperation = (id?: string) =>
+    tool.operations.find((operation) => operation.id === id)?.id ?? tool.operations[0]?.id ?? "";
+  const [selectedOperationId, setSelectedOperationId] = useState(() => pickOperation(subId));
   const [sourceUrl, setSourceUrl] = useState("");
   const [operationOptions, setOperationOptions] = useState<Record<string, string>>({});
   const [outputPath, setOutputPath] = useState("");
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [formError, setFormError] = useState("");
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const selectedOperation = tool.operations.find((operation) => operation.id === selectedOperationId);
   /**
@@ -150,16 +156,20 @@ export function ToolPanel({ tool, initialPath, droppedPaths, jobs = [], defaultF
   const resultMessage = formError || (currentJob && currentJob.status !== "running" ? jobResultText(currentJob) : "");
   const resultIsError = Boolean(formError) || currentJob?.status === "failed";
 
-  useEffect(() => {
-    closeButtonRef.current?.focus();
-  }, []);
+  // The files stay; the options and the destination belong to the operation that is left.
+  function showOperation(id: string) {
+    setSelectedOperationId(id);
+    setOperationOptions({});
+    setOutputPath("");
+    resetFeedback();
+  }
 
-  // Reduced motion collapses the exit to ~1ms, so guarantee the unmount either way.
+  // The sidebar or the palette chose another operation of this tool.
   useEffect(() => {
-    if (!leaving || !onExited) return;
-    const timeout = window.setTimeout(onExited, 320);
-    return () => window.clearTimeout(timeout);
-  }, [leaving, onExited]);
+    const next = pickOperation(subId);
+    if (next !== selectedOperationId) showOperation(next);
+    // Only a change from outside matters; the selection follows it, not the other way round.
+  }, [subId]);
 
   // A file dropped on the window belongs to the tool the user already has open.
   useEffect(() => {
@@ -172,229 +182,214 @@ export function ToolPanel({ tool, initialPath, droppedPaths, jobs = [], defaultF
   }, [droppedPaths, tool.id]);
 
   return (
-    <aside
-      className={`tool-panel${previewable ? " tool-panel--wide" : ""}`}
-      role="dialog"
-      aria-modal="false"
-      aria-labelledby="tool-panel-title"
-      data-leaving={leaving ? "true" : undefined}
-      onAnimationEnd={(event) => {
-        if (leaving && event.animationName.includes("panel-exit")) onExited?.();
-      }}
-    >
-      <div className="tool-panel__topbar">
-        <span>{tool.integrationName}</span>
-        <button
-          ref={closeButtonRef}
-          className="icon-button"
-          type="button"
-          onClick={onClose}
-          aria-label={t("Close tool")}
-        >
-          <X size={18} />
-        </button>
-      </div>
-      <div className={`tool-panel__body${previewable ? " tool-panel__body--split" : ""}`}>
-        {previewable && (
-          <section className="tool-panel__workspace" aria-label={t("File preview")}>
-            <FilePreview
-              path={selectedFiles[0]?.path}
-              crop={crop}
-              onCropChange={applyCrop}
-              seekTo={
-                selectedOperationId === "thumbnail"
-                  ? Number(operationOptions.at ?? 1)
-                  : selectedOperationId === "trim"
-                    ? Number(operationOptions.start ?? 0)
-                    : undefined
-              }
-              onNatural={setNaturalSize}
-            />
-          </section>
-        )}
-
-        <section className="tool-panel__controls">
-        <h2 id="tool-panel-title">{t(tool.title)}</h2>
-        <p>{t(tool.description)}</p>
-
-        {tool.operations.length > 0 && (
-          <label className="operation-select">
-            <span>{t("Operation")}</span>
-            <Select
-              label={t("Operation")}
-              value={selectedOperationId}
-              choices={tool.operations.map((operation) => ({
-                value: operation.id,
-                label: t(operation.label),
-              }))}
-              onChange={(next) => {
-                setSelectedOperationId(next);
-                setOperationOptions({});
-                setOutputPath("");
-                resetFeedback();
-              }}
-            />
-            <small>{selectedOperation ? t(selectedOperation.description) : ""}</small>
-          </label>
-        )}
-
-        {formatChoice && formatChoice.formats.length > 1 && (
-          <label className="operation-select">
-            <span>{formatChoice.label}</span>
-            <Select
-              label={formatChoice.label}
-              value={targetFormat}
-              choices={formatChoice.formats.map((format) => ({
-                value: format,
-                label: format.toUpperCase(),
-              }))}
-              onChange={(next) => {
-                setOperationOptions((current) => ({ ...current, format: next }));
-                // The destination carried the old extension, so it has to go.
-                setOutputPath("");
-                resetFeedback();
-              }}
-            />
-          </label>
-        )}
-
-        <OperationOptions
-          onPickFile={(key) => {
-            void open({ multiple: false })
-              .then((selected) => {
-                if (typeof selected === "string") {
-                  setOperationOptions((current) => ({ ...current, [key]: selected }));
+    <ToolPage tool={tool}>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid min-w-0 gap-4">
+          {previewable && (
+            <section aria-label={t("File preview")}>
+              <FilePreview
+                path={selectedFiles[0]?.path}
+                crop={crop}
+                onCropChange={applyCrop}
+                seekTo={
+                  selectedOperationId === "thumbnail"
+                    ? Number(operationOptions.at ?? 1)
+                    : selectedOperationId === "trim"
+                      ? Number(operationOptions.start ?? 0)
+                      : undefined
                 }
-              })
-              .catch(handleFormError);
-          }}
-          toolId={tool.id}
-          operationId={selectedOperationId}
-          values={operationOptions}
-          onChange={(key, value) => {
-            setOperationOptions((currentValues) => {
-              const next = { ...currentValues, [key]: value };
-              // "Sign in" is one control over two host options: a browser
-              // name, or a cookie file. Sending both is rejected, so the
-              // unused one is cleared rather than left behind.
-              if (key === "signIn") {
-                next.cookiesFrom = value === "file" ? "" : value;
-                if (value !== "file") next.cookieFile = "";
-              }
-              return next;
-            });
-            resetFeedback();
-          }}
-        />
+                onNatural={setNaturalSize}
+              />
+            </section>
+          )}
 
-        {urlTools.includes(tool.id) && (
-          <label className="source-url">
-            <span>{t("Media URL")}</span>
-            <input
-              aria-label={t("Media URL")}
-              type="url"
-              placeholder="https://..."
-              value={sourceUrl}
-              onChange={(event) => {
-                setSourceUrl(event.target.value);
+          {urlTools.includes(tool.id) ? (
+            <label className="grid gap-2 rounded-xl border bg-card p-5 text-card-foreground shadow-xs">
+              <span className="text-sm font-medium">{t("Media URL")}</span>
+              <Input
+                aria-label={t("Media URL")}
+                type="url"
+                placeholder="https://..."
+                value={sourceUrl}
+                onChange={(event) => {
+                  setSourceUrl(event.target.value);
+                  resetFeedback();
+                }}
+              />
+              <small className="text-xs text-muted-foreground">{supportedSitesHint(tool.id, t)}</small>
+            </label>
+          ) : (
+            <FileField />
+          )}
+
+          <section className="grid gap-5 rounded-xl border bg-card p-6 text-card-foreground shadow-xs">
+            <div className="grid gap-1">
+              <h2 className="font-heading text-lg font-semibold">{t("Options")}</h2>
+            </div>
+
+            {tool.operations.length > 0 && (
+              <label className="grid gap-2">
+                <span className="text-sm font-medium">{t("Operation")}</span>
+                <Select
+                  label={t("Operation")}
+                  value={selectedOperationId}
+                  choices={tool.operations.map((operation) => ({
+                    value: operation.id,
+                    label: t(operation.label),
+                  }))}
+                  onChange={(next) => {
+                    showOperation(next);
+                    onSubChange?.(next);
+                  }}
+                />
+                <small className="text-xs text-muted-foreground">
+                  {selectedOperation ? t(selectedOperation.description) : ""}
+                </small>
+              </label>
+            )}
+
+            {formatChoice && formatChoice.formats.length > 1 && (
+              <label className="grid gap-2">
+                <span className="text-sm font-medium">{formatChoice.label}</span>
+                <Select
+                  label={formatChoice.label}
+                  value={targetFormat}
+                  choices={formatChoice.formats.map((format) => ({
+                    value: format,
+                    label: format.toUpperCase(),
+                  }))}
+                  onChange={(next) => {
+                    setOperationOptions((current) => ({ ...current, format: next }));
+                    // The destination carried the old extension, so it has to go.
+                    setOutputPath("");
+                    resetFeedback();
+                  }}
+                />
+              </label>
+            )}
+
+            <OperationOptions
+              onPickFile={(key) => {
+                void open({ multiple: false })
+                  .then((selected) => {
+                    if (typeof selected === "string") {
+                      setOperationOptions((current) => ({ ...current, [key]: selected }));
+                    }
+                  })
+                  .catch(handleFormError);
+              }}
+              toolId={tool.id}
+              operationId={selectedOperationId}
+              values={operationOptions}
+              onChange={(key, value) => {
+                setOperationOptions((currentValues) => {
+                  const next = { ...currentValues, [key]: value };
+                  // "Sign in" is one control over two host options: a browser
+                  // name, or a cookie file. Sending both is rejected, so the
+                  // unused one is cleared rather than left behind.
+                  if (key === "signIn") {
+                    next.cookiesFrom = value === "file" ? "" : value;
+                    if (value !== "file") next.cookieFile = "";
+                  }
+                  return next;
+                });
                 resetFeedback();
               }}
             />
-            <small className="source-url__hint">{supportedSitesHint(tool.id, t)}</small>
-          </label>
-        )}
 
-        {!urlTools.includes(tool.id) && <FileField />}
+            {requiresOutput(tool.id, selectedOperationId) && (
+              <div className="flex items-center justify-between gap-4">
+                <span className="grid min-w-0 gap-0.5">
+                  <strong className="text-sm font-medium">{t("Destination")}</strong>
+                  <small className="truncate text-xs text-muted-foreground">
+                    {effectiveOutput || t("Choose the destination when you run it. The extension decides the format.")}
+                  </small>
+                  {!outputPath && automaticOutput && (
+                    <small className="text-xs text-muted-foreground">
+                      {t("Your default folder, from Settings. Pick another with the button.")}
+                    </small>
+                  )}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label={t("Choose destination")}
+                  onClick={() => void chooseNativeOutput().catch(handleFormError)}
+                >
+                  <FolderOpen />
+                </Button>
+              </div>
+            )}
+          </section>
 
-        {requiresOutput(tool.id, selectedOperationId) && (
-          <div className="tool-option">
-            <span>
-              <strong>{t("Destination")}</strong>
-              <small>
-                {effectiveOutput ||
-                  t("Choose the destination when you run it. The extension decides the format.")}
-              </small>
-              {!outputPath && automaticOutput && (
-                <small className="tool-option__note">
-                  {t("Your default folder, from Settings. Pick another with the button.")}
-                </small>
-              )}
-            </span>
-            <button
-              className="icon-button"
-              type="button"
-              aria-label={t("Choose destination")}
-              onClick={() => void chooseNativeOutput().catch(handleFormError)}
+          {resultMessage && (
+            <pre
+              className={`rounded-xl border p-4 font-mono text-xs whitespace-pre-wrap ${resultIsError ? "border-destructive/30 bg-destructive/10 text-destructive" : "bg-muted"}`}
+              role={resultIsError ? "alert" : "status"}
             >
-              <FolderOpen size={18} />
-            </button>
-          </div>
-        )}
-
-        {resultMessage && (
-          <pre
-            className={`run-message${resultIsError ? " run-message--error" : ""}`}
-            role={resultIsError ? "alert" : "status"}
-          >
-            {resultMessage}
-          </pre>
-        )}
-        </section>
-      </div>
-      <div className="tool-panel__footer">
-        <div className="tool-panel__status" aria-live="polite">
-          {isRunning ? (
-            <>
-              <div className="tool-panel__status-line">
-                <strong>{currentJob.message}</strong>
-                <span>{currentJob.progress == null ? "…" : `${Math.round(currentJob.progress * 100)}%`}</span>
-              </div>
-              <div
-                className={`progress-track progress-track--operation${currentJob.progress == null ? " progress-track--indeterminate" : ""}`}
-                role="progressbar"
-                aria-label={t("Operation progress")}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={currentJob.progress == null ? undefined : Math.round(currentJob.progress * 100)}
-              >
-                <span
-                  style={{ inlineSize: currentJob.progress == null ? undefined : `${currentJob.progress * 100}%` }}
-                />
-              </div>
-              <p className="tool-panel__hint">{t("You can close this tool: the job keeps running in the Queue.")}</p>
-            </>
-          ) : (
-            <p>
-              {currentJob?.status === "succeeded" ? (
-                <>
-                  <Check size={14} aria-hidden="true" /> {t("Done, and recorded in the history.")}
-                </>
-              ) : currentJob?.status === "failed" ? (
-                <>
-                  <AlertTriangle size={14} aria-hidden="true" /> {t("The job failed. Your original file was left untouched.")}
-                </>
-              ) : (
-                canRun ? readyHint(tool.id, selectedOperationId, t) : idleHint(tool.id, t)
-              )}
-            </p>
+              {resultMessage}
+            </pre>
           )}
         </div>
-        {isRunning && onCancel && currentJobId ? (
-          <button className="button button--light" type="button" onClick={() => onCancel(currentJobId)}>
-            <CircleSlash size={16} aria-hidden="true" /> {t("Stop")}
-          </button>
-        ) : (
-          <button
-            className="button button--primary"
-            type="button"
-            disabled={!canRun || isRunning}
-            onClick={() => void startOperation()}
-          >
-            <Play size={16} aria-hidden="true" /> {t(isRunning ? "Running" : "Run")}
-          </button>
-        )}
+
+        <section
+          aria-labelledby="tool-summary-title"
+          className="grid gap-4 rounded-xl border bg-card p-6 text-card-foreground shadow-xs lg:sticky lg:top-4"
+        >
+          <div className="grid gap-1">
+            <h2 id="tool-summary-title" className="font-heading text-lg font-semibold">{t("Summary")}</h2>
+            <p className="text-sm text-muted-foreground">{t("Nothing leaves your computer.")}</p>
+          </div>
+          <div className="grid gap-2 text-sm" aria-live="polite">
+            {isRunning ? (
+              <>
+                <div className="flex justify-between gap-3">
+                  <strong className="truncate font-medium">{currentJob.message}</strong>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {currentJob.progress == null ? "…" : `${Math.round(currentJob.progress * 100)}%`}
+                  </span>
+                </div>
+                <Progress
+                  value={currentJob.progress == null ? null : Math.round(currentJob.progress * 100)}
+                  className={currentJob.progress == null ? "animate-pulse" : undefined}
+                  aria-label={t("Operation progress")}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t("You can close this tool: the job keeps running in the Queue.")}
+                </p>
+              </>
+            ) : (
+              <p className="flex items-start gap-2 text-muted-foreground">
+                {currentJob?.status === "succeeded" ? (
+                  <>
+                    <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />{" "}
+                    {t("Done, and recorded in the history.")}
+                  </>
+                ) : currentJob?.status === "failed" ? (
+                  <>
+                    <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />{" "}
+                    {t("The job failed. Your original file was left untouched.")}
+                  </>
+                ) : canRun ? (
+                  readyHint(tool.id, selectedOperationId, t)
+                ) : (
+                  idleHint(tool.id, t)
+                )}
+              </p>
+            )}
+          </div>
+          {isRunning && onCancel && currentJobId ? (
+            <Button variant="outline" className="w-full" onClick={() => onCancel(currentJobId)}>
+              <CircleSlash aria-hidden="true" /> {t("Stop")}
+            </Button>
+          ) : (
+            <Button className="w-full" disabled={!canRun || isRunning} onClick={() => void startOperation()}>
+              <Play aria-hidden="true" /> {t(isRunning ? "Running" : "Run")}
+            </Button>
+          )}
+        </section>
       </div>
-    </aside>
+    </ToolPage>
   );
 
   function FileField() {
@@ -410,37 +405,43 @@ export function ToolPanel({ tool, initialPath, droppedPaths, jobs = [], defaultF
           count: selectedFileNames.length,
         })
       : t("or click to choose");
+    const look =
+      "flex w-full cursor-pointer items-center gap-4 rounded-xl border border-dashed bg-card p-4 text-left text-card-foreground outline-none hover:border-ring/60 focus-visible:ring-[3px] focus-visible:ring-ring/50 has-[input:focus-visible]:ring-[3px] has-[input:focus-visible]:ring-ring/50";
+    const body = (
+      <>
+        <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-muted text-primary">
+          <FilePlus2 className="size-5" aria-hidden="true" />
+        </span>
+        <span className="grid min-w-0 gap-0.5">
+          <strong className="truncate font-medium">{label}</strong>
+          <span className="text-xs text-muted-foreground">{hint}</span>
+        </span>
+      </>
+    );
 
     // The native host must receive real Windows paths, so it opens a system dialog.
     // A file input would only expose a bare file name to the WebView.
     if (isNativeHost()) {
       return (
-        <button
-          type="button"
-          className="file-drop file-drop--compact"
-          onClick={() => void chooseNativeFiles().catch(handleFormError)}
-        >
-          <FilePlus2 size={24} aria-hidden="true" />
-          <strong>{label}</strong>
-          <span>{hint}</span>
+        <button type="button" className={look} onClick={() => void chooseNativeFiles().catch(handleFormError)}>
+          {body}
         </button>
       );
     }
 
     return (
-      <label className="file-drop file-drop--compact">
+      <label className={look}>
         <input
           type="file"
           multiple
+          className="sr-only"
           aria-label={t("Choose files")}
           onChange={(event) => {
             setSelectedFiles(admitFiles(Array.from(event.target.files ?? []).map((file) => file.name)));
             resetFeedback();
           }}
         />
-        <FilePlus2 size={24} aria-hidden="true" />
-        <strong>{label}</strong>
-        <span>{hint}</span>
+        {body}
       </label>
     );
   }
@@ -583,12 +584,12 @@ function OperationOptions({
   );
   if (fields.length === 0) return null;
   return (
-    <div className="operation-options" aria-label={t("Operation options")}>
+    <div className="grid gap-5" aria-label={t("Operation options")}>
       {fields.map((field) => {
         const value = values[field.key] ?? field.defaultValue ?? "";
         return (
-          <label key={field.key}>
-            <span>{t(field.label)}</span>
+          <label key={field.key} className="grid gap-2">
+            <span className="text-sm font-medium">{t(field.label)}</span>
             {field.type === "select" ? (
               <Select
                 label={t(field.label)}
@@ -600,22 +601,22 @@ function OperationOptions({
                 onChange={(next) => onChange(field.key, next)}
               />
             ) : field.type === "file" ? (
-              <span className="operation-options__file">
-                <input
+              <span className="flex gap-2">
+                <Input
                   aria-label={t(field.label)}
                   type="text"
                   placeholder={field.placeholder && t(field.placeholder)}
                   value={value}
                   onChange={(event) => onChange(field.key, event.target.value)}
                 />
-                <button
-                  type="button"
-                  className="icon-button"
+                <Button
+                  variant="outline"
+                  size="icon"
                   aria-label={t("Choose {name}", { name: t(field.label) })}
                   onClick={() => onPickFile?.(field.key)}
                 >
-                  <FilePlus2 size={16} />
-                </button>
+                  <FilePlus2 />
+                </Button>
               </span>
             ) : field.type === "number" ? (
               <NumberField
@@ -628,7 +629,7 @@ function OperationOptions({
                 onChange={(next) => onChange(field.key, next)}
               />
             ) : (
-              <input
+              <Input
                 aria-label={t(field.label)}
                 type={field.type}
                 placeholder={field.placeholder && t(field.placeholder)}
@@ -636,7 +637,7 @@ function OperationOptions({
                 onChange={(event) => onChange(field.key, event.target.value)}
               />
             )}
-            {field.hint && <small className="operation-options__hint">{t(field.hint)}</small>}
+            {field.hint && <small className="text-xs text-muted-foreground">{t(field.hint)}</small>}
           </label>
         );
       })}
