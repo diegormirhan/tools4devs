@@ -25,7 +25,7 @@ export function ToolPage({
   title?: string;
   /** Already translated; the tool's own description when absent. */
   description?: string;
-  /** The engine's name in a badge. The app's own utilities have none to show. */
+  /** The engine's name in a badge. What the app does itself has none to show. */
   showEngine?: boolean;
   className?: string;
   children: ReactNode;

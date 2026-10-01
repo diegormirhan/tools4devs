@@ -31,6 +31,8 @@
 @source "../components/ImageSearchPanel.tsx";
 @source "../components/MusicPanel.tsx";
 @source "../components/UtilityPanel.tsx";
+@source "../components/ChatMockupPanel.tsx";
+@source "../components/PostMockupPanel.tsx";
 
 @custom-variant dark (&:is(.dark *));
 

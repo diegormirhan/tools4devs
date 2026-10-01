@@ -27,9 +27,13 @@ import {
   type ChatPlatform,
   type MockupMessage,
 } from "../utilities/mockup";
-import { PanelShell } from "./PanelShell";
+import { PageCard, PageResult, ToolPage } from "./ToolPage";
 import { Select } from "./Select";
 import { useT } from "../i18n/language";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Toggle } from "@/components/ui/toggle";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const PLATFORM_LABELS: Record<ChatPlatform, string> = {
   whatsapp: "WhatsApp",
@@ -113,124 +117,132 @@ export function ChatMockupPanel({
   }
 
   return (
-    <PanelShell
-      title={tool.integrationName}
-      wide
-      bodyClassName="mockup-panel__body"
-    >
-      <section className="tool-panel__controls mockup-panel__form">
-        <h2 id="tool-panel-title">{t(tool.title)}</h2>
-        <p>{t(tool.description)}</p>
-
-        <label className="operation-select">
-          <span>{t("App")}</span>
-          <Select
-            label={t("App")}
-            value={platform}
-            choices={CHAT_PLATFORMS.map((value) => ({ value, label: PLATFORM_LABELS[value] }))}
-            onChange={(value) => setPlatform(value as ChatPlatform)}
-          />
-        </label>
-
-        <label className="mockup-field">
-          <span>{t("Contact name")}</span>
-          <input
-            type="text"
-            value={contactName}
-            onChange={(event) => {
-              setContactName(event.target.value);
-              onDirtyChange?.(true);
-            }}
-          />
-        </label>
-
-        {platform === "whatsapp" && (
-          <label className="mockup-field">
-            <span>{t("Status")}</span>
-            <input
-              type="text"
-              value={contactStatus}
-              onChange={(event) => {
-                setContactStatus(event.target.value);
-                onDirtyChange?.(true);
-              }}
-            />
-          </label>
-        )}
-
-        <div className="mockup-messages">
-          {messages.map((message) => (
-            <div className="mockup-message-row mockup-message-row--chat" key={message.id}>
-              <button
-                type="button"
-                className={`mockup-sender mockup-sender--${message.from}`}
-                onClick={() => updateMessage(message.id, { from: message.from === "me" ? "them" : "me" })}
-                aria-label={t(message.from === "me" ? "Sent by you — tap to switch" : "Sent by them — tap to switch")}
-              >
-                {t(message.from === "me" ? "You" : "Them")}
-              </button>
-              <button
-                type="button"
-                className={`mockup-sender mockup-sender--type${message.type === "voice" ? " mockup-sender--active" : ""}`}
-                onClick={() =>
-                  updateMessage(message.id, {
-                    type: message.type === "voice" ? "text" : "voice",
-                    duration: message.duration ?? "0:21",
-                  })
-                }
-                aria-label={t("Toggle voice message")}
-              >
-                <Mic size={11} aria-hidden="true" />
-              </button>
-              {message.type === "voice" ? (
-                <input
-                  type="text"
-                  className="mockup-message-text"
-                  value={message.duration ?? "0:21"}
-                  placeholder="0:21"
-                  onChange={(event) => updateMessage(message.id, { duration: event.target.value })}
-                  aria-label={t("Duration")}
-                />
-              ) : (
-                <input
-                  type="text"
-                  className="mockup-message-text"
-                  value={message.text}
-                  placeholder={t("Type a message")}
-                  onChange={(event) => updateMessage(message.id, { text: event.target.value })}
-                />
-              )}
-              <input
-                type="text"
-                className="mockup-message-time"
-                value={message.time}
-                onChange={(event) => updateMessage(message.id, { time: event.target.value })}
-                aria-label={t("Time")}
-              />
-              <button
-                type="button"
-                className="icon-button"
-                onClick={() => removeMessage(message.id)}
-                aria-label={t("Remove this message")}
-              >
-                <Trash2 size={15} />
-              </button>
+    <ToolPage tool={tool} showEngine={false}>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid min-w-0 gap-4">
+          <PageCard>
+            <div className="grid gap-1">
+              <h2 className="font-heading text-lg font-semibold">{t("Conversation")}</h2>
+              <p className="text-sm text-muted-foreground">{t("Who is talking, and what they say.")}</p>
             </div>
-          ))}
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="grid gap-2">
+                <span className="text-sm font-medium">{t("App")}</span>
+                <Select
+                  label={t("App")}
+                  value={platform}
+                  choices={CHAT_PLATFORMS.map((value) => ({ value, label: PLATFORM_LABELS[value] }))}
+                  onChange={(value) => setPlatform(value as ChatPlatform)}
+                />
+              </label>
+              <label className="grid gap-2">
+                <span className="text-sm font-medium">{t("Contact name")}</span>
+                <Input
+                  value={contactName}
+                  onChange={(event) => {
+                    setContactName(event.target.value);
+                    onDirtyChange?.(true);
+                  }}
+                />
+              </label>
+              {platform === "whatsapp" && (
+                <label className="grid gap-2">
+                  <span className="text-sm font-medium">{t("Status")}</span>
+                  <Input
+                    value={contactStatus}
+                    onChange={(event) => {
+                      setContactStatus(event.target.value);
+                      onDirtyChange?.(true);
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+
+            <div className="grid gap-2.5">
+              {messages.map((message, index) => (
+                <div
+                  key={message.id}
+                  role="group"
+                  aria-label={t("Message {number}", { number: index + 1 })}
+                  className="grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-2 sm:grid-cols-[auto_auto_minmax(0,1fr)_6.5rem_auto]"
+                >
+                  <ToggleGroup
+                    type="single"
+                    variant="outline"
+                    size="sm"
+                    aria-label={t("Who sent it")}
+                    value={message.from}
+                    onValueChange={(from) => {
+                      if (from) updateMessage(message.id, { from: from as MockupMessage["from"] });
+                    }}
+                  >
+                    <ToggleGroupItem value="me" className="px-2.5 text-xs">{t("You")}</ToggleGroupItem>
+                    <ToggleGroupItem value="them" className="px-2.5 text-xs">{t("Them")}</ToggleGroupItem>
+                  </ToggleGroup>
+                  <Toggle
+                    variant="outline"
+                    size="sm"
+                    aria-label={t("Toggle voice message")}
+                    pressed={message.type === "voice"}
+                    onPressedChange={(voice) =>
+                      updateMessage(message.id, {
+                        type: voice ? "voice" : "text",
+                        duration: message.duration ?? "0:21",
+                      })
+                    }
+                  >
+                    <Mic aria-hidden="true" />
+                  </Toggle>
+                  {message.type === "voice" ? (
+                    <Input
+                      value={message.duration ?? "0:21"}
+                      placeholder="0:21"
+                      onChange={(event) => updateMessage(message.id, { duration: event.target.value })}
+                      aria-label={t("Duration")}
+                    />
+                  ) : (
+                    <Input
+                      value={message.text}
+                      placeholder={t("Type a message")}
+                      onChange={(event) => updateMessage(message.id, { text: event.target.value })}
+                      aria-label={t("Message")}
+                    />
+                  )}
+                  <Input
+                    className="col-start-3 font-mono sm:col-start-auto"
+                    value={message.time}
+                    onChange={(event) => updateMessage(message.id, { time: event.target.value })}
+                    aria-label={t("Time")}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeMessage(message.id)}
+                    aria-label={t("Remove this message")}
+                  >
+                    <Trash2 aria-hidden="true" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            <Button variant="outline" className="justify-self-start" onClick={addMessage}>
+              <Plus aria-hidden="true" /> {t("Add a message")}
+            </Button>
+          </PageCard>
+
+          {error && (
+            <PageResult error icon={<AlertTriangle aria-hidden="true" />}>
+              {error}
+            </PageResult>
+          )}
         </div>
 
-        <button className="button button--light" type="button" onClick={addMessage}>
-          <Plus size={15} aria-hidden="true" /> {t("Add a message")}
-        </button>
-
-        {error && (
-          <p className="run-message run-message--error" role="alert">
-            <AlertTriangle size={14} aria-hidden="true" /> {error}
-          </p>
-        )}
-      </section>
-
-      <section className="mockup-panel__preview">
+        <div className="grid justify-items-center gap-4 lg:sticky lg:top-4">
+          {/* The phone imitates each app, and app.css still draws it. */}
+          <div data-legacy>
         <div className={`mockup-phone mockup-phone--${platform}`} ref={previewRef}>
           <header className="mockup-phone__header">
             {platform === "whatsapp" && (
@@ -318,10 +330,12 @@ export function ChatMockupPanel({
           )}
         </div>
 
-        <button className="button button--primary" type="button" onClick={() => void saveImage()} disabled={saving}>
-          <Download size={16} aria-hidden="true" /> {t(saving ? "Saving…" : "Save as image")}
-        </button>
-      </section>
-    </PanelShell>
+          </div>
+          <Button className="w-full max-w-[300px]" onClick={() => void saveImage()} disabled={saving}>
+            <Download aria-hidden="true" /> {t(saving ? "Saving…" : "Save as image")}
+          </Button>
+        </div>
+      </div>
+    </ToolPage>
   );
 }
