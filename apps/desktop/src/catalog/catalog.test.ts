@@ -169,6 +169,10 @@ describe("what the sidebar and the cards draw from", () => {
     }
   });
 
+  it("gives every card a clip to preview, so none falls back to a bare icon", () => {
+    expect(tools.filter((tool) => !tool.preview).map((tool) => tool.id)).toEqual([]);
+  });
+
   it("keeps all the clips together within the installer's budget", () => {
     const publicDirectory = path.resolve(import.meta.dirname, "../../public");
     const total = tools

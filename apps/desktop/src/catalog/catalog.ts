@@ -189,6 +189,7 @@ const presentationById: Record<string, ToolPresentation> = {
   "chat-mockup": {
     id: "chat-mockup",
     icon: MessageSquare,
+    preview: { src: "/previews/chat-mockup.webm", poster: "/previews/chat-mockup.jpg" },
     title: "Chat mockup",
     description: "A made-up WhatsApp, iMessage or Instagram DM conversation, for a mockup or a test.",
     category: "utilities",
@@ -206,6 +207,7 @@ const presentationById: Record<string, ToolPresentation> = {
   "post-mockup": {
     id: "post-mockup",
     icon: LayoutTemplate,
+    preview: { src: "/previews/post-mockup.webm", poster: "/previews/post-mockup.jpg" },
     title: "Post mockup",
     description: "A made-up tweet or Instagram post, for a mockup or a test.",
     category: "utilities",
@@ -479,6 +481,7 @@ const presentationById: Record<string, ToolPresentation> = {
   tokei: {
     id: "tokei",
     icon: ChartColumn,
+    preview: { src: "/previews/tokei.webm", poster: "/previews/tokei.jpg" },
     title: "Count code",
     description: "See lines, comments and files per language in a project.",
     category: "developer",
@@ -492,6 +495,7 @@ const presentationById: Record<string, ToolPresentation> = {
   hexyl: {
     id: "hexyl",
     icon: Binary,
+    preview: { src: "/previews/hexyl.webm", poster: "/previews/hexyl.jpg" },
     title: "View bytes",
     description: "Inspect the start of a file in hexadecimal.",
     category: "developer",
@@ -503,6 +507,7 @@ const presentationById: Record<string, ToolPresentation> = {
   dust: {
     id: "dust",
     icon: HardDrive,
+    preview: { src: "/previews/dust.webm", poster: "/previews/dust.jpg" },
     title: "Disk usage",
     description: "Find out which folders are taking the space.",
     category: "files",
@@ -514,6 +519,7 @@ const presentationById: Record<string, ToolPresentation> = {
   "7zip": {
     id: "7zip",
     icon: Archive,
+    preview: { src: "/previews/7zip.webm", poster: "/previews/7zip.jpg" },
     title: "Compress files",
     description: "Create and extract 7z, zip, tar, gzip, bzip2 and xz archives.",
     category: "files",

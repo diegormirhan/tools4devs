@@ -11,7 +11,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const { LUCIDE, FFMPEG, FRAMES = "/tmp/preview-frames" } = process.env;
 const OUT = process.env.OUT ?? join(here, "out");
 const ids = process.argv.slice(2).length ? process.argv.slice(2) : ["ffmpeg", "qpdf", "jq", "qr"];
-const need = ["file-video", "scissors", "rotate-cw", "check", "triangle-alert", "link", "download", "image", "search", "scan-search", "mic", "film", "audio-lines", "captions", "folder", "type", "file-text", "text-search", "folder-search", "map-pin"];
+const need = ["file-video", "scissors", "rotate-cw", "check", "triangle-alert", "link", "download", "image", "search", "scan-search", "mic", "film", "audio-lines", "captions", "folder", "type", "file-text", "text-search", "folder-search", "map-pin", "archive", "table", "hard-drive", "binary"];
 const ICONS = Object.fromEntries(need.map((n) => [n, readFileSync(join(LUCIDE, `${n}.svg`), "utf8").replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>[\s\S]*$/, "").replace(/<!--[\s\S]*?-->/g, "").trim()]));
 mkdirSync(OUT, { recursive: true });
 const b = await chromium.launch({ executablePath: process.env.CHROMIUM ?? "/opt/pw-browsers/chromium", args: ["--no-sandbox", "--allow-file-access-from-files"] });

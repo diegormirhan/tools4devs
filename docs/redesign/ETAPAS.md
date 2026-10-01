@@ -19,7 +19,7 @@ Regras que valem para toda etapa:
 | 3 | Shell, sidebar em árvore e Ctrl+K | G | 2 | UC-01, 03, 10, 11 | ☑ |
 | 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ◐ falta o layout dos utilitários (aguarda aprovação) |
 | 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☑ |
-| 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ◐ 9 de 39 |
+| 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ☑ |
 | 7 | Primitivos restantes e limpeza do CSS | M | 4, 5 | UC-07, 08 | ☐ |
 | 8 | Testes finais, docs e entrega | M | 1–7 | todos | ☐ |
 
@@ -161,9 +161,13 @@ Detalhes: §8 Fase 6. Motor em `previews/clip.html`.
 - [x] Teste: cada `preview.src` existe e pesa < 200 KB (etapa 2); clipes e posters somam < 4 MB (`catalog.test.ts`).
 - [x] Copiar os 4 prontos (`ffmpeg`, `qpdf`, `jq`, `qr` → `qr-barcode`) para `apps/desktop/public/previews/` (feito na etapa 2).
 - [x] Lote 1 (2026-10-01): yt-dlp (Paste · Download · Extract), Tesseract (Scan · Read · Search), ImageMagick (Convert · Grey · Inspect), Work on text (Case · Sort · Count), Minify and format (Minify · Format · Indent). 61 a 96 KB cada; 9 ferramentas com clipe somam 1,2 MB. Conferidos em folhas de quadros antes de entrar.
-- [ ] Lote 2: as 30 ferramentas restantes (hoje mostram o ícone e a lista de ações no hover).
+- [x] Lote 2 (2026-10-01), em quatro grupos conferidos em folhas de quadros: vídeo, download e imagem (8); documentos e dados (7); utilitários e calculadoras (9); arquivos e mockups (6). Cada clipe tem 3 cenas e 3 legendas que mostram operações reais da ferramenta.
+- [x] Posters a 640×360 (q 5): só aparecem com movimento reduzido ou antes do vídeo carregar, numa prévia de ~320 px. Caíram de ~25 KB para ~12 KB e abriram espaço para os 39 caberem no orçamento.
+- [x] Teste novo: todo card tem `preview`.
 
 **Pronto quando**: cada card tem clipe ou poster; nenhum clipe passa de 200 KB; loop sem salto.
+
+Resultado (2026-10-01): 39 de 39 com clipe; o maior tem 115 KB; clipes e posters somam 3,76 MB (teto 4 MB). O loop não salta porque toda cena termina na faixa de transição, como nos quatro originais.
 
 ## Etapa 7 · Primitivos restantes e limpeza (M)
 

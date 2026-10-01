@@ -25,7 +25,8 @@ const ID = new URLSearchParams(location.search).get("id");
 const HUE = { ffmpeg: 255, qpdf: 285, jq: 322, qr: 215, "yt-dlp": 165, tesseract: 285, imagemagick: 78, "text-tools": 215, "code-formatting": 215,
   "ffprobe": 255, "songrec": 255, "mkvtoolnix": 255, "gallery-dl": 165, "libvips": 78, "image-search": 78, "oxipng": 78, "exiftool": 78,
   "poppler": 285, "pandoc": 285, "yq": 322, "miller": 322, "ripgrep": 322, "fd": 322, "difftastic": 322,
-  "codes-hashes": 215, "test-data": 215, "css-tools": 215, "dates-time": 12, "math-finance": 12, "colors": 12, "everyday": 12, "network": 12, "random-picks": 12 }[ID];
+  "codes-hashes": 215, "test-data": 215, "css-tools": 215, "dates-time": 12, "math-finance": 12, "colors": 12, "everyday": 12, "network": 12, "random-picks": 12,
+  "7zip": 195, "dust": 195, "tokei": 195, "hexyl": 195, "chat-mockup": 135, "post-mockup": 135 }[ID];
 const D = 6; // seconds; every clip is a seamless 6 s loop
 const stage = document.getElementById("stage");
 stage.style.cssText = `--bg:oklch(0.27 0.09 ${HUE});--panel:oklch(0.985 0.006 ${HUE});--ink:oklch(0.26 0.06 ${HUE});--acc:oklch(0.82 0.14 ${HUE});--soft:oklch(0.4 0.1 ${HUE});--line:oklch(0.88 0.03 ${HUE})`;
@@ -47,11 +48,13 @@ const CAPS = { ffmpeg: ["Convert.", "Compress.", "Trim."], qpdf: ["Merge.", "Spl
   "text-tools": ["Case.", "Sort.", "Count."], "code-formatting": ["Minify.", "Format.", "Indent."],
   "ffprobe": ["Open.", "Codecs.", "Tracks."], "songrec": ["Listen.", "Match.", "Named."], "mkvtoolnix": ["Convert.", "Merge.", "Inspect."], "gallery-dl": ["Paste.", "Collect.", "Save."], "libvips": ["Resize.", "Crop.", "Enlarge."], "image-search": ["Pick.", "Search.", "Found."], "oxipng": ["Load.", "Shrink.", "Lossless."], "exiftool": ["Read.", "Remove.", "Title."],
   "poppler": ["Open.", "Text.", "Images."], "pandoc": ["Markdown.", "Convert.", "Formats."], "yq": ["Read.", "Format.", "Query."], "miller": ["CSV.", "JSON.", "Summarise."], "ripgrep": ["Search.", "Matches.", "Fast."], "fd": ["Find.", "Filter.", "Done."], "difftastic": ["Compare.", "Changes.", "Structure."],
-  "codes-hashes": ["Encode.", "Hash.", "Decode."], "test-data": ["CPF.", "CNPJ.", "Card."], "css-tools": ["Radius.", "Shadow.", "Gradient."], "dates-time": ["Count.", "Workdays.", "Age."], "math-finance": ["Percent.", "Save.", "Convert."], "colors": ["HEX.", "Shades.", "Mix."], "everyday": ["Fuel.", "Barbecue.", "Million."], "network": ["My IP.", "Locate.", "DNS."], "random-picks": ["Dice.", "Draw.", "Numbers."] }[ID];
+  "codes-hashes": ["Encode.", "Hash.", "Decode."], "test-data": ["CPF.", "CNPJ.", "Card."], "css-tools": ["Radius.", "Shadow.", "Gradient."], "dates-time": ["Count.", "Workdays.", "Age."], "math-finance": ["Percent.", "Save.", "Convert."], "colors": ["HEX.", "Shades.", "Mix."], "everyday": ["Fuel.", "Barbecue.", "Million."], "network": ["My IP.", "Locate.", "DNS."], "random-picks": ["Dice.", "Draw.", "Numbers."],
+  "7zip": ["Pack.", "Shrink.", "Extract."], "dust": ["Scan.", "Weigh.", "Find."], "tokei": ["Count.", "Languages.", "Lines."], "hexyl": ["Open.", "Bytes.", "ASCII."], "chat-mockup": ["Write.", "Style.", "Save."], "post-mockup": ["Write.", "Like.", "Save."] }[ID];
 const TAG = { ffmpeg: "FFMPEG", qpdf: "QPDF", jq: "JQ", qr: "QR CODES", "yt-dlp": "YT-DLP", tesseract: "TESSERACT", imagemagick: "IMAGEMAGICK", "text-tools": "TEXT", "code-formatting": "CODE",
   "ffprobe": "FFPROBE", "songrec": "SONGREC", "mkvtoolnix": "MKVTOOLNIX", "gallery-dl": "GALLERY-DL", "libvips": "LIBVIPS", "image-search": "REVERSE SEARCH", "oxipng": "OXIPNG", "exiftool": "EXIFTOOL",
   "poppler": "POPPLER", "pandoc": "PANDOC", "yq": "YQ", "miller": "MILLER", "ripgrep": "RIPGREP", "fd": "FD", "difftastic": "DIFFTASTIC",
-  "codes-hashes": "CODES", "test-data": "TEST DATA", "css-tools": "CSS", "dates-time": "DATES", "math-finance": "MATH", "colors": "COLOUR", "everyday": "EVERYDAY", "network": "NETWORK", "random-picks": "RANDOM" }[ID];
+  "codes-hashes": "CODES", "test-data": "TEST DATA", "css-tools": "CSS", "dates-time": "DATES", "math-finance": "MATH", "colors": "COLOUR", "everyday": "EVERYDAY", "network": "NETWORK", "random-picks": "RANDOM",
+  "7zip": "7-ZIP", "dust": "DUST", "tokei": "TOKEI", "hexyl": "HEXYL", "chat-mockup": "CHAT MOCKUP", "post-mockup": "POST MOCKUP" }[ID];
 const SW = [2.1, 4.2]; // scene switch times (hidden behind the wipes)
 mk(TAG, "tag", "", stage);
 const capbox = mk("", "capbox", "", stage);
@@ -971,6 +974,147 @@ CLIPS["random-picks"] = () => {
     pop(won, u, 1.15, 1 - xo2, { y: 30 });
     const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
     balls.forEach((b, i) => pop(b, w, 0.1 + i * 0.15, sO, { x: -175 + i * 70, y: -20 }));
+  };
+};
+
+/* ---- batch 2d (stage 6): files and mockups ---- */
+const mini = (g, icon, name) => inG(g, `<div class="card" style="width:96px;height:72px;border-radius:12px;gap:4px">${ic(icon, 22, "color:var(--soft)")}<small>${name}</small></div>`);
+const bubble2 = (g, side, text, color, ink = "#fff") => inG(g, `<div style="padding:7px 11px;border-radius:14px;${side === "me" ? "border-bottom-right-radius:4px" : "border-bottom-left-radius:4px"};background:${color};color:${ink};font-size:12px;white-space:nowrap">${text}</div>`);
+
+CLIPS["7zip"] = () => {
+  const files = [["file-text", "notes.txt"], ["image", "photo.jpg"], ["table", "data.csv"]].map(([i, n]) => mini(0, i, n));
+  const arc = inG(0, `<div class="card" style="width:150px;height:120px">${ic("archive", 40, "color:var(--soft)")}<b style="font-size:13px">project.7z</b></div>`);
+  const num = big(1, "120 MB", 64);
+  const track = inG(1, `<div class="track" style="width:300px;height:12px"><div class="fill" style="width:100%"></div></div>`);
+  const fill = track.querySelector(".fill");
+  const off = inG(1, `<div class="pill">−68%</div>`);
+  const arc2 = inG(2, `<div class="card" style="width:150px;height:120px">${ic("archive", 40, "color:var(--soft)")}<b style="font-size:13px">project.7z</b></div>`);
+  const out = [["file-text", "notes.txt"], ["image", "photo.jpg"], ["table", "data.csv"]].map(([i, n]) => mini(2, i, n));
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    put(arc, { x: 120, y: -20, o: seg(s, 0, 0.15) * (1 - xo), s: 1 + 0.05 * Math.sin(Math.PI * seg(s, 1.3, 1.6)) });
+    files.forEach((f, i) => { const k = E.inout(seg(s, 0.4 + i * 0.2, 0.95 + i * 0.2)); put(f, { x: lerp(-170, 120, k), y: lerp(-90 + i * 70, -20, k), s: lerp(1, 0.3, k), o: seg(s, 0.05, 0.2) * (1 - seg(s, 0.85 + i * 0.2, 0.95 + i * 0.2)) * (1 - xo) }); });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95), k = E.inout(seg(u, 0.5, 1.3)), mb = lerp(120, 38, k);
+    num.firstChild.textContent = Math.round(mb) + " MB";
+    put(num, { y: -40, s: lerp(0.8, 1, E.back(seg(u, 0, 0.5))), o: seg(u, 0, 0.2) * (1 - xo2) });
+    fill.style.width = (mb / 120) * 100 + "%";
+    put(track, { y: 30, o: seg(u, 0.1, 0.3) * (1 - xo2) });
+    put(off, { x: 150, y: -96, r: -6, s: E.back(seg(u, 1.25, 1.6)), o: seg(u, 1.25, 1.4) * (1 - xo2) });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    put(arc2, { x: -130, y: -20, o: seg(w, 0, 0.15) * sO });
+    out.forEach((f, i) => { const k2 = E.out(seg(w, 0.35 + i * 0.18, 0.85 + i * 0.18)); put(f, { x: lerp(-130, 110, k2), y: lerp(-20, -90 + i * 70, k2), s: lerp(0.3, 1, k2), o: seg(w, 0.35 + i * 0.18, 0.45 + i * 0.18) * sO }); });
+  };
+};
+
+CLIPS.dust = () => {
+  const tree = [[0, "project/"], [1, "node_modules/"], [1, "assets/"], [1, "src/"], [1, "dist/"]].map(([d, n]) => inG(0, `<div class="mono" style="font-size:15px;width:220px;white-space:nowrap;padding-left:${d * 22}px">${ic("folder", 15, "vertical-align:-2px;margin-right:8px")}${n}</div>`));
+  const sizes = [["node_modules", 1.8, "1.8 GB"], ["assets", 0.62, "620 MB"], ["dist", 0.21, "210 MB"], ["src", 0.04, "40 MB"]];
+  const bars = sizes.map(([n, , v]) => inG(1, `<div style="display:flex;align-items:center;gap:12px;width:420px"><span class="mono" style="width:120px;font-size:13px">${n}</span><div style="flex:1;height:18px;border-radius:6px;background:rgb(255 255 255/.08)"><div class="fill" style="height:100%;width:0;border-radius:6px;background:var(--acc)"></div></div><span class="mono" style="width:62px;text-align:right;font-size:13px">${v}</span></div>`));
+  const winner = inG(2, `<div class="card" style="width:300px;height:96px;flex-direction:row;gap:16px;border-radius:16px">${ic("hard-drive", 34, "color:var(--soft)")}<div style="display:grid"><b style="font-size:18px">node_modules</b><small>1.8 GB · 67%</small></div></div>`);
+  const tip = inG(2, `<div class="pill">largest folder</div>`);
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    tree.forEach((r, i) => put(r, { y: -80 + i * 30, o: seg(s, 0.1 + i * 0.15, 0.25 + i * 0.15) * (1 - xo) }));
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95);
+    bars.forEach((b, i) => { b.querySelector(".fill").style.width = (sizes[i][1] / 1.8) * 100 * E.out(seg(u, 0.3 + i * 0.15, 0.9 + i * 0.15)) + "%"; put(b, { y: -68 + i * 38, o: seg(u, 0.05 + i * 0.1, 0.2 + i * 0.1) * (1 - xo2) }); });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    put(winner, { y: -30, s: lerp(0.9, 1, E.back(seg(w, 0.05, 0.5))), o: seg(w, 0.05, 0.2) * sO });
+    pop(tip, w, 0.7, sO, { y: 50 });
+  };
+};
+
+CLIPS.tokei = () => {
+  const files = big(0, "0", 72);
+  const fl = label(0, "files read");
+  const langs = [["TypeScript", 0.58, 258], ["Rust", 0.27, 30], ["CSS", 0.1, 200], ["Other", 0.05, 100]];
+  const stack = inG(1, `<div style="width:420px;height:28px;border-radius:8px;overflow:hidden;display:flex">${langs.map(([, , h]) => `<i style="display:block;height:100%;width:0;background:oklch(0.72 0.14 ${h})"></i>`).join("")}</div>`);
+  const segs = [...stack.querySelectorAll("i")];
+  const keys = langs.map(([n, p, h]) => inG(1, `<div style="display:flex;gap:8px;align-items:center;font-size:14px;white-space:nowrap"><i style="width:10px;height:10px;border-radius:3px;background:oklch(0.72 0.14 ${h})"></i>${n} <b class="mono" style="font-weight:500;opacity:.8">${Math.round(p * 100)}%</b></div>`));
+  const lines = big(2, "0", 72);
+  const ll = label(2, "lines of code · 9,410 comments");
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    files.firstChild.textContent = Math.round(312 * E.out(seg(s, 0.2, 1.3)));
+    put(files, { y: -34, o: seg(s, 0.1, 0.25) * (1 - xo) });
+    put(fl, { y: 22, o: seg(s, 0.2, 0.35) * (1 - xo) });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95);
+    segs.forEach((g, i) => (g.style.width = langs[i][1] * 100 * E.out(seg(u, 0.3 + i * 0.15, 0.8 + i * 0.15)) + "%"));
+    put(stack, { y: -50, o: seg(u, 0.05, 0.2) * (1 - xo2) });
+    keys.forEach((k, i) => put(k, { x: -156 + i * 104, y: 4, o: seg(u, 0.6 + i * 0.12, 0.75 + i * 0.12) * (1 - xo2) }));
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    lines.firstChild.textContent = Math.round(48213 * E.out(seg(w, 0.1, 1.1))).toLocaleString("en-US");
+    put(lines, { y: -34, o: seg(w, 0.05, 0.2) * sO });
+    put(ll, { y: 22, o: seg(w, 0.25, 0.4) * sO });
+  };
+};
+
+CLIPS.hexyl = () => {
+  const file = inG(0, fileCard("binary", "icon.png", ".PNG · 4 KB"));
+  const bytes = "89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 20 00 00 00 20 08 06 00 00 00 73 7A 7A".split(" ");
+  const cells = bytes.map((b, i) => inG(1, `<div class="mono" style="font-size:15px;color:${i < 4 ? "var(--acc)" : "#fff"}">${b}</div>`));
+  const offs = [0, 1, 2, 3].map((r) => inG(1, `<div class="mono" style="font-size:13px;opacity:.4">${String(r * 8).padStart(8, "0")}</div>`));
+  const hex4 = ["89", "50", "4E", "47"].map((b) => inG(2, `<div class="card" style="width:64px;height:64px;border-radius:12px"><b class="mono" style="font-size:20px">${b}</b></div>`));
+  const ascii = ["·", "P", "N", "G"].map((c) => inG(2, `<div style="font:800 40px 'Inter Variable';color:var(--acc)">${c}</div>`));
+  const sig = inG(2, `<div class="pill">PNG signature</div>`);
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    put(file, { y: -20, s: lerp(0.8, 1, E.back(seg(s, 0.1, 0.6))), o: seg(s, 0.1, 0.25) * (1 - xo) });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95);
+    offs.forEach((o2, r) => put(o2, { x: -200, y: -74 + r * 36, o: seg(u, 0.05, 0.2) * (1 - xo2) }));
+    cells.forEach((c, i) => put(c, { x: -110 + (i % 8) * 40, y: -74 + Math.floor(i / 8) * 36, o: seg(u, 0.1 + i * 0.03, 0.18 + i * 0.03) * (1 - xo2) }));
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85), k = E.inout(seg(w, 0.5, 1.0));
+    hex4.forEach((h, i) => put(h, { x: -114 + i * 76, y: lerp(-20, -60, k), o: seg(w, 0.05 + i * 0.08, 0.2 + i * 0.08) * sO }));
+    ascii.forEach((a, i) => put(a, { x: -114 + i * 76, y: lerp(-20, 22, k), o: seg(w, 0.6 + i * 0.1, 0.75 + i * 0.1) * sO }));
+    pop(sig, w, 1.25, sO, { y: 82 });
+  };
+};
+
+CLIPS["chat-mockup"] = () => {
+  const phone = (g) => inG(g, `<div style="width:220px;height:250px;border-radius:26px;background:oklch(0.97 0.01 ${HUE});box-shadow:0 22px 50px -14px rgb(0 0 0/.55)"></div>`);
+  const P0 = phone(0), P1 = phone(1), P2 = phone(2);
+  const msgs = [["them", "Are we still on for tomorrow?"], ["me", "Yes! See you at 10."], ["them", "Perfect 👌"]];
+  const greenB = msgs.map(([side, text]) => bubble2(0, side, text, side === "me" ? "oklch(0.86 0.12 145)" : "#fff", "#111"));
+  const styled = msgs.map(([side, text]) => [bubble2(1, side, text, side === "me" ? "oklch(0.86 0.12 145)" : "#fff", "#111"), bubble2(1, side, text, side === "me" ? "oklch(0.62 0.19 255)" : "oklch(0.92 0.01 255)", side === "me" ? "#fff" : "#111")]);
+  const shot = inG(2, `<div class="card" style="width:96px;height:96px">${ic("image", 30, "color:var(--soft)")}<b style="font-size:12px">chat.png</b></div>`);
+  const saved = inG(2, `<div class="pill" style="display:flex;gap:6px;align-items:center">${ic("check", 16)} saved</div>`);
+  const widths = [174, 118, 70];
+  const at = (i, side, dx = 0) => ({ x: dx + (side === "me" ? 96 - widths[i] / 2 : -96 + widths[i] / 2), y: -90 + i * 46 });
+  const blue = msgs.map(([side, text]) => bubble2(2, side, text, side === "me" ? "oklch(0.62 0.19 255)" : "oklch(0.92 0.01 255)", side === "me" ? "#fff" : "#111"));
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    put(P0, { y: -20, o: seg(s, 0, 0.15) * (1 - xo) });
+    greenB.forEach((b, i) => pop(b, s, 0.3 + i * 0.35, 1 - xo, at(i, msgs[i][0])));
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95), k = seg(u, 0.6, 1.0);
+    put(P1, { y: -20, o: seg(u, 0, 0.15) * (1 - xo2) });
+    styled.forEach(([a, b], i) => { put(a, { ...at(i, msgs[i][0]), o: (1 - k) * seg(u, 0, 0.15) * (1 - xo2) }); put(b, { ...at(i, msgs[i][0]), o: k * (1 - xo2) }); });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85), f = E.inout(seg(w, 0.5, 1.1));
+    put(P2, { x: lerp(0, -70, f), y: -20, s: lerp(1, 0.85, f), o: seg(w, 0, 0.15) * sO });
+    blue.forEach((b, i) => { const p = at(i, msgs[i][0], lerp(0, -70, f)); put(b, { x: p.x * lerp(1, 0.85, f) + lerp(0, -70, f) * (1 - lerp(1, 0.85, f)), y: -20 + (p.y + 20) * lerp(1, 0.85, f), s: lerp(1, 0.85, f), o: seg(w, 0, 0.15) * sO }); });
+    put(shot, { x: lerp(-70, 150, f), y: -20, s: lerp(0.3, 1, f), o: seg(w, 0.5, 0.6) * sO });
+    pop(saved, w, 1.15, sO, { x: 150, y: 56 });
+  };
+};
+
+CLIPS["post-mockup"] = () => {
+  const card = (g) => inG(g, `<div style="width:340px;height:190px;border-radius:18px;background:#fff;box-shadow:0 22px 50px -14px rgb(0 0 0/.55);color:#111;padding:18px;display:grid;align-content:start;gap:10px"><div style="display:flex;gap:10px;align-items:center"><i style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,oklch(0.75 0.15 ${HUE}),oklch(0.6 0.18 300))"></i><div style="display:grid"><b style="font-size:14px">Ada Lovelace</b><span style="font-size:12px;opacity:.55">@ada · 2h</span></div></div><span class="txt" style="font-size:16px;line-height:1.35"></span><div style="display:flex;gap:18px;font-size:13px;opacity:.75;margin-top:4px"><span class="lk">♥ 0</span><span>↻ 12</span></div></div>`);
+  const C0 = card(0), C1 = card(1), C2 = card(2);
+  const text = "Shipped the new sidebar today. Small change, big relief.";
+  const heart = inG(1, `<div style="font-size:54px;color:oklch(0.65 0.22 20)">♥</div>`);
+  const file = inG(2, `<div class="card" style="width:96px;height:96px">${ic("image", 30, "color:var(--soft)")}<b style="font-size:12px">post.png</b></div>`);
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    C0.querySelector(".txt").textContent = typed(text, s, 0.3, 1.5);
+    put(C0, { y: -20, s: lerp(0.9, 1, E.out(seg(s, 0, 0.4))), o: seg(s, 0, 0.2) * (1 - xo) });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95);
+    C1.querySelector(".txt").textContent = text;
+    C1.querySelector(".lk").textContent = "♥ " + Math.round(1240 * E.out(seg(u, 0.5, 1.4))).toLocaleString("en-US");
+    put(C1, { y: -20, o: seg(u, 0, 0.15) * (1 - xo2) });
+    put(heart, { x: 120, y: -60, s: E.back(seg(u, 0.3, 0.6)) * (1 + 0.15 * Math.sin(Math.PI * seg(u, 0.6, 0.9))), o: seg(u, 0.3, 0.4) * (1 - seg(u, 1.2, 1.4)) * (1 - xo2) });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85), f = E.inout(seg(w, 0.5, 1.1));
+    C2.querySelector(".txt").textContent = text;
+    C2.querySelector(".lk").textContent = "♥ 1,240";
+    put(C2, { x: lerp(0, -60, f), y: -20, s: lerp(1, 0.8, f), o: seg(w, 0, 0.15) * sO });
+    put(file, { x: lerp(-60, 170, f), y: -20, s: lerp(0.3, 1, f), o: seg(w, 0.5, 0.6) * sO });
   };
 };
 
