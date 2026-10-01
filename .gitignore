@@ -12,7 +12,6 @@ apps/desktop/src-tauri/gen/
 # Internal project documentation: kept on disk and in local git history,
 # but no longer tracked going forward, so it stops publishing to the
 # public remote. README.md and the per-folder technical READMEs stay.
-/AGENTS.md
 /PRODUCT.md
 /DESIGN.md
 /docs/*.md
@@ -53,3 +52,6 @@ Desktop.ini
 # this is a guard against it ever arriving by accident.
 *.key
 updater.key*
+
+# End-to-end test artifacts
+/e2e-report/

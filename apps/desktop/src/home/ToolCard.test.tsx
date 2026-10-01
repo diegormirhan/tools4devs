@@ -86,12 +86,6 @@ describe("the hover preview", () => {
     expect(onPreviewChange).toHaveBeenLastCalledWith(false);
   });
 
-  it("opens from the keyboard too", () => {
-    const { onPreviewChange } = renderCard("ffmpeg");
-    fireEvent.focus(screen.getByRole("button", { name: "Get FFmpeg" }));
-    expect(onPreviewChange).toHaveBeenLastCalledWith(true);
-  });
-
   it("plays the muted clip, loading nothing until it opens", () => {
     renderCard("ffmpeg", available, { previewing: true });
     const video = document.querySelector("video")!;

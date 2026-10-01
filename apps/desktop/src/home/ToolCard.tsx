@@ -79,7 +79,12 @@ export function ToolCard({ tool, row, installation, onOpen, onInstall, previewin
         className="absolute inset-0 rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         aria-label={t(isReady ? "Open {name}" : "Get {name}", { name: tool.integrationName })}
         onClick={act}
-        onFocus={() => onPreviewChange(true)}
+        // Only focus from the keyboard opens it at once. A mouse click focuses the
+        // button too, and a preview opening between press and release covered
+        // the card, so the release landed on the preview and the click was lost.
+        onFocus={(event) => {
+          if (focusIsVisible(event.currentTarget)) onPreviewChange(true);
+        }}
         onBlur={closePreview}
       />
 
@@ -205,4 +210,13 @@ function ToolPreview({
       </div>
     </div>
   );
+}
+
+/** Whether focus arrived the way a keyboard brings it; true where the selector is unknown. */
+function focusIsVisible(element: Element): boolean {
+  try {
+    return element.matches(":focus-visible");
+  } catch {
+    return true;
+  }
 }

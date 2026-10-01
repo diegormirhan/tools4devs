@@ -13,6 +13,7 @@
     "test": "npm run test:domain && npm run test:ui",
     "test:domain": "node --test \"tests/**/*.test.mjs\"",
     "test:ui": "vitest run --config apps/desktop/vitest.config.ts --maxWorkers 2",
+    "test:e2e": "playwright test",
     "test:coverage": "node --test --experimental-test-coverage \"tests/**/*.test.mjs\"",
     "validate:tools": "node scripts/tool-manifest/validate-file.mjs tooling/tools.json",
     "audit:capabilities": "node scripts/tool-manifest/audit-capabilities.mjs",
@@ -45,6 +46,7 @@
     "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tauri-apps/cli": "^2.11.4",
     "@testing-library/jest-dom": "^6.9.1",
