@@ -141,7 +141,7 @@ function Shell() {
 
   async function chooseFile() {
     if (!isNativeHost()) {
-      setFileMessage(t("Open tools4devs on Windows to pick local files."));
+      setFileMessage(t("Open Tools4Devs on Windows to pick local files."));
       return;
     }
     try {

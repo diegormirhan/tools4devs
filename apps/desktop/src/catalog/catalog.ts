@@ -100,7 +100,7 @@ const utilityPresentations: Record<string, ToolPresentation> = Object.fromEntrie
       keywords: group.keywords,
       icon: group.icon,
       preview: group.preview,
-      builtIn: { integrationName: "tools4devs", capabilities: [] },
+      builtIn: { integrationName: "Tools4Devs", capabilities: [] },
     },
   ]),
 );

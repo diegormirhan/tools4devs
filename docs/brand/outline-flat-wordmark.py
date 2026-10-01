@@ -4,6 +4,7 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(root / "tmp" / "brand-fonttools"))
+text = sys.argv[1] if len(sys.argv) > 1 else "Tools4Devs"
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 
@@ -12,7 +13,7 @@ glyphs = font.getGlyphSet()
 characters = font.getBestCmap()
 advance = 0
 paths = []
-for letter in "tools4devs":
+for letter in text:
     name = characters[ord(letter)]
     pen = SVGPathPen(glyphs)
     glyphs[name].draw(pen)

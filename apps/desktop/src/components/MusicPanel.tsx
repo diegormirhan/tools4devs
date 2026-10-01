@@ -143,7 +143,7 @@ export function MusicPanel({
   function listenNow() {
     if (busy || !deviceId) return;
     if (!isNativeHost()) {
-      setError(t("Open the tools4devs app to listen. This page is the interface preview only."));
+      setError(t("Open the Tools4Devs app to listen. This page is the interface preview only."));
       return;
     }
     setBusy(true);

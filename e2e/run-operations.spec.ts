@@ -132,7 +132,7 @@ test.describe("installing a tool", () => {
     await dialog.getByRole("button", { name: /Open 7-Zip/ }).click();
     await expect(page.getByRole("region", { name: "Compress files" })).toBeVisible();
     // The page and the catalog follow without a reload.
-    await page.getByRole("button", { name: /tools4devs/ }).first().click();
+    await page.getByRole("button", { name: /Tools4Devs/ }).first().click();
     await expect(page.getByRole("button", { name: "Open 7-Zip" })).toBeVisible();
   });
 });

@@ -16,7 +16,7 @@ pub fn run() {
     if let Err(error) = data_migration::migrate_current_user() {
         use windows::{core::{w, PCWSTR}, Win32::UI::WindowsAndMessaging::{MessageBoxW, MB_ICONERROR, MB_OK}};
         let message: Vec<u16> = format!("Could not migrate your saved data. Close the old app and try again. Your original data has been kept.\n\n{error}\0").encode_utf16().collect();
-        unsafe { MessageBoxW(None, PCWSTR(message.as_ptr()), w!("tools4devs"), MB_OK | MB_ICONERROR); }
+        unsafe { MessageBoxW(None, PCWSTR(message.as_ptr()), w!("Tools4Devs"), MB_OK | MB_ICONERROR); }
         return;
     }
     tauri::Builder::default()
@@ -1009,7 +1009,7 @@ fn resolve_suite_executable(tool_id: &str, executable: &str) -> Result<std::path
         let found = resolve_executable(executable)?;
         if !ffmpeg_build::can_run_the_app_operations(&found) {
             return Err(format!(
-                "The FFmpeg at {} lacks encoders tools4devs uses. Install FFmpeg from the app.",
+                "The FFmpeg at {} lacks encoders Tools4Devs uses. Install FFmpeg from the app.",
                 found.display()
             ));
         }

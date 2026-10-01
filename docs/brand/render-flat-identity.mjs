@@ -35,7 +35,7 @@ function wordmark(ink) {
   const scale = 110 / outlines.unitsPerEm;
   const width = outlines.width * scale + 16;
   const paths = outlines.paths.map(glyph => `<path d="${glyph.path}" transform="translate(${8 + glyph.x * scale} 95) scale(${scale} ${-scale})" fill="${glyph.letter === "4" ? colors.blue : ink}"/>`).join("");
-  return svg("tools4devs wordmark — Inter Tight Semibold", `0 0 ${width} 120`, paths);
+  return svg("Tools4Devs wordmark — Inter Tight Semibold", `0 0 ${width} 120`, paths);
 }
 const darkWordmark = wordmark(colors.white);
 const lightWordmark = wordmark(colors.navy);

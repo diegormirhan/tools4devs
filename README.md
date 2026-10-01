@@ -2,7 +2,7 @@
 
 <img src="apps/desktop/src-tauri/icons/tools4devs.svg" alt="" width="96" height="96">
 
-# tools4devs
+# Tools4Devs
 
 [![Release](https://img.shields.io/github/v/tag/diegormirhan/tools4devs?label=release&color=88afff)](https://github.com/diegormirhan/tools4devs/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -14,9 +14,9 @@
 
 </div>
 
-![The tools4devs catalog in its dark theme](docs/screenshots/catalog-dark.png)
+![The Tools4Devs catalog in its dark theme](docs/screenshots/catalog-dark.png)
 
-tools4devs puts twenty-five open-source tools (FFmpeg, yt-dlp, qpdf, ImageMagick, Tesseract and others) in one window with one queue. Nine of them ship inside the installer. The app downloads, verifies and installs the rest on its own, and shows the download size before it starts.
+Tools4Devs puts twenty-five open-source tools (FFmpeg, yt-dlp, qpdf, ImageMagick, Tesseract and others) in one window with one queue. Nine of them ship inside the installer. The app downloads, verifies and installs the rest on its own, and shows the download size before it starts.
 
 It also has about ninety small tools built in: text, hashes, dates, calculators, colours, CSS generators, QR codes, test data and chat or post mockups. These run inside the app and need nothing installed.
 

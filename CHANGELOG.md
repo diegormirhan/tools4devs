@@ -14,10 +14,16 @@ All notable changes to tools4devs. Versions follow [semantic versioning](https:/
 - Drop or choose a file on the home page to see the tools that can open it.
 - Rebuild the queue, history, settings, install dialog, update notice, quick tools and chat and post mockups to match. A quick tool page is named after the tool and shows input and result side by side.
 - Clearing the history asks for confirmation.
+- Write the name as Tools4Devs wherever it is shown: window title, logo, About page and messages. The executable, installer keys, saved settings and update channel keep the lowercase identifier, so installed copies keep updating.
+- Paint the window's title bar in the sidebar's colours on Windows 11.
+- Add an About page, from Settings, listing every bundled or downloadable tool with its version, licence, hash and project.
+- Open and close the sidebar smoothly; labels fade instead of shrinking.
 
 ### Fixed
 
 - The CSS generators' box sample now has a size of its own; box shadow and border radius previews used to draw nothing.
+- An FFmpeg found on PATH without the encoders the app uses (Gyan's build has libx264, not libopenh264) counts as missing, so the app offers its own instead of failing to convert or compress video.
+- Buttons and the sidebar tree show the hand cursor again, tool names in the tree no longer run under the pin star, and the settings drop-downs open below their field instead of over it.
 
 
 

@@ -26,7 +26,7 @@ type OperationProgressEvent = {
 };
 
 const browserPreviewNotice =
-  "Open the tools4devs app to run operations on Windows. This page is the interface preview only.";
+  "Open the Tools4Devs app to run operations on Windows. This page is the interface preview only.";
 
 /**
  * Runs operations against the native host and mirrors them in the session queue.

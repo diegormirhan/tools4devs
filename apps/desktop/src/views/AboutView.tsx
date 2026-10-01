@@ -16,7 +16,7 @@ export function AboutView({ version }: { version: string }) {
   return (
     <div data-slot="page" className="grid max-w-[760px] gap-6 px-6 pt-4 pb-16 lg:px-8">
       <PageHeader
-        title={t("About tools4devs")}
+        title={t("About Tools4Devs")}
         lead={t("Its own code is under the MIT licence. Every tool it runs keeps its own licence, listed below.")}
       />
 

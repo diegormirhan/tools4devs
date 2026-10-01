@@ -160,7 +160,7 @@ test("About lists every component with its version, licence and hash, and opens 
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("button", { name: "Components and licences" }).click();
 
-  await expect(page.getByRole("heading", { level: 1, name: "About tools4devs" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "About Tools4Devs" })).toBeVisible();
   await expect(page.getByText("MIT", { exact: true }).first()).toBeVisible();
   const components = page.getByRole("list", { name: "Components" }).getByRole("listitem");
   await expect(components).toHaveCount(26);
