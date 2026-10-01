@@ -27,7 +27,7 @@ const pageTitles: Record<Exclude<View, "tool">, string> = {
 /**
  * The window frame: sidebar, header and the scrolling page. A page still drawn
  * by app.css marks itself data-legacy, where Tailwind's reset does not reach
- * (theme.css); so do the overlays below.
+ * (theme.css).
  */
 export function AppShell({
   rows,
@@ -80,7 +80,7 @@ export function AppShell({
           {children}
         </div>
       </SidebarInset>
-      <div data-legacy>{overlays}</div>
+      {overlays}
       <CommandPalette
         rows={rows}
         open={paletteOpen}

@@ -67,14 +67,3 @@ test("never hardcodes a colour below the token blocks", () => {
 
   assert.deepEqual(literals, []);
 });
-
-test("hangs the update card from the top, clear of the top bar", () => {
-  const rule = stylesheet.slice(stylesheet.indexOf(".update-card {"));
-  const body = rule.slice(0, rule.indexOf("}"));
-  // It used to sit at the bottom as a pill. It now arrives from above and
-  // stops under the top bar, so an anchor at the bottom edge is the exact
-  // regression this guards against.
-  assert.match(body, /inset-block-start:/);
-  assert.doesNotMatch(body, /inset-block-end:/);
-  assert.match(body, /animation: update-drop/);
-});

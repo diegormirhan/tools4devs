@@ -22,6 +22,7 @@
 @source "../home";
 @source "../views";
 @source "../components/ThemeSwitch.tsx";
+@source "../components/UpdateCard.tsx";
 @source "../components/InstallDialog.tsx";
 
 @custom-variant dark (&:is(.dark *));
