@@ -13,7 +13,7 @@ describe("desktop catalog", () => {
     migratePreferences(localStorage);
     render(<App />);
     expect(screen.getByRole("heading", { name: "O que você quer fazer?" })).toBeVisible();
-    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(document.documentElement).not.toHaveClass("dark");
   });
 
   it("shows the tools4devs name in the sidebar", () => {
@@ -135,11 +135,11 @@ describe("desktop catalog", () => {
     const themes = screen.getByRole("radiogroup", { name: "Interface theme" });
 
     await user.click(within(themes).getByRole("radio", { name: "Dark theme" }));
-    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(document.documentElement).toHaveClass("dark");
     expect(within(themes).getByRole("radio", { name: "Dark theme" })).toHaveAttribute("aria-checked", "true");
 
     await user.click(within(themes).getByRole("radio", { name: "Light theme" }));
-    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(document.documentElement).not.toHaveClass("dark");
     expect(window.localStorage.getItem("tools4devs.theme-preference")).toBe("light");
   });
 

@@ -27,6 +27,7 @@ import { JobView } from "./views/JobView";
 import { SettingsView } from "./views/SettingsView";
 import "./styles/theme.css";
 import "./styles/utility-previews.css";
+import "./styles/crop-overlay.css";
 import "./styles/app.css";
 
 type SidebarChoice = "collapsed" | "expanded" | null;

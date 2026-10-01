@@ -21,33 +21,25 @@ test("never writes a vendor prefix by hand", () => {
   assert.deepEqual(handWritten, []);
 });
 
-test("keeps its element rules to the screens it still draws", () => {
-  // Unlayered, these would beat every Tailwind utility on the new sidebar and
-  // header: a second focus outline on each shadcn button, for one.
-  const scoped = stylesheet.slice(stylesheet.indexOf("@scope ([data-legacy])"));
-  assert.notEqual(stylesheet.indexOf("@scope ([data-legacy])"), -1);
-  assert.match(scoped.slice(0, scoped.indexOf("\n}\n")), /button:focus-visible/);
-  assert.doesNotMatch(stylesheet.slice(0, stylesheet.indexOf("@scope ([data-legacy])")), /^button[ ,:{]/m);
+test("holds only the window frame and the mockups", () => {
+  // Every screen is drawn by Tailwind utilities on its components now; a class
+  // rule here outside the mockups is a screen drawn twice.
+  const classes = [...stylesheet.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/\.([a-z][\w-]*)/gi)]
+    .map((match) => match[1])
+    .filter((name) => !name.startsWith("mockup-"));
+  assert.deepEqual([...new Set(classes)], []);
 });
 
-test("blurs what is behind the modal", () => {
-  assert.match(stylesheet, /\.panel-scrim\s*\{[^}]*backdrop-filter:\s*blur/);
-});
-
-test("leaves a way out of the blur for anyone who asked for less transparency", () => {
-  assert.match(stylesheet, /prefers-reduced-transparency:\s*reduce/);
-});
-
-test("never hardcodes a colour below the token blocks", () => {
-  // The token blocks own every literal colour; a hex further down means the
-  // light theme has a rule that does not follow it. The one deliberate
-  // exception is a mockup: a WhatsApp bubble has to be WhatsApp green and a
-  // tweet's card has to be Twitter's own off-white, whichever theme the app
+test("never hardcodes a colour outside a mockup", () => {
+  // theme.css owns every colour; a hex here means a rule that does not follow
+  // the theme. The one deliberate exception is a mockup: a WhatsApp bubble has
+  // to be WhatsApp green and a tweet's card has to be Twitter's own off-white,
+  // whichever theme the app
   // itself is in, the same way a flag does not recolour for dark mode. That
   // exemption has to track which rule a line is *inside*, not just whether
   // the selector's own text sits on the same line — a multi-line rule's
   // declarations do not repeat it.
-  const body = stylesheet.slice(stylesheet.indexOf("* { box-sizing: border-box; }"));
+  const body = stylesheet;
   let insideMockupPhone = false;
   let depth = 0;
   const literals = [];

@@ -3,13 +3,11 @@
  * with our blue --primary and cooler sidebar and background tones on top.
  * Every colour lives in the :root (light) or .dark block; nothing below them.
  *
- * Tailwind's preflight is not imported: the screens still drawn by app.css depend on
- * the browser defaults it resets. The part the components need is applied below, only
- * inside them. Utilities are generated only from the sources listed here, so a legacy
- * class name such as "hidden" never picks up a Tailwind rule.
+ * Utilities are generated from the app's own source only, not from tests.
  */
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities) source(none);
 @import "tw-animate-css";
 @import "@fontsource-variable/inter";
@@ -17,22 +15,11 @@
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
 
-@source "../components/ui";
+@source "../components";
 @source "../navigation";
 @source "../home";
 @source "../views";
-@source "../components/ThemeSwitch.tsx";
-@source "../components/UpdateCard.tsx";
-@source "../components/Select.tsx";
-@source "../components/NumberField.tsx";
-@source "../components/ToolPanel.tsx";
-@source "../components/InstallDialog.tsx";
-@source "../components/ToolPage.tsx";
-@source "../components/ImageSearchPanel.tsx";
-@source "../components/MusicPanel.tsx";
-@source "../components/UtilityPanel.tsx";
-@source "../components/ChatMockupPanel.tsx";
-@source "../components/PostMockupPanel.tsx";
+@source not "../**/*.test.tsx";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -155,57 +142,20 @@
   background-color: oklch(var(--group-tile-l) var(--group-tile-c) var(--hue));
 }
 
-/*
- * The part of Tailwind's preflight the components rely on, scoped to them: every
- * shadcn element carries data-slot, and the frame marks what app.css still draws
- * with data-legacy, where the scope stops. Dialogs render in a portal outside the
- * frame and are still reached, because their own elements carry data-slot.
- */
+/* shadcn's base layer: borders and outlines take the tokens unless told otherwise. */
 @layer base {
-  @scope ([data-slot]) to ([data-legacy]) {
-    *,
-    ::before,
-    ::after,
-    ::backdrop {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      border: 0 solid;
-      border-color: var(--border);
-      outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
-    }
-    h1, h2, h3, h4, h5, h6 {
-      font-size: inherit;
-      font-weight: inherit;
-    }
-    a {
-      color: inherit;
-      text-decoration: inherit;
-    }
-    ol, ul, menu {
-      list-style: none;
-    }
-    img, svg, video, canvas {
-      display: block;
-      vertical-align: middle;
-    }
-    img, video {
-      max-width: 100%;
-      height: auto;
-    }
-    button, input, select, textarea {
-      font: inherit;
-      letter-spacing: inherit;
-      color: inherit;
-      border-radius: 0;
-      background-color: transparent;
-    }
-    ::placeholder {
-      opacity: 1;
-      color: color-mix(in oklab, currentcolor 50%, transparent);
-    }
-    textarea {
-      resize: vertical;
-    }
+  *,
+  ::before,
+  ::after,
+  ::backdrop {
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+  /* Scrollbars, the colour picker and other native parts follow the theme too. */
+  :root {
+    color-scheme: light;
+  }
+  :root.dark {
+    color-scheme: dark;
   }
 }

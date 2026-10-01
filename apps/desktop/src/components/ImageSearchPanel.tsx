@@ -129,8 +129,7 @@ export function ImageSearchPanel({
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="grid min-w-0 gap-4">
           {showsPicture && (
-            // The preview is still drawn by app.css.
-            <section data-legacy className="overflow-hidden rounded-xl border" aria-label={t("Picture preview")}>
+            <section aria-label={t("Picture preview")}>
               <FilePreview path={path} />
             </section>
           )}

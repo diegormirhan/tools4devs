@@ -149,8 +149,8 @@ export function PostMockupPanel({
         </div>
 
         <div className="grid justify-items-center gap-4 lg:sticky lg:top-4">
-          {/* The post imitates each app, and app.css still draws it. */}
-          <div data-legacy className="grid w-full justify-items-center">
+          {/* The post imitates each app, in its own colours (app.css). */}
+          <div className="grid w-full justify-items-center">
         {platform === "tweet" ? (
           <div className="mockup-post mockup-post--tweet" ref={previewRef}>
             <div className="mockup-tweet__grid">

@@ -186,8 +186,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="grid min-w-0 gap-4">
           {previewable && (
-            // The preview and its crop rectangle are still drawn by app.css.
-            <section data-legacy className="overflow-hidden rounded-xl border" aria-label={t("File preview")}>
+            <section aria-label={t("File preview")}>
               <FilePreview
                 path={selectedFiles[0]?.path}
                 crop={crop}

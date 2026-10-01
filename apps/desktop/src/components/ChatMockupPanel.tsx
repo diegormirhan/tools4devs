@@ -241,8 +241,8 @@ export function ChatMockupPanel({
         </div>
 
         <div className="grid justify-items-center gap-4 lg:sticky lg:top-4">
-          {/* The phone imitates each app, and app.css still draws it. */}
-          <div data-legacy>
+          {/* The phone imitates each app, in its own colours (app.css). */}
+          <div>
         <div className={`mockup-phone mockup-phone--${platform}`} ref={previewRef}>
           <header className="mockup-phone__header">
             {platform === "whatsapp" && (

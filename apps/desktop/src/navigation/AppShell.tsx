@@ -25,9 +25,7 @@ const pageTitles: Record<Exclude<View, "tool">, string> = {
 };
 
 /**
- * The window frame: sidebar, header and the scrolling page. A page still drawn
- * by app.css marks itself data-legacy, where Tailwind's reset does not reach
- * (theme.css).
+ * The window frame: sidebar, header and the scrolling page.
  */
 export function AppShell({
   rows,

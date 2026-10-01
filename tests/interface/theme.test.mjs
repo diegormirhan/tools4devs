@@ -8,17 +8,11 @@ const theme = readFileSync(
   "utf8",
 );
 
-test("does not load Tailwind's preflight while the legacy stylesheet still renders screens", () => {
-  // Preflight resets margins, borders and headings on every element. The screens
-  // not yet migrated rely on the browser defaults it would remove.
-  assert.doesNotMatch(theme, /@import\s+["']tailwindcss["']/);
-  assert.doesNotMatch(theme, /tailwindcss\/preflight/);
-});
-
-test("resets only the new interface, never a screen app.css still draws", () => {
-  // shadcn's components expect Tailwind's reset; the legacy screens inside the
-  // frame expect the browser defaults, so the reset stops at data-legacy.
-  assert.match(theme, /@scope \(\[data-slot\]\) to \(\[data-legacy\]\)/);
+test("loads Tailwind's preflight under its own layer", () => {
+  // Nothing in the window depends on the browser defaults any more, so the reset
+  // applies everywhere, below the utilities that override it.
+  assert.match(theme, /@import\s+"tailwindcss\/preflight\.css"\s+layer\(base\)/);
+  assert.doesNotMatch(theme, /data-legacy/);
 });
 
 test("writes every literal colour inside the light or the dark token block", () => {
