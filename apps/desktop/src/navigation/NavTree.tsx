@@ -13,6 +13,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/cn";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { useNavigation } from "./navigation";
 
 /** Sub-tools shown before "N more…"; FFmpeg alone has fourteen. */
@@ -99,7 +100,7 @@ export function NavTree({ rows, openGroupId, onOpenGroupChange, pinnedIds, onTog
                 <ChevronRight className={cn("transition-transform", open && "rotate-90")} />
               </div>
             </SidebarMenuButton>
-            {open && (
+            <Unfold open={open}>
               <SidebarMenuSub role="group" className="mr-0 pr-0">
                 {row.tools.map((tool) => (
                   <ToolItem
@@ -116,7 +117,7 @@ export function NavTree({ rows, openGroupId, onOpenGroupChange, pinnedIds, onTog
                   />
                 ))}
               </SidebarMenuSub>
-            )}
+            </Unfold>
           </SidebarMenuItem>
         );
       })}
@@ -195,7 +196,7 @@ function ToolItem({
       >
         <Star className={cn(pinned && "fill-sidebar-primary text-sidebar-primary")} />
       </SidebarMenuAction>
-      {hasSubTools && expanded && (
+      <Unfold open={hasSubTools && expanded}>
         <SidebarMenuSub role="group" className="mr-0 pr-0">
           {listed.map((operation) => {
             const active = current && location.subId === operation.id;
@@ -240,8 +241,19 @@ function ToolItem({
             </SidebarMenuSubItem>
           )}
         </SidebarMenuSub>
-      )}
+      </Unfold>
     </SidebarMenuSubItem>
+  );
+}
+
+/** A sub-list that slides open and shut instead of appearing at once; it stays mounted while it closes. */
+function Unfold({ open, children }: { open: boolean; children: React.ReactNode }) {
+  return (
+    <Collapsible open={open}>
+      <CollapsibleContent className="overflow-hidden ease-(--ease-sidebar) data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down motion-reduce:animate-none">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

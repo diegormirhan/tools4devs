@@ -11,7 +11,6 @@
 @import "tailwindcss/utilities.css" layer(utilities) source(none);
 @import "tw-animate-css";
 @import "@fontsource-variable/inter";
-@import "@fontsource-variable/fraunces";
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
 
@@ -94,7 +93,7 @@
 @theme inline {
   --ease-sidebar: cubic-bezier(0.32, 0.72, 0, 1);
   --font-sans: "Inter Variable", system-ui, sans-serif;
-  --font-heading: "Fraunces Variable", Georgia, serif;
+  --font-heading: "Inter Variable", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --animate-listen-pulse: listen-pulse 1.8s ease-out infinite;
   --radius-sm: calc(var(--radius) - 4px);
