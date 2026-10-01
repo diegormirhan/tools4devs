@@ -23,6 +23,17 @@ test("UC-02: hovering a card plays its clip after a pause, one at a time", async
   await expect(page.locator("video")).toHaveCount(0);
 });
 
+test("UC-02: the open preview reads and acts as the card it covers", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Get FFmpeg" }).hover();
+  const clip = page.locator("video");
+  await expect(clip).toHaveCount(1);
+  expect(await clip.evaluate((video) => getComputedStyle(video).cursor)).toBe("pointer");
+
+  await clip.click();
+  await expect(page.getByRole("dialog", { name: /FFmpeg/ })).toBeVisible();
+});
+
 test("UC-02: keyboard focus opens the preview too", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Get FFmpeg" }).focus();

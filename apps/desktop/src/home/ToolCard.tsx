@@ -158,9 +158,11 @@ function ToolPreview({
   const hidden = tool.operations.length - listedActions;
 
   return (
+    // It covers the card, so a click anywhere on it does what the card would.
     <div
       aria-hidden="true"
-      className="absolute -top-4 -left-5 z-20 w-[calc(100%+40px)] overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-lg animate-in fade-in-0 zoom-in-[0.98] duration-150"
+      onClick={onAct}
+      className="absolute -top-4 -left-5 z-20 w-[calc(100%+40px)] cursor-pointer overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-lg animate-in fade-in-0 zoom-in-[0.98] duration-150"
     >
       <div className="grid aspect-video place-items-center bg-muted">
         {tool.preview && !reducedMotion ? (
@@ -192,7 +194,7 @@ function ToolPreview({
               {!isReady && size ? ` · ${t("{size} download", { size: formatBytes(size) })}` : ""}
             </span>
           </span>
-          <Button size="sm" tabIndex={-1} onClick={onAct}>
+          <Button size="sm" tabIndex={-1}>
             {t(isReady ? "Open" : "Get it")}
             {isReady ? <ArrowUpRight /> : <Download />}
           </Button>
