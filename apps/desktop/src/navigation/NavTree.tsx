@@ -171,6 +171,8 @@ function ToolItem({
           data-tree-id={tool.id}
           data-tree-parent={parentId}
           tabIndex={tabStop === tool.id ? 0 : -1}
+          // Room for the pin star, which sits over the end of the row.
+          className="pr-8"
           onClick={open}
           onKeyDown={(event) =>
             handleItemKeys(event, {
