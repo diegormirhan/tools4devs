@@ -52,7 +52,8 @@ export function AppSidebar({
   return (
     <Sidebar variant="inset" collapsible="icon" role="complementary" aria-label={t("Main navigation")}>
       <SidebarHeader>
-        <SidebarMenu>
+        {/* Collapsed, the mark loses its wordmark and sits right on the search icon without this. */}
+        <SidebarMenu className="group-data-[collapsible=icon]:gap-3">
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" onClick={() => go({ view: "catalog" })} tooltip={t("Tools")}>
               <img src="/brand/tools4devs-mark.svg" alt="" width="32" height="32" className="size-8 rounded-lg" />
