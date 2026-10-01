@@ -18,7 +18,7 @@ Regras que valem para toda etapa:
 | 2 | Modelo de dados (ícone, preview, árvore) | P | 1 | — | ☑ |
 | 3 | Shell, sidebar em árvore e Ctrl+K | G | 2 | UC-01, 03, 10, 11 | ☑ |
 | 4 | Páginas de ferramenta inline | G | 3 | UC-04, 05, 06, 09, 12, 13 | ◐ falta o layout dos utilitários (aguarda aprovação) |
-| 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☐ |
+| 5 | Cards novos e preview no hover | G | 2 (4 recomendado) | UC-02 | ☑ |
 | 6 | Clipes de preview | G | 0 (motor pronto) | UC-02 | ☐ |
 | 7 | Primitivos restantes e limpeza do CSS | M | 4, 5 | UC-07, 08 | ☐ |
 | 8 | Testes finais, docs e entrega | M | 1–7 | todos | ☐ |
@@ -139,12 +139,17 @@ Não verificado: a operação real de ponta a ponta no `tauri:dev` (exige compil
 
 Detalhes: §4.2, §7.4, §8 Fase 5.
 
-- [ ] Testes primeiro: estados de erro e progresso do `ToolCard`; nomes `Open {name}` / `Get {name}`; `ToolPreview` com reduced motion (só poster), um vídeo por vez, abre no foco.
-- [ ] `ToolCard` novo: ícone tingido por grupo, título em serifa, motor em mono, selos.
-- [ ] `ToolPreview`: atraso de ~300 ms, `preload="none"`, `IntersectionObserver`, posicionamento absoluto (sem reflow).
-- [ ] Remover grade de pontinhos, barra de destaque, elevação no hover e `card-arrive`.
-- [ ] Remover `ToolArtwork.tsx`, `CategoryFilter.tsx` e `ToolSection.tsx` (a sidebar assume os filtros).
-- [ ] Ajustar `scripts/screenshots.mjs` aos seletores novos (vindo da etapa 3).
+- [x] Testes primeiro (`src/home/ToolCard.test.tsx`, 10): nomes `Open {name}` / `Get {name}`, motor, ações e tamanho no card, erro com "Try again", progresso com `aria-valuenow`; preview abre após a pausa e fecha ao sair, abre no foco, toca o clipe mudo com `preload="none"`, mostra só o poster com movimento reduzido, cai no ícone sem clipe.
+- [x] `ToolCard` novo em `src/home/`: o card inteiro é o botão (a ação do card antigo vira o nome dele), quadrado tingido pelo grupo (`bg-group-tile`, tokens `--group-tile-l/c` em `theme.css`), título em serifa, motor em mono, selos de ações e de download.
+- [x] `ToolPreview` sobre a grade, a partir do card, sem mover nada; 300 ms de pausa; só um aberto por vez (o estado fica na `CatalogView`), logo um vídeo por vez. O preview repete o botão do card, por isso é `aria-hidden` e o botão dele fica fora do Tab. Sem `IntersectionObserver`: o vídeo só existe enquanto o preview está aberto, debaixo do ponteiro ou do foco.
+- [x] `CatalogView` nova (tela inicial do mockup): título, "Choose a file", área do arquivo (arrastando, escolhido, sugestões, erro) e seções por grupo. A página tem `data-slot` e entra no reset escopado; as páginas antigas (painéis, Fila/Histórico, Configurações) passaram a se marcar `data-legacy` uma a uma.
+- [x] Removidos `ToolArtwork.tsx`, `CategoryFilter.tsx`, `ToolSection.tsx` e o `ToolCard` antigo, com a grade de pontinhos, a barra de destaque, a elevação e o `card-arrive` que eram deles. O CSS deles no `app.css` vira lixo para a etapa 7.
+- [x] `scripts/screenshots.mjs` não precisou mudar: `#section-data` e `Get yt-dlp` continuam. `skills/app-demo-media/record.mjs` foi ajustado (card, hover e "fechar painel" agora voltam pela marca da sidebar).
+- [x] `components/ui/progress.tsx` passa o `value` ao Radix: a cópia do registro só desenhava a barra, sem anunciar a porcentagem (afetava também o diálogo de instalação).
+
+Ficou de fora do mockup: o escurecimento dos outros cards enquanto um preview está aberto.
+
+Resultado (2026-10-01): 46 testes de domínio e 372 de interface verdes; `tsc` e build verdes; tela inicial e preview do FFmpeg conferidos no navegador. O JS do app passou de 604 kB (antes da etapa 1) para 755 kB, por Radix, cmdk e sonner.
 
 **Pronto quando**: UC-02 passa; a grade não treme ao abrir/fechar o preview; cards sem clipe mostram poster ou ícone.
 

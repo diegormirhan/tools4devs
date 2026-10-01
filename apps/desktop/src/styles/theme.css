@@ -19,6 +19,7 @@
 
 @source "../components/ui";
 @source "../navigation";
+@source "../home";
 @source "../components/InstallDialog.tsx";
 
 @custom-variant dark (&:is(.dark *));
@@ -54,6 +55,8 @@
   /* A group tints its icons with its own hue at this lightness and chroma. */
   --group-icon-l: 0.45;
   --group-icon-c: 0.12;
+  --group-tile-l: 0.93;
+  --group-tile-c: 0.045;
 }
 
 .dark {
@@ -85,6 +88,8 @@
   --sidebar-ring: oklch(0.55 0.13 258);
   --group-icon-l: 0.82;
   --group-icon-c: 0.11;
+  --group-tile-l: 0.32;
+  --group-tile-c: 0.06;
 }
 
 @theme inline {
@@ -125,6 +130,10 @@
 
 @utility text-group-icon {
   color: oklch(var(--group-icon-l) var(--group-icon-c) var(--hue));
+}
+
+@utility bg-group-tile {
+  background-color: oklch(var(--group-tile-l) var(--group-tile-c) var(--hue));
 }
 
 /*

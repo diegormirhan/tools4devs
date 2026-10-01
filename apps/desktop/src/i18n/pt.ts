@@ -47,14 +47,17 @@ export const portuguese: Record<string, string> = {
 
   // ── The catalog screen
   "What do you want to do?": "O que você quer fazer?",
-  "Pick a tool below. You can also drop a file onto this window, or choose one first.":
-    "Escolha uma ferramenta abaixo. Você também pode arrastar um arquivo para esta janela, ou escolher um antes.",
+  "Pick a tool on the left, or drop a file on this window and we will suggest what fits.":
+    "Escolha uma ferramenta à esquerda, ou arraste um arquivo para esta janela e sugerimos o que serve.",
+  "Choose a file": "Escolher um arquivo",
+  "Your file": "Seu arquivo",
+  "These tools read it:": "Estas ferramentas leem este arquivo:",
+  "No tool here is made for this kind of file.": "Nenhuma ferramenta daqui foi feita para este tipo de arquivo.",
+  "What you can do": "O que dá para fazer",
+  "{size} download": "download de {size}",
   "Open tools4devs on Windows to pick local files.":
     "Abra o tools4devs no Windows para escolher arquivos locais.",
   "Drop the file here": "Solte o arquivo aqui",
-  "Drop a file, or choose one": "Arraste um arquivo, ou escolha um",
-  "Now open a tool below": "Agora abra uma ferramenta abaixo",
-  "Processed on your own machine": "Processado na sua própria máquina",
   "No tool matches that": "Nenhuma ferramenta corresponde a isso",
 
   // ── The queue and the history
@@ -769,11 +772,9 @@ export const portuguese: Record<string, string> = {
   "English": "English",
   "Enlarge by": "Ampliar em",
   "Every N frames": "A cada N quadros",
-  "Everything": "Tudo",
   "Export it from a private window and close that window straight away: YouTube rotates the cookies of any tab left open, which invalidates the file.": "Exporte de uma janela anônima e feche essa janela logo em seguida: o YouTube rotaciona os cookies de qualquer aba deixada aberta, o que invalida o arquivo.",
   "Expression": "Expressão",
   "File preview": "Prévia do arquivo",
-  "Filter by category": "Filtrar por categoria",
   "Firefox": "Firefox",
   "Format": "Formato",
   "Frames per second": "Quadros por segundo",
@@ -884,7 +885,6 @@ export const portuguese: Record<string, string> = {
   "Verifying": "Verificando",
   "Version {version} is installed. Restart to use it — anything running now will be lost.": "A versão {version} está instalada. Reinicie para usá-la — o que estiver rodando agora será perdido.",
   "Vivaldi": "Vivaldi",
-  "Waiting for the host to finish.": "Esperando o host terminar.",
   "What this PC is playing": "O que este PC está tocando",
   "What was recognised": "O que foi reconhecido",
   "Width": "Largura",

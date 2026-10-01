@@ -149,11 +149,13 @@ async function at(finder) {
 }
 const byText = (text, root) => `__find(${JSON.stringify(text)}${root ? "," + JSON.stringify(root) : ""})`;
 const bySel = (selector) => `document.querySelector(${JSON.stringify(selector)})`;
-const card = (title) => `[...document.querySelectorAll("article.tool-card")].find(a => a.querySelector("h3")?.innerText.trim() === ${JSON.stringify(title)})`;
+const card = (title) => `[...document.querySelectorAll('article[aria-labelledby^="card-"]')].find(a => a.querySelector("h3")?.innerText.trim() === ${JSON.stringify(title)})`;
 const cardOpen = (title) => `${card(title)}?.querySelector("button")`;
-const cardArt = (title) => `${card(title)}?.querySelector(".tool-artwork")`;
+// Pausing on a card is what opens its preview now; there is no artwork to aim at.
+const cardArt = (title) => card(title);
 const nthPlus = (n) => `[...document.querySelectorAll(".operation-options .number-field")][${n}]?.querySelector("button:last-of-type")`;
-const closePanel = bySel(".tool-panel__topbar .icon-button");
+// A tool is a page now; the way back to the catalog is the brand at the top of the sidebar.
+const closePanel = bySel('[data-slot="sidebar-header"] button');
 async function clickOn(finder) { const p = await at(finder); await click(p.x, p.y); }
 async function hover(finder) { const p = await at(finder); await moveTo(p.x, p.y); }
 async function type(text, delay = 55) { for (const ch of text) { await send("Input.insertText", { text: ch }); await sleep(delay + Math.random() * 40); } }

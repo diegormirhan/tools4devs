@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { Upload } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import toolManifest from "../../../tooling/tools.json";
 import { open } from "@tauri-apps/plugin-dialog";
 import { createCatalogRows, type CatalogTool } from "./catalog/catalog";
@@ -15,11 +14,11 @@ import { useUpdate } from "./hooks/useUpdate";
 import { MusicPanel } from "./components/MusicPanel";
 import { ChatMockupPanel } from "./components/ChatMockupPanel";
 import { PostMockupPanel } from "./components/PostMockupPanel";
-import { ToolSection } from "./components/ToolSection";
-import { CategoryFilter } from "./components/CategoryFilter";
+import { CatalogView } from "./home/CatalogView";
 import { useFileDrop } from "./hooks/useFileDrop";
 import { isNativeHost, useOperationRunner } from "./hooks/useOperationRunner";
 import { useInstallationState } from "./hooks/useInstallationState";
+import { useMediaQuery } from "./hooks/useMediaQuery";
 import { useStoredState } from "./hooks/useStoredState";
 import { useTheme } from "./hooks/useTheme";
 import { AppShell } from "./navigation/AppShell";
@@ -68,7 +67,6 @@ function Shell() {
   useEffect(() => writeSetting("tools4devs.concurrency", String(concurrency)), [concurrency]);
   useEffect(() => writeSetting("tools4devs.conflict", conflictPolicy), [conflictPolicy]);
 
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [defaultFolder, setDefaultFolder] = useState(() => {
     try {
       return localStorage.getItem('tools4devs.destination') ?? '';
@@ -96,10 +94,6 @@ function Shell() {
   const sidebarCollapsed = sidebarChoice ? sidebarChoice === "collapsed" : narrowWindow;
   const setSidebarCollapsed = (collapsed: boolean) => setSidebarChoice(collapsed ? "collapsed" : "expanded");
 
-  const visibleRows = useMemo(
-    () => (activeCategory === null ? catalogRows : catalogRows.filter((row) => row.id === activeCategory)),
-    [catalogRows, activeCategory],
-  );
   const installationPlan = pendingTool ? installations.planInstallation(pendingTool.id) : [];
   const pinnedToolIds = useMemo(
     () => new Set(toolManifest.tools.filter((tool) => tool.status === "downloadable").map((tool) => tool.id)),
@@ -138,6 +132,22 @@ function Shell() {
 
   function openTool(tool: CatalogTool) {
     go({ view: "tool", toolId: tool.id });
+  }
+
+  async function chooseFile() {
+    if (!isNativeHost()) {
+      setFileMessage(t("Open tools4devs on Windows to pick local files."));
+      return;
+    }
+    try {
+      const selected = await open({ multiple: false, directory: false });
+      if (typeof selected === "string") {
+        setPendingFile(selected);
+        setFileMessage("");
+      }
+    } catch (error) {
+      setFileMessage(String(error));
+    }
   }
 
   function requestInstallation(tool: CatalogTool) {
@@ -188,7 +198,8 @@ function Shell() {
       }
     >
       {openedTool ? (
-        utilityGroupIds.includes(openedTool.id) ? (
+        <div data-legacy>
+        {utilityGroupIds.includes(openedTool.id) ? (
           <UtilityPanel
             key={openedTool.id}
             tool={openedTool}
@@ -224,75 +235,22 @@ function Shell() {
             onRun={runToolOperation}
             onCancel={runner.cancelOperation}
           />
-        )
-      ) : location.view === "catalog" ? (
-        <div className="catalog-view">
-          <section className="drop-workspace" aria-labelledby="workspace-title">
-            <div className="drop-workspace__copy">
-              <h1 id="workspace-title">{t("What do you want to do?")}</h1>
-              <p>{t("Pick a tool below. You can also drop a file onto this window, or choose one first.")}</p>
-            </div>
-            <button
-              type="button"
-              className="file-drop"
-              data-dragging={fileDrop.isDraggingOver ? "true" : undefined}
-              onClick={async () => {
-                if (!isNativeHost()) {
-                  setFileMessage(t("Open tools4devs on Windows to pick local files."));
-                  return;
-                }
-                try {
-                  const selected = await open({ multiple: false, directory: false });
-                  if (typeof selected === "string") {
-                    setPendingFile(selected);
-                    setFileMessage("");
-                  }
-                } catch (error) {
-                  setFileMessage(String(error));
-                }
-              }}
-            >
-              <Upload size={23} aria-hidden="true" />
-              <span>
-                <strong>
-                  {fileDrop.isDraggingOver
-                    ? t("Drop the file here")
-                    : (pendingFile?.split(/[\\/]/).pop() ?? t("Drop a file, or choose one"))}
-                </strong>
-                <small>{t(pendingFile ? "Now open a tool below" : "Processed on your own machine")}</small>
-              </span>
-            </button>
-            {fileMessage && (
-              <p className="drop-workspace__notice" role="alert">
-                {fileMessage}
-              </p>
-            )}
-            {suggestedTools.length > 0 && (
-              <div className="category-filter" role="group" aria-label={t("Tools that read this file")}>
-                {suggestedTools.map((tool) => (
-                  <button key={tool.id} type="button" className="category-chip" onClick={() => openTool(tool)}>
-                    {t(tool.title)}
-                  </button>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <CategoryFilter rows={catalogRows} active={activeCategory} onChange={setActiveCategory} />
-
-          <div className="catalog-rows">
-            {visibleRows.map((row) => (
-              <ToolSection
-                key={row.id}
-                row={row}
-                installations={installations.states}
-                onOpen={openTool}
-                onInstall={requestInstallation}
-              />
-            ))}
-          </div>
+        )}
         </div>
+      ) : location.view === "catalog" ? (
+        <CatalogView
+          rows={catalogRows}
+          installations={installations.states}
+          onOpen={openTool}
+          onInstall={requestInstallation}
+          file={pendingFile}
+          fileMessage={fileMessage}
+          dragging={fileDrop.isDraggingOver}
+          onChooseFile={() => void chooseFile()}
+          suggestedTools={suggestedTools}
+        />
       ) : location.view === "settings" ? (
+        <div data-legacy>
         <SettingsView
           preference={theme.preference}
           onThemeChange={theme.setPreference}
@@ -313,7 +271,9 @@ function Shell() {
           onClearHistory={runner.clearHistory}
           onReturn={() => go({ view: "catalog" })}
         />
+        </div>
       ) : (
+        <div data-legacy>
         <JobView
           activeNavigation={location.view === "history" ? "history" : "queue"}
           runningJobs={runner.runningJobs}
@@ -322,6 +282,7 @@ function Shell() {
           onCancel={runner.cancelOperation}
           onReturn={() => go({ view: "catalog" })}
         />
+        </div>
       )}
     </AppShell>
   );
@@ -330,17 +291,6 @@ function Shell() {
 /** The sidebar used to be remembered as expanded on every launch; only "collapsed" was ever a choice. */
 function legacySidebarChoice(): SidebarChoice {
   return readSetting("tools4devs.sidebar") === "collapsed" ? "collapsed" : null;
-}
-
-function useMediaQuery(query: string): boolean {
-  return useSyncExternalStore(
-    (onChange) => {
-      const media = window.matchMedia?.(query);
-      media?.addEventListener?.("change", onChange);
-      return () => media?.removeEventListener?.("change", onChange);
-    },
-    () => window.matchMedia?.(query).matches ?? false,
-  );
 }
 
 /** Reads a saved setting, tolerating a storage that refuses to answer. */

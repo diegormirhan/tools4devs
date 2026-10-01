@@ -25,9 +25,9 @@ const pageTitles: Record<Exclude<View, "tool">, string> = {
 };
 
 /**
- * The window frame: sidebar, header and the scrolling page. What it frames is
- * still drawn by app.css, so it sits under data-legacy, where Tailwind's reset
- * does not reach (theme.css).
+ * The window frame: sidebar, header and the scrolling page. A page still drawn
+ * by app.css marks itself data-legacy, where Tailwind's reset does not reach
+ * (theme.css); so do the overlays below.
  */
 export function AppShell({
   rows,
@@ -76,7 +76,7 @@ export function AppShell({
       />
       <SidebarInset className="min-h-0 overflow-hidden">
         <ShellHeader rows={rows} />
-        <div ref={pageRef} data-legacy className="min-h-0 flex-1 overflow-auto">
+        <div ref={pageRef} className="min-h-0 flex-1 overflow-auto">
           {children}
         </div>
       </SidebarInset>
