@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { AlertTriangle, Check, CircleSlash, Copy, FolderOpen } from "lucide-react";
+import { AlertTriangle, Check, CircleSlash, Copy, FileQuestion, FolderOpen, type LucideIcon } from "lucide-react";
 import type { ToolJob } from "../domain/job-queue";
 import { useT, type Translate } from "../i18n/language";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { ClearHistoryDialog } from "./ClearHistoryDialog";
+import { PageHeader } from "./PageHeader";
 
 export function JobView({
   activeNavigation,
@@ -11,6 +16,7 @@ export function JobView({
   onClearHistory,
   onCancel,
   onReturn,
+  iconFor,
 }: {
   activeNavigation: "queue" | "history";
   runningJobs: ToolJob[];
@@ -18,17 +24,13 @@ export function JobView({
   onClearHistory: () => void;
   onCancel: (jobId: string) => void;
   onReturn: () => void;
+  /** The icon of the tool that ran the job, so a row is recognised before it is read. */
+  iconFor: (toolId: string) => LucideIcon | undefined;
 }) {
   const t = useT();
+  const [confirming, setConfirming] = useState(false);
   const isQueue = activeNavigation === "queue";
   const jobs = isQueue ? runningJobs : finishedJobs;
-  const title = t(isQueue ? "Operation queue" : "Result history");
-  const emptyTitle = t(isQueue ? "Nothing running" : "No results yet");
-  const emptyDescription = t(
-    isQueue
-      ? "An operation started from a tool panel keeps running here after you close the panel, and can be stopped from here."
-      : "Everything this app has run, kept across restarts until you clear it.",
-  );
   const lead = jobs.length
     ? t(jobs.length === 1 ? "{count} operation in this section." : "{count} operations in this section.", {
         count: jobs.length,
@@ -36,33 +38,44 @@ export function JobView({
     : t(isQueue ? "Nothing is running right now." : "Nothing has finished yet.");
 
   return (
-    <section className="job-view">
-      <div className="job-view__header">
-        <span className="placeholder-view__line" aria-hidden="true" />
-        <h1>{title}</h1>
-        <p>{lead}</p>
-        {!isQueue && jobs.length > 0 && (
-          <button className="button button--quiet button--small" type="button" onClick={onClearHistory}>
-            {t("Clear the history")}
-          </button>
-        )}
-      </div>
+    <div data-slot="page" className="grid max-w-[940px] gap-6 px-6 pt-4 pb-16 lg:px-8">
+      <PageHeader
+        title={t(isQueue ? "Operation queue" : "Result history")}
+        lead={lead}
+        action={
+          !isQueue &&
+          jobs.length > 0 && (
+            <Button variant="outline" onClick={() => setConfirming(true)}>
+              {t("Clear the history")}
+            </Button>
+          )
+        }
+      />
+
       {jobs.length ? (
-        <div className="job-list">
+        <div className="grid gap-3">
           {jobs.map((job) => (
-            <JobRow key={job.id} job={job} onCancel={isQueue ? onCancel : undefined} />
+            <JobRow key={job.id} job={job} icon={iconFor(job.toolId)} onCancel={isQueue ? onCancel : undefined} />
           ))}
         </div>
       ) : (
-        <div className="job-empty">
-          <h2>{emptyTitle}</h2>
-          <p>{emptyDescription}</p>
-          <button className="button button--light" type="button" onClick={onReturn}>
+        <section className="grid justify-items-start gap-2 rounded-xl border border-dashed p-8">
+          <h2 className="font-heading text-lg font-semibold">{t(isQueue ? "Nothing running" : "No results yet")}</h2>
+          <p className="max-w-prose text-sm text-muted-foreground">
+            {t(
+              isQueue
+                ? "An operation started from a tool panel keeps running here after you close the panel, and can be stopped from here."
+                : "Everything this app has run, kept across restarts until you clear it.",
+            )}
+          </p>
+          <Button variant="outline" className="mt-2" onClick={onReturn}>
             {t("Back to the tools")}
-          </button>
-        </div>
+          </Button>
+        </section>
       )}
-    </section>
+
+      <ClearHistoryDialog open={confirming} onOpenChange={setConfirming} onConfirm={onClearHistory} />
+    </div>
   );
 }
 
@@ -76,14 +89,17 @@ const statusLabels: Record<ToolJob["status"], string> = {
   interrupted: "Interrupted",
 };
 
-function JobRow({ job, onCancel }: { job: ToolJob; onCancel?: (jobId: string) => void }) {
+function JobRow({ job, icon, onCancel }: { job: ToolJob; icon?: LucideIcon; onCancel?: (jobId: string) => void }) {
   const t = useT();
   const [copied, setCopied] = useState(false);
   const [revealError, setRevealError] = useState("");
   const percentage = job.progress == null ? null : Math.round(job.progress * 100);
+  const failed = job.status === "failed" || job.status === "interrupted";
   const optionsLabel = Object.entries(job.options)
     .map(([key, value]) => `${key}: ${value}`)
     .join(" · ");
+  const Icon = icon ?? FileQuestion;
+
   async function copyOutputPath() {
     if (!job.outputPath) return;
     try {
@@ -91,90 +107,76 @@ function JobRow({ job, onCancel }: { job: ToolJob; onCancel?: (jobId: string) =>
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard access can be denied; the path stays visible in the row.
+      // Clipboard access can be denied; the path stays on the buttons' tooltip.
     }
   }
 
   function revealOutput() {
     setRevealError("");
-    void invoke("reveal_path", { path: job.outputPath }).catch((error) =>
-      setRevealError(describeError(error)),
-    );
+    void invoke("reveal_path", { path: job.outputPath }).catch((error) => setRevealError(describeError(error)));
   }
 
   return (
-    <article className={`job-row job-row--${job.status}`} aria-label={`${t(job.operationLabel)} — ${t(job.toolName)}`}>
-      <div className="job-row__identity">
-        <strong>{t(job.operationLabel)}</strong>
-        <span>
+    <article
+      className="flex items-center gap-4 rounded-xl border bg-card px-5 py-4 text-card-foreground shadow-xs"
+      aria-label={`${t(job.operationLabel)} — ${t(job.toolName)}`}
+    >
+      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted text-primary">
+        <Icon className="size-5" aria-hidden="true" />
+      </span>
+      <div className="grid min-w-0 flex-1 gap-0.5">
+        <strong className="font-semibold">{t(job.operationLabel)}</strong>
+        <span className="truncate text-sm text-muted-foreground">
           {t(job.toolName)} · {job.sourceLabel}
           {optionsLabel ? ` · ${optionsLabel}` : ""}
         </span>
-        <span className="job-row__message">{hostMessage(job.message, t)}</span>
+        {job.message && (
+          <span className={failed ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>
+            {hostMessage(job.message, t)}
+          </span>
+        )}
         {job.outputPath && (
-          // The path itself is not shown: it is one long monospace line that
-          // pushed the row wide and told nobody anything they could act on.
-          // The two things anybody does with it are here instead, and the
-          // whole path is on the buttons for anyone who hovers.
-          <span className="job-row__actions">
-            <button
-              className="button button--quiet button--small"
-              type="button"
-              title={job.outputPath}
-              onClick={revealOutput}
-            >
-              <FolderOpen size={13} aria-hidden="true" /> {t("Show in folder")}
-            </button>
-            <button
-              className="button button--quiet button--small"
-              type="button"
-              title={job.outputPath}
-              onClick={() => void copyOutputPath()}
-              aria-live="polite"
-            >
-              {copied ? <Check size={13} aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
+          // The path itself is not shown: it is one long line that pushed the row
+          // wide and told nobody anything they could act on. The two things anybody
+          // does with it are here instead, and the whole path is on their tooltip.
+          <span className="-ml-3 mt-1.5 flex gap-1">
+            <Button variant="ghost" size="sm" title={job.outputPath} onClick={revealOutput}>
+              <FolderOpen aria-hidden="true" /> {t("Show in folder")}
+            </Button>
+            <Button variant="ghost" size="sm" title={job.outputPath} onClick={() => void copyOutputPath()} aria-live="polite">
+              {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
               {t(copied ? "Copied" : "Copy path")}
-            </button>
+            </Button>
           </span>
         )}
         {revealError && (
-          <span className="job-row__message job-row__message--error" role="alert">
+          <span className="text-sm text-destructive" role="alert">
             {t(revealError)}
           </span>
         )}
       </div>
-      <div className="job-row__status">
-        <span className="job-row__status-label">
-          {job.status === "succeeded" && <Check size={13} aria-hidden="true" />}
-          {(job.status === "failed" || job.status === "interrupted") && (
-            <AlertTriangle size={13} aria-hidden="true" />
-          )}
-          {(job.status === "cancelled" || job.status === "queued") && (
-            <CircleSlash size={13} aria-hidden="true" />
-          )}
+      <div className="flex shrink-0 items-center gap-3">
+        <Badge
+          variant={job.status === "running" ? "secondary" : "outline"}
+          className={failed ? "border-destructive/30 bg-destructive/10 text-destructive" : job.status === "running" ? "bg-primary/15 text-primary" : undefined}
+        >
+          {job.status === "succeeded" && <Check aria-hidden="true" />}
+          {failed && <AlertTriangle aria-hidden="true" />}
+          {(job.status === "cancelled" || job.status === "queued") && <CircleSlash aria-hidden="true" />}
           {t(statusLabels[job.status])}
           {job.status === "running" && percentage != null ? ` ${percentage}%` : ""}
-        </span>
-        {onCancel && (job.status === "running" || job.status === "queued") && (
-          <button
-            className="button button--quiet button--small"
-            type="button"
-            onClick={() => onCancel(job.id)}
-          >
-            <CircleSlash size={13} aria-hidden="true" /> {t("Stop")}
-          </button>
-        )}
+        </Badge>
         {job.status === "running" && (
-          <div
-            className={`progress-track${percentage == null ? " progress-track--indeterminate" : ""}`}
-            role="progressbar"
+          <Progress
+            value={percentage}
+            className={percentage == null ? "w-36 animate-pulse" : "w-36"}
             aria-label={t("Progress of {name}", { name: job.operationLabel })}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={percentage ?? undefined}
-          >
-            <span style={{ inlineSize: percentage == null ? undefined : `${percentage}%` }} />
-          </div>
+          />
+        )}
+        {onCancel && (job.status === "running" || job.status === "queued") && (
+          <Button variant="outline" size="sm" onClick={() => onCancel(job.id)}>
+            <CircleSlash aria-hidden="true" /> {t("Stop")}
+          </Button>
         )}
       </div>
     </article>

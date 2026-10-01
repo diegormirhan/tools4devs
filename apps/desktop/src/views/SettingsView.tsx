@@ -1,10 +1,28 @@
+import { useState, type ReactNode } from "react";
+import { RefreshCw } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { NumberField } from "../components/NumberField";
-import { Select } from "../components/Select";
 import { ThemeSwitch } from "../components/ThemeSwitch";
 import type { ThemePreference } from "../hooks/useTheme";
 import type { UpdateState } from "../hooks/useUpdate";
 import { useT, type Language, type Translate } from "../i18n/language";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { ClearHistoryDialog } from "./ClearHistoryDialog";
+import { PageHeader } from "./PageHeader";
+
+/** One setting: what it is and what it does on the left, its control on the right. */
+function SettingRow({ title, description, children }: { title: string; description?: string; children?: ReactNode }) {
+  return (
+    <section className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-xl border bg-card px-6 py-5 text-card-foreground shadow-xs">
+      <div className="grid min-w-0 gap-1">
+        <h2 className="font-heading text-base font-semibold">{title}</h2>
+        {description && <p className="text-[13px] text-muted-foreground">{description}</p>}
+      </div>
+      <div className="flex shrink-0 items-center gap-2">{children}</div>
+    </section>
+  );
+}
 
 export function SettingsView({
   preference,
@@ -24,7 +42,6 @@ export function SettingsView({
   onCheckForUpdates,
   finishedCount,
   onClearHistory,
-  onReturn,
 }: {
   preference: ThemePreference;
   onThemeChange: (preference: ThemePreference) => void;
@@ -43,173 +60,122 @@ export function SettingsView({
   onCheckForUpdates: () => Promise<void>;
   finishedCount: number;
   onClearHistory: () => void;
-  onReturn: () => void;
 }) {
   const t = useT();
-  const answer = updateMessage(updateState, t);
+  const [confirmingClear, setConfirmingClear] = useState(false);
+  const checking = updateState.phase === "checking";
 
   return (
-    <section className="settings-view">
-      <div className="job-view__header">
-        <span className="placeholder-view__line" aria-hidden="true" />
-        <h1>{t("Settings")}</h1>
+    <div data-slot="page" className="grid max-w-[760px] gap-3 px-6 pt-4 pb-16 lg:px-8">
+      <div className="mb-3">
+        <PageHeader title={t("Settings")} lead={t("Everything stays on this computer.")} />
       </div>
 
-      <div className="settings-card">
-        <div className="settings-card__copy">
-          <h2>{t("Version")}</h2>
-          {answer && <p>{answer}</p>}
-        </div>
-        <div className="settings-card__control">
-          <span className="settings-card__path">{version ? `tools4devs ${version}` : "—"}</span>
-          <button
-            className="button button--light"
-            type="button"
-            onClick={() => void onCheckForUpdates()}
-            disabled={updateState.phase === "checking" || updateState.phase === "downloading"}
-          >
-            {t(updateState.phase === "checking" ? "Checking…" : "Check now")}
-          </button>
-        </div>
-      </div>
+      <SettingRow title={t("Version")} description={updateMessage(updateState, t) || undefined}>
+        <span className="font-mono text-[13px] text-muted-foreground">{version || "—"}</span>
+        <Button variant="outline" onClick={() => void onCheckForUpdates()} disabled={checking || updateState.phase === "downloading"}>
+          <RefreshCw className={checking ? "animate-spin" : undefined} aria-hidden="true" />
+          {t(checking ? "Checking…" : "Check for updates")}
+        </Button>
+      </SettingRow>
 
-      <div className="settings-card">
-        <div className="settings-card__copy">
-          <h2>{t("Language")}</h2>
-        </div>
-        <div className="settings-card__control settings-card__control--wide">
-          <Select
-            label={t("Language")}
-            value={language}
-            choices={[
-              { value: "en", label: "English" },
-              { value: "pt", label: "Português (Brasil)" },
-            ]}
-            onChange={(value) => onLanguageChange(value === "pt" ? "pt" : "en")}
-          />
-        </div>
-      </div>
+      <SettingRow title={t("Language")} description={t("Tools, options and errors are all translated.")}>
+        <Select value={language} onValueChange={(value) => onLanguageChange(value === "pt" ? "pt" : "en")}>
+          <SelectTrigger className="w-[180px]" aria-label={t("Language")}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="en">English</SelectItem>
+            <SelectItem value="pt">Português (Brasil)</SelectItem>
+          </SelectContent>
+        </Select>
+      </SettingRow>
 
-      <div className="settings-card">
-        <div className="settings-card__copy">
-          <h2>{t("Theme")}</h2>
-        </div>
-        <ThemeSwitch preference={preference} onChange={onThemeChange} variant="labelled" />
-      </div>
+      <SettingRow title={t("Theme")} description={t("Follow Windows, or pick one.")}>
+        <ThemeSwitch preference={preference} onChange={onThemeChange} />
+      </SettingRow>
 
-      <div className="settings-card">
-        <div className="settings-card__copy">
-          <h2>{t("Sidebar")}</h2>
-        </div>
-        <button
-          className="button button--light"
-          type="button"
-          onClick={() => onSidebarChange(!sidebarCollapsed)}
-          aria-pressed={sidebarCollapsed}
+      <SettingRow title={t("Sidebar")} description={t("Keep the tool tree open when the window is wide.")}>
+        <Switch
+          checked={!sidebarCollapsed}
+          onCheckedChange={(checked) => onSidebarChange(!checked)}
+          aria-label={t("Keep the tool tree open")}
+        />
+      </SettingRow>
+
+      <SettingRow title={t("Default destination")} description={defaultFolder || t("Not set")}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            void open({ directory: true, multiple: false })
+              .then((selected) => {
+                if (typeof selected === "string") onDefaultFolderChange(selected);
+              })
+              .catch(() => undefined);
+          }}
         >
-          {t(sidebarCollapsed ? "Show it" : "Hide it")}
-        </button>
-      </div>
+          {t("Choose")}
+        </Button>
+        {defaultFolder && (
+          <Button variant="ghost" onClick={() => onDefaultFolderChange("")}>
+            {t("Clear")}
+          </Button>
+        )}
+      </SettingRow>
 
-      <div className="settings-card">
-        <div className="settings-card__copy">
-          <h2>{t("Default destination")}</h2>
-        </div>
-        <div className="settings-card__control">
-          <span className="settings-card__path">{defaultFolder || t("Not set")}</span>
-          <button
-            className="button button--light"
-            type="button"
-            onClick={() => {
-              void open({ directory: true, multiple: false })
-                .then((selected) => {
-                  if (typeof selected === "string") onDefaultFolderChange(selected);
-                })
-                .catch(() => undefined);
-            }}
-          >
-            {t("Choose")}
-          </button>
-          {defaultFolder && (
-            <button className="button button--light" type="button" onClick={() => onDefaultFolderChange("")}>
-              {t("Clear")}
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="settings-card">
-        <div className="settings-card__copy">
-          <h2>{t("History")}</h2>
-          <p>
-            {finishedCount > 0
-              ? t(finishedCount === 1 ? "{count} finished operation" : "{count} finished operations", {
-                  count: finishedCount,
-                })
-              : t("Nothing has finished yet")}
-          </p>
-        </div>
-        <button
-          className="button button--light"
-          type="button"
-          onClick={onClearHistory}
-          disabled={finishedCount === 0}
-        >
+      <SettingRow
+        title={t("History")}
+        description={
+          finishedCount > 0
+            ? t(finishedCount === 1 ? "{count} finished operation" : "{count} finished operations", { count: finishedCount })
+            : t("Nothing has finished yet")
+        }
+      >
+        <Button variant="outline" onClick={() => setConfirmingClear(true)} disabled={finishedCount === 0}>
           {t("Clear")}
-        </button>
-      </div>
+        </Button>
+      </SettingRow>
 
-      <div className="settings-card">
-        <div className="settings-card__copy">
-          <h2>{t("How many at once")}</h2>
-          <p>{t("Anything beyond this waits in the queue.")}</p>
-        </div>
-        <div className="settings-card__control">
-          <NumberField
-            label={t("Operations at once")}
-            value={String(concurrency)}
-            min={1}
-            max={8}
-            onChange={(value) => onConcurrencyChange(Math.min(8, Math.max(1, Number(value) || 1)))}
-          />
-        </div>
-      </div>
+      <SettingRow title={t("How many at once")} description={t("Anything beyond this waits in the queue.")}>
+        <Select value={String(concurrency)} onValueChange={(value) => onConcurrencyChange(Number(value))}>
+          <SelectTrigger className="w-[180px]" aria-label={t("Operations at once")}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((count) => (
+              <SelectItem key={count} value={String(count)}>
+                {t("{count} at a time", { count })}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </SettingRow>
 
-      <div className="settings-card">
-        <div className="settings-card__copy">
-          <h2>{t("When the file already exists")}</h2>
-        </div>
-        <div className="settings-card__control settings-card__control--wide">
-          <Select
-            label={t("When the file already exists")}
-            value={conflictPolicy}
-            choices={[
-              { value: "keep-both", label: t("Keep both — number the new one") },
-              { value: "overwrite", label: t("Overwrite the old one") },
-            ]}
-            onChange={onConflictPolicyChange}
-          />
-        </div>
-      </div>
+      <SettingRow title={t("When the file already exists")} description={t("Choose what happens to the old file.")}>
+        <Select value={conflictPolicy} onValueChange={onConflictPolicyChange}>
+          <SelectTrigger className="w-[300px]" aria-label={t("When the file already exists")}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="keep-both">{t("Keep both — number the new one")}</SelectItem>
+            <SelectItem value="overwrite">{t("Overwrite the old one")}</SelectItem>
+          </SelectContent>
+        </Select>
+      </SettingRow>
 
-      <div className="settings-card settings-card--pending">
-        <div className="settings-card__copy">
-          <h2>{t("Not available yet")}</h2>
-          <ul>
-            <li>{t("Pausing an operation, rather than stopping it")}</li>
-            <li>{t("Scheduling one for later")}</li>
-          </ul>
-        </div>
-      </div>
+      <SettingRow title={t("Not available yet")}>
+        <ul className="list-disc pl-5 text-[13px] text-muted-foreground">
+          <li>{t("Pausing an operation, rather than stopping it")}</li>
+          <li>{t("Scheduling one for later")}</li>
+        </ul>
+      </SettingRow>
 
-      <button className="button button--light" type="button" onClick={onReturn}>
-        {t("Back to the tools")}
-      </button>
-    </section>
+      <ClearHistoryDialog open={confirmingClear} onOpenChange={setConfirmingClear} onConfirm={onClearHistory} />
+    </div>
   );
 }
 
-/** What the last check found, in the one sentence the card has room for. */
+/** What the last check found, in the one sentence the row has room for. */
 function updateMessage(state: UpdateState, t: Translate): string {
   switch (state.phase) {
     case "current":

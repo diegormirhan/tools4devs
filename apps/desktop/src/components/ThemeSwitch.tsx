@@ -1,11 +1,11 @@
 import { Monitor, Moon, Sun } from "lucide-react";
 import type { ThemePreference } from "../hooks/useTheme";
 import { useT } from "../i18n/language";
+import { cn } from "@/lib/cn";
 
 type ThemeSwitchProps = {
   preference: ThemePreference;
   onChange: (preference: ThemePreference) => void;
-  variant?: "compact" | "labelled";
 };
 
 const options: Array<{ id: ThemePreference; label: string; icon: typeof Sun }> = [
@@ -14,11 +14,13 @@ const options: Array<{ id: ThemePreference; label: string; icon: typeof Sun }> =
   { id: "dark", label: "Dark", icon: Moon },
 ];
 
-export function ThemeSwitch({ preference, onChange, variant = "compact" }: ThemeSwitchProps) {
+/** Three choices, one of them current: a radio group drawn as a segmented control. */
+export function ThemeSwitch({ preference, onChange }: ThemeSwitchProps) {
   const t = useT();
   return (
     <div
-      className={`theme-switch theme-switch--${variant}`}
+      data-slot="theme-switch"
+      className="inline-flex overflow-hidden rounded-md border shadow-xs"
       role="radiogroup"
       aria-label={t("Interface theme")}
     >
@@ -32,12 +34,14 @@ export function ThemeSwitch({ preference, onChange, variant = "compact" }: Theme
             role="radio"
             aria-checked={selected}
             aria-label={t("{name} theme", { name: t(option.label) })}
-            title={t(option.label)}
-            className={selected ? "theme-switch__option theme-switch__option--selected" : "theme-switch__option"}
+            className={cn(
+              "flex h-9 items-center gap-1.5 border-r px-3 text-sm outline-none last:border-r-0 hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50",
+              selected && "bg-accent font-medium",
+            )}
             onClick={() => onChange(option.id)}
           >
-            <Icon size={15} aria-hidden="true" />
-            {variant === "labelled" && <span>{t(option.label)}</span>}
+            <Icon className="size-4" aria-hidden="true" />
+            {t(option.label)}
           </button>
         );
       })}

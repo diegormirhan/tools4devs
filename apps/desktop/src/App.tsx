@@ -250,7 +250,6 @@ function Shell() {
           suggestedTools={suggestedTools}
         />
       ) : location.view === "settings" ? (
-        <div data-legacy>
         <SettingsView
           preference={theme.preference}
           onThemeChange={theme.setPreference}
@@ -269,11 +268,8 @@ function Shell() {
           onCheckForUpdates={update.checkNow}
           finishedCount={runner.finishedJobs.length}
           onClearHistory={runner.clearHistory}
-          onReturn={() => go({ view: "catalog" })}
         />
-        </div>
       ) : (
-        <div data-legacy>
         <JobView
           activeNavigation={location.view === "history" ? "history" : "queue"}
           runningJobs={runner.runningJobs}
@@ -281,8 +277,8 @@ function Shell() {
           onClearHistory={runner.clearFinishedJobs}
           onCancel={runner.cancelOperation}
           onReturn={() => go({ view: "catalog" })}
+          iconFor={(toolId) => toolsById.get(toolId)?.icon}
         />
-        </div>
       )}
     </AppShell>
   );
