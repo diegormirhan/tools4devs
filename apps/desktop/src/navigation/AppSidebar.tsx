@@ -70,8 +70,8 @@ export function AppSidebar({
               className="text-muted-foreground"
             >
               <Search />
-              <span>{t("Search tools…")}</span>
-              <kbd className="ml-auto rounded border px-1.5 font-mono text-[11px]">Ctrl K</kbd>
+              <span className="min-w-0 truncate">{t("Search tools…")}</span>
+              <kbd className="ml-auto shrink-0 rounded border px-1.5 font-mono text-[11px] whitespace-nowrap">Ctrl K</kbd>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
