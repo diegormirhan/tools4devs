@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowUpRight, Check, CloudDownload, Download } from "lucide-react";
 import type { InstallationState } from "../../../../scripts/component-installation/installation-state.mjs";
 import type { CatalogRow, CatalogTool } from "../catalog/catalog";
@@ -8,9 +8,12 @@ import { useT } from "../i18n/language";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/cn";
 
 /** Long enough that sweeping the pointer across the grid opens nothing. */
 const previewDelay = 300;
+/** How long the preview takes to fade out; it stays mounted for that long. */
+const previewExit = 180;
 /** Operations named in the preview before the rest become "+N". */
 const listedActions = 6;
 
@@ -50,6 +53,17 @@ export function ToolCard({ tool, row, installation, onOpen, onInstall, previewin
   const hue = { "--hue": row.hue } as CSSProperties;
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  // The preview stays a moment after it is let go, long enough to fade out instead of vanishing.
+  const [previewShown, setPreviewShown] = useState(previewing);
+  useEffect(() => {
+    if (previewing) {
+      setPreviewShown(true);
+      return;
+    }
+    const leaving = window.setTimeout(() => setPreviewShown(false), previewExit);
+    return () => window.clearTimeout(leaving);
+  }, [previewing]);
 
   function schedulePreview() {
     window.clearTimeout(timer.current);
@@ -131,7 +145,7 @@ export function ToolCard({ tool, row, installation, onOpen, onInstall, previewin
         </Badge>
       )}
 
-      {previewing && <ToolPreview tool={tool} isReady={isReady} size={size} onAct={act} />}
+      {previewShown && <ToolPreview tool={tool} isReady={isReady} size={size} onAct={act} leaving={!previewing} />}
     </article>
   );
 }
@@ -146,11 +160,13 @@ function ToolPreview({
   isReady,
   size,
   onAct,
+  leaving,
 }: {
   tool: CatalogTool;
   isReady: boolean;
   size: number | null;
   onAct: () => void;
+  leaving: boolean;
 }) {
   const t = useT();
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
@@ -162,7 +178,12 @@ function ToolPreview({
     <div
       aria-hidden="true"
       onClick={onAct}
-      className="absolute -top-4 -left-5 z-20 w-[calc(100%+40px)] cursor-pointer overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-lg animate-in fade-in-0 zoom-in-[0.98] duration-150"
+      className={cn(
+        "absolute -top-4 -left-5 z-20 w-[calc(100%+40px)] cursor-pointer overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-lg motion-reduce:animate-none",
+        leaving
+          ? "pointer-events-none animate-out fade-out-0 zoom-out-[0.97] duration-180 ease-in fill-mode-forwards"
+          : "animate-in fade-in-0 zoom-in-[0.96] slide-in-from-bottom-2 duration-300 ease-(--ease-sidebar)",
+      )}
     >
       <div className="grid aspect-video place-items-center bg-muted">
         {tool.preview && !reducedMotion ? (

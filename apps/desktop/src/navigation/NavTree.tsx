@@ -77,7 +77,8 @@ export function NavTree({ rows, openGroupId, onOpenGroupChange, pinnedIds, onTog
         const open = openGroupId === row.id;
         const Icon = row.icon;
         return (
-          <SidebarMenuItem key={row.id} role="none">
+          // The group's hue, shared by its own icon and by every tool listed under it.
+          <SidebarMenuItem key={row.id} role="none" style={{ "--hue": row.hue } as React.CSSProperties}>
             <SidebarMenuButton asChild tooltip={t(row.title)}>
               <div
                 role="treeitem"
@@ -94,7 +95,7 @@ export function NavTree({ rows, openGroupId, onOpenGroupChange, pinnedIds, onTog
                   })
                 }
               >
-                <Icon className="text-group-icon" style={{ "--hue": row.hue } as React.CSSProperties} />
+                <Icon className="text-group-icon" />
                 <span className="truncate">{t(row.title)}</span>
                 <span className="ml-auto text-xs text-sidebar-foreground/70 tabular-nums">{row.tools.length}</span>
                 <ChevronRight className={cn("transition-transform", open && "rotate-90")} />
@@ -183,7 +184,7 @@ function ToolItem({
             })
           }
         >
-          <Icon />
+          <Icon className="text-group-icon!" />
           <span>{t(tool.title)}</span>
         </div>
       </SidebarMenuSubButton>
