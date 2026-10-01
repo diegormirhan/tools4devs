@@ -368,7 +368,7 @@ export function UtilityPanel({
 
 /** The text boxes fill their card edge to edge, under its header. */
 const ioText =
-  "block min-h-36 w-full flex-1 resize-y bg-transparent px-6 py-4 font-mono text-sm leading-relaxed break-words outline-none placeholder:text-muted-foreground focus-visible:bg-accent/40";
+  "block min-h-36 w-full flex-1 resize-y bg-transparent px-6 py-4 font-mono text-sm leading-relaxed break-words outline-none placeholder:text-muted-foreground";
 
 /** The input or the result: a header with its name and an action, the content below. */
 function IoCard({
@@ -385,7 +385,7 @@ function IoCard({
   return (
     <section
       aria-labelledby={labelId}
-      className="flex min-w-0 flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-xs"
+      className="flex min-w-0 flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-xs has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-[3px] has-[textarea:focus-visible]:ring-ring/50"
     >
       <header className="flex min-h-14 items-center justify-between gap-3 border-b px-6 py-2">
         <h2 id={labelId} className="text-sm font-medium">{label}</h2>
