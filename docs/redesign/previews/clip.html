@@ -14,7 +14,7 @@ html,body{width:640px;height:360px;overflow:hidden;background:#000}
 .capbox{position:absolute;left:26px;bottom:22px;height:44px;width:420px;overflow:hidden}
 .cap{position:absolute;left:0;top:0;font:600 34px/44px "Fraunces Variable",Georgia,serif;letter-spacing:-.02em;white-space:nowrap}
 .dots{position:absolute;right:26px;bottom:30px;display:flex;gap:6px}.dots i{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.25}
-.wipe{position:absolute;inset:0;background:var(--acc);z-index:20}
+.wipe{position:absolute;inset:0;background:var(--bg);z-index:20}
 svg.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .mono{font-family:"JBM",monospace}
 .track{background:rgb(255 255 255/.16);border-radius:99px;overflow:hidden}.fill{background:var(--acc);height:100%;border-radius:99px}
@@ -55,7 +55,7 @@ const TAG = { ffmpeg: "FFMPEG", qpdf: "QPDF", jq: "JQ", qr: "QR CODES", "yt-dlp"
   "poppler": "POPPLER", "pandoc": "PANDOC", "yq": "YQ", "miller": "MILLER", "ripgrep": "RIPGREP", "fd": "FD", "difftastic": "DIFFTASTIC",
   "codes-hashes": "CODES", "test-data": "TEST DATA", "css-tools": "CSS", "dates-time": "DATES", "math-finance": "MATH", "colors": "COLOUR", "everyday": "EVERYDAY", "network": "NETWORK", "random-picks": "RANDOM",
   "7zip": "7-ZIP", "dust": "DUST", "tokei": "TOKEI", "hexyl": "HEXYL", "chat-mockup": "CHAT MOCKUP", "post-mockup": "POST MOCKUP" }[ID];
-const SW = [2.1, 4.2]; // scene switch times (hidden behind the wipes)
+const SW = [2.1, 4.2]; // scene switch times (hidden behind the dips)
 mk(TAG, "tag", "", stage);
 const capbox = mk("", "capbox", "", stage);
 const capEls = CAPS.map((c) => mk(c, "cap", "", capbox));
@@ -69,12 +69,17 @@ function chrome(t) {
     c.style.transform = `translateY(${(1 - E.out(a)) * 100 - E.inout(b) * 100}%)`;
   });
   [...dots.children].forEach((d, i) => (d.style.opacity = i === sc ? 1 : .25));
-  // wipes cover the frame, switch scenes behind them, then uncover
+  // Between scenes the frame dips to its own background and the scene eases back a
+  // little, so the switch behind it goes unnoticed rather than being a move of its own.
+  let depth = 0;
   [[1.86, 2.36], [3.96, 4.46]].forEach(([a, b], i) => {
-    const m = (a + b) / 2, w = wipes[i];
-    w.style.display = t >= a && t <= b ? "block" : "none";
-    w.style.transform = t < m ? `translateX(${-100 + E.inout(seg(t, a, m)) * 100}%)` : `translateX(${E.inout(seg(t, m, b)) * 100}%)`;
+    const p = seg(t, a, b), w = wipes[i], on = t >= a && t <= b;
+    const cover = p < .5 ? E.inout(p * 2) : 1 - E.inout(p * 2 - 1);
+    w.style.display = on ? "block" : "none";
+    w.style.opacity = cover;
+    if (on) depth = cover;
   });
+  groups.forEach((g) => (g.style.transform = depth ? `scale(${1 - depth * .06})` : ""));
 }
 const groups = [0, 1, 2].map(() => mk("", "abs", "inset:0;left:0;top:0;width:640px;height:360px;transform:none", stage));
 groups.forEach((g) => (g.style.left = "0", g.style.top = "0"));

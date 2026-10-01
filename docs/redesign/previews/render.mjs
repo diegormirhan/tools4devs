@@ -16,6 +16,8 @@ const ICONS = Object.fromEntries(need.map((n) => [n, readFileSync(join(LUCIDE, `
 mkdirSync(OUT, { recursive: true });
 const b = await chromium.launch({ executablePath: process.env.CHROMIUM ?? "/opt/pw-browsers/chromium", args: ["--no-sandbox", "--allow-file-access-from-files"] });
 const FPS = 30, D = 6;
+// The QR pattern compresses badly; a little more compression keeps it under 200 KB.
+const CRF = { qr: "43" };
 for (const id of ids) {
   const ctx = await b.newContext({ viewport: { width: 640, height: 360 }, deviceScaleFactor: 2 });
   await ctx.addInitScript((icons) => { window.ICONS = icons; }, ICONS);
@@ -29,7 +31,7 @@ for (const id of ids) {
     await pg.screenshot({ path: join(dir, `f${String(i).padStart(4, "0")}.png`) });
   }
   execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-framerate", String(FPS), "-i", join(dir, "f%04d.png"), "-vf", "scale=960:540:flags=lanczos",
-    "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "36", "-row-mt", "1", "-pix_fmt", "yuv420p", "-an", join(OUT, `${id}.webm`)]);
+    "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", CRF[id] ?? "36", "-row-mt", "1", "-pix_fmt", "yuv420p", "-an", join(OUT, `${id}.webm`)]);
   execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", join(dir, "f0048.png"), "-vf", "scale=640:360:flags=lanczos", "-q:v", "5", join(OUT, `${id}.jpg`)]);
   console.log(id, "ok");
   await ctx.close();
