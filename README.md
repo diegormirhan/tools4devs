@@ -47,6 +47,9 @@ Download the installer from the [latest release](https://github.com/diegormirhan
 > [!NOTE]
 > The installer isn't code-signed yet, so SmartScreen shows a warning the first time you run it. Each release includes SHA-256 checksums. The portable build doesn't update itself.
 
+> [!IMPORTANT]
+> **On 4.0.0 or older? Install 5.0.0 by hand once.** Updates are signed with a new key from 5.0.0, which older versions cannot verify, so they will not offer it. Run the new installer over the old one: preferences, history and downloaded tools are kept, and automatic updates work again from then on.
+
 ## The catalog
 
 | Category | Tools | What you can do |
@@ -91,6 +94,7 @@ npm run tauri:dev
 
 ```bash
 npm test              # manifest, execution, interface and component tests
+npm run test:e2e      # the real interface in Chromium over a simulated host; report in e2e-report/
 npm run tauri:build   # installer, MSI and portable build
 ```
 
@@ -118,7 +122,15 @@ cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib -- --ignored 
 
 ## Upgrade compatibility
 
-The 3.4.0 release uses tools4devs for the executable, installers and release artifacts. Existing updaters read latest.json and stop at the signed 3.4.0 bridge. The bridge and newer clients read tools4devs.json to find the current release. Both manifests must accompany every release; after 3.4.0 they deliberately advertise different versions. See [the Windows upgrade contract](apps/desktop/src-tauri/installer/README.md) before changing the channels or data identities.
+Each installed version reads one manifest from the latest GitHub release, so every release carries all three:
+
+| Manifest | Advertises | Read by |
+| --- | --- | --- |
+| `tools4devs-updates.json` | the current release | 5.0.0 and later, signed with the current key |
+| `tools4devs.json` | 4.0.0, frozen | 3.4.0 to 4.0.0, which trust only the original key |
+| `latest.json` | 3.4.0, frozen | ToolHaven 2.1.0 to 3.3.0, which stop at the 3.4.0 bridge |
+
+The original signing key was lost after 4.0.0, so 5.0.0 starts a new key and channel; older versions keep seeing the last release they can verify instead of an update they would reject. See [the Windows upgrade contract](apps/desktop/src-tauri/installer/README.md) before changing the channels or data identities.
 
 ## Screenshots
 
