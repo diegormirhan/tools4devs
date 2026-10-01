@@ -128,6 +128,7 @@ const presentationById: Record<string, ToolPresentation> = {
   poppler: {
     id: "poppler",
     icon: FileOutput,
+    preview: { src: "/previews/poppler.webm", poster: "/previews/poppler.jpg" },
     title: "Extract from PDFs",
     description: "Pull the text out of a document, or turn a page into an image.",
     category: "documents",
@@ -406,6 +407,7 @@ const presentationById: Record<string, ToolPresentation> = {
   yq: {
     id: "yq",
     icon: FileJson,
+    preview: { src: "/previews/yq.webm", poster: "/previews/yq.jpg" },
     title: "Work with YAML",
     description: "Format, query and convert YAML and JSON.",
     category: "developer",
@@ -420,6 +422,7 @@ const presentationById: Record<string, ToolPresentation> = {
   miller: {
     id: "miller",
     icon: Table,
+    preview: { src: "/previews/miller.webm", poster: "/previews/miller.jpg" },
     title: "Spreadsheets and CSV",
     description: "Convert between CSV, TSV and JSON, and summarise the columns.",
     category: "developer",
@@ -435,6 +438,7 @@ const presentationById: Record<string, ToolPresentation> = {
   difftastic: {
     id: "difftastic",
     icon: GitCompare,
+    preview: { src: "/previews/difftastic.webm", poster: "/previews/difftastic.jpg" },
     title: "Compare files",
     description: "A structural diff: it compares the syntax, not just the lines.",
     category: "developer",
@@ -449,6 +453,7 @@ const presentationById: Record<string, ToolPresentation> = {
   ripgrep: {
     id: "ripgrep",
     icon: TextSearch,
+    preview: { src: "/previews/ripgrep.webm", poster: "/previews/ripgrep.jpg" },
     title: "Search a project",
     description: "Find text and patterns across folders, fast.",
     category: "developer",
@@ -462,6 +467,7 @@ const presentationById: Record<string, ToolPresentation> = {
   fd: {
     id: "fd",
     icon: FolderSearch,
+    preview: { src: "/previews/fd.webm", poster: "/previews/fd.jpg" },
     title: "Find files",
     description: "Locate files by name, extension or path.",
     category: "developer",
@@ -538,6 +544,7 @@ const presentationById: Record<string, ToolPresentation> = {
   pandoc: {
     id: "pandoc",
     icon: FileType,
+    preview: { src: "/previews/pandoc.webm", poster: "/previews/pandoc.jpg" },
     title: "Convert documents",
     description: "Convert Markdown and documents between open formats.",
     category: "documents",

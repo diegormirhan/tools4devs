@@ -23,7 +23,8 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-
 const ID = new URLSearchParams(location.search).get("id");
 // The group hue of each tool (catalog.ts rowDefinitions).
 const HUE = { ffmpeg: 255, qpdf: 285, jq: 322, qr: 215, "yt-dlp": 165, tesseract: 285, imagemagick: 78, "text-tools": 215, "code-formatting": 215,
-  "ffprobe": 255, "songrec": 255, "mkvtoolnix": 255, "gallery-dl": 165, "libvips": 78, "image-search": 78, "oxipng": 78, "exiftool": 78 }[ID];
+  "ffprobe": 255, "songrec": 255, "mkvtoolnix": 255, "gallery-dl": 165, "libvips": 78, "image-search": 78, "oxipng": 78, "exiftool": 78,
+  "poppler": 285, "pandoc": 285, "yq": 322, "miller": 322, "ripgrep": 322, "fd": 322, "difftastic": 322 }[ID];
 const D = 6; // seconds; every clip is a seamless 6 s loop
 const stage = document.getElementById("stage");
 stage.style.cssText = `--bg:oklch(0.27 0.09 ${HUE});--panel:oklch(0.985 0.006 ${HUE});--ink:oklch(0.26 0.06 ${HUE});--acc:oklch(0.82 0.14 ${HUE});--soft:oklch(0.4 0.1 ${HUE});--line:oklch(0.88 0.03 ${HUE})`;
@@ -43,9 +44,11 @@ function put(el, { x = 0, y = 0, r = 0, s = 1, sx = s, sy = s, o = 1 } = {}) {
 const CAPS = { ffmpeg: ["Convert.", "Compress.", "Trim."], qpdf: ["Merge.", "Split.", "Rotate."], jq: ["Format.", "Query.", "Validate."], qr: ["Encode.", "Style.", "Save."],
   "yt-dlp": ["Paste.", "Download.", "Extract."], tesseract: ["Scan.", "Read.", "Search."], imagemagick: ["Convert.", "Grey.", "Inspect."],
   "text-tools": ["Case.", "Sort.", "Count."], "code-formatting": ["Minify.", "Format.", "Indent."],
-  "ffprobe": ["Open.", "Codecs.", "Tracks."], "songrec": ["Listen.", "Match.", "Named."], "mkvtoolnix": ["Convert.", "Merge.", "Inspect."], "gallery-dl": ["Paste.", "Collect.", "Save."], "libvips": ["Resize.", "Crop.", "Enlarge."], "image-search": ["Pick.", "Search.", "Found."], "oxipng": ["Load.", "Shrink.", "Lossless."], "exiftool": ["Read.", "Remove.", "Title."] }[ID];
+  "ffprobe": ["Open.", "Codecs.", "Tracks."], "songrec": ["Listen.", "Match.", "Named."], "mkvtoolnix": ["Convert.", "Merge.", "Inspect."], "gallery-dl": ["Paste.", "Collect.", "Save."], "libvips": ["Resize.", "Crop.", "Enlarge."], "image-search": ["Pick.", "Search.", "Found."], "oxipng": ["Load.", "Shrink.", "Lossless."], "exiftool": ["Read.", "Remove.", "Title."],
+  "poppler": ["Open.", "Text.", "Images."], "pandoc": ["Markdown.", "Convert.", "Formats."], "yq": ["Read.", "Format.", "Query."], "miller": ["CSV.", "JSON.", "Summarise."], "ripgrep": ["Search.", "Matches.", "Fast."], "fd": ["Find.", "Filter.", "Done."], "difftastic": ["Compare.", "Changes.", "Structure."] }[ID];
 const TAG = { ffmpeg: "FFMPEG", qpdf: "QPDF", jq: "JQ", qr: "QR CODES", "yt-dlp": "YT-DLP", tesseract: "TESSERACT", imagemagick: "IMAGEMAGICK", "text-tools": "TEXT", "code-formatting": "CODE",
-  "ffprobe": "FFPROBE", "songrec": "SONGREC", "mkvtoolnix": "MKVTOOLNIX", "gallery-dl": "GALLERY-DL", "libvips": "LIBVIPS", "image-search": "REVERSE SEARCH", "oxipng": "OXIPNG", "exiftool": "EXIFTOOL" }[ID];
+  "ffprobe": "FFPROBE", "songrec": "SONGREC", "mkvtoolnix": "MKVTOOLNIX", "gallery-dl": "GALLERY-DL", "libvips": "LIBVIPS", "image-search": "REVERSE SEARCH", "oxipng": "OXIPNG", "exiftool": "EXIFTOOL",
+  "poppler": "POPPLER", "pandoc": "PANDOC", "yq": "YQ", "miller": "MILLER", "ripgrep": "RIPGREP", "fd": "FD", "difftastic": "DIFFTASTIC" }[ID];
 const SW = [2.1, 4.2]; // scene switch times (hidden behind the wipes)
 mk(TAG, "tag", "", stage);
 const capbox = mk("", "capbox", "", stage);
@@ -575,6 +578,183 @@ CLIPS.exiftool = () => {
     put(pic2, { x: -130, y: -20, o: seg(w, 0, 0.15) * sO });
     qtxt.textContent = typed("Sunset at Ipanema", w, 0.3, 1.2);
     put(field, { x: 120, y: -20, s: E.back(seg(w, 0.05, 0.4)), o: seg(w, 0.05, 0.2) * sO });
+  };
+};
+
+/* ---- batch 2b (stage 6): documents and data ---- */
+const tok = {
+  k: (s) => `<span style="color:oklch(0.8 0.12 ${HUE})">${s}</span>`,
+  s: (s) => `<span style="color:oklch(0.82 0.13 160)">${s}</span>`,
+  n: (s) => `<span style="color:oklch(0.82 0.13 60)">${s}</span>`,
+  p: (s) => `<span style="opacity:.55">${s}</span>`,
+  add: (s) => `<span style="background:oklch(0.62 0.15 150/.35);border-radius:3px">${s}</span>`,
+  del: (s) => `<span style="background:oklch(0.6 0.18 25/.4);border-radius:3px">${s}</span>`,
+};
+// One line of code in a window: number, indentation, content; all lines share a left edge.
+const codeLine = (g, ind, html, i, width = 440, size = 14) =>
+  inG(g, `<div class="mono" style="font-size:${size}px;white-space:nowrap;color:#fff;display:flex;width:${width}px"><span style="width:26px;opacity:.3">${i + 1}</span><span class="pad" style="padding-left:${ind * 16}px">${html}</span></div>`);
+const pageCard = (label, w = 120, h = 160) => `<div class="card" style="width:${w}px;height:${h}px;align-items:stretch;justify-content:flex-start;padding:16px 14px;gap:9px;border-radius:10px"><b style="font:800 13px 'Inter Variable';color:var(--soft)">${label}</b>${[100, 84, 92, 60, 76, 88].map((x) => `<i style="display:block;height:5px;border-radius:3px;background:var(--line);width:${x}%"></i>`).join("")}</div>`;
+
+CLIPS.poppler = () => {
+  const pdf = inG(0, fileCard("file-text", "report.pdf", ".PDF · 12 PAGES"));
+  const stack = [2, 1, 0].map((i) => inG(0, pageCard("", 96, 128)));
+  const page = inG(1, pageCard("PDF"));
+  const lines = ["Quarterly report", "Revenue grew 18% over", "the same period last", "year, led by exports."].map(() => inG(1, `<div class="mono" style="font-size:15px;color:#fff;width:250px;white-space:nowrap"></div>`));
+  const text = ["Quarterly report", "Revenue grew 18% over", "the same period last", "year, led by exports."];
+  const imgs = [0, 1, 2, 3].map((i) => inG(2, `<div class="card" style="width:96px;height:128px;padding:8px;border-radius:10px"><div style="width:80px;height:84px;border-radius:6px;overflow:hidden">${photo(80, 84)}</div><small>page-${i + 1}.png</small></div>`));
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    put(pdf, { x: -110, y: -20, s: lerp(0.8, 1, E.back(seg(s, 0.1, 0.6))), o: seg(s, 0.1, 0.25) * (1 - xo) });
+    stack.forEach((p, i) => { const k = E.out(seg(s, 0.6 + i * 0.12, 1.1 + i * 0.12)); put(p, { x: lerp(-110, 70 + i * 26, k), y: -20 - i * 8, r: lerp(0, (i - 1) * 6, k), o: seg(s, 0.6 + i * 0.12, 0.7 + i * 0.12) * (1 - xo) }); });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95);
+    put(page, { x: -170, y: -20, s: 0.85, o: seg(u, 0, 0.15) * (1 - xo2) });
+    lines.forEach((l, i) => { l.firstChild.textContent = typed(text[i], u, 0.2 + i * 0.3, 0.5 + i * 0.3); put(l, { x: 80, y: -66 + i * 30, o: seg(u, 0.15 + i * 0.3, 0.25 + i * 0.3) * (1 - xo2) }); });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    imgs.forEach((el, i) => put(el, { x: -165 + i * 110, y: -20, s: E.back(seg(w, 0.1 + i * 0.15, 0.5 + i * 0.15)), o: seg(w, 0.1 + i * 0.15, 0.22 + i * 0.15) * sO }));
+  };
+};
+
+CLIPS.pandoc = () => {
+  const win = inG(0, codeWin(420, 200));
+  const md = [[0, tok.k("# Field notes")], [0, ""], [0, "Saw the " + tok.s("**heron**") + " again."], [0, tok.p("- ") + "06:40, east bank"], [0, tok.p("- ") + "07:15, gone"]];
+  const L = md.map(([ind, h], i) => codeLine(0, ind, h, i, 360));
+  const src = inG(1, fileCard("file-text", "notes.md", "MARKDOWN"));
+  const arrow = inG(1, arrowSvg("pd-ar"));
+  const doc = inG(1, `<div class="card" style="width:150px;height:170px;align-items:stretch;justify-content:flex-start;padding:16px 14px;gap:8px;border-radius:10px"><b style="font:600 17px 'Fraunces Variable',Georgia,serif;color:var(--ink)">Field notes</b><span style="font-size:11px;color:var(--ink)">Saw the <b>heron</b> again.</span>${[90, 70].map((x) => `<i style="display:block;height:5px;border-radius:3px;background:var(--line);width:${x}%"></i>`).join("")}</div>`);
+  const formats = ["DOCX", "HTML", "EPUB", "ODT", "LaTeX", "RTF"].map((f) => inG(2, `<div class="card" style="width:112px;height:56px;border-radius:12px"><b class="mono" style="font-size:15px;font-weight:500">${f}</b></div>`));
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    put(win, { y: -20, sx: lerp(0.94, 1, E.out(seg(s, 0, 0.4))), o: seg(s, 0, 0.2) * (1 - xo) });
+    L.forEach((l, i) => put(l, { x: -10, y: -64 + i * 24, o: seg(s, 0.3 + i * 0.15, 0.45 + i * 0.15) * (1 - xo) }));
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95);
+    put(src, { x: lerp(-270, -120, E.back(seg(u, 0.05, 0.6))), y: -20, o: seg(u, 0.02, 0.2) * (1 - xo2) });
+    document.getElementById("pd-ar").style.strokeDashoffset = 120 * (1 - E.out(seg(u, 0.6, 0.95)));
+    put(arrow, { x: 0, y: -20, o: 1 - xo2 });
+    put(doc, { x: lerp(270, 120, E.back(seg(u, 0.85, 1.4))), y: -20, r: lerp(8, 0, E.out(seg(u, 0.85, 1.4))), o: seg(u, 0.83, 1.0) * (1 - xo2) });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    formats.forEach((f, i) => put(f, { x: -130 + (i % 3) * 130, y: -54 + Math.floor(i / 3) * 70, s: E.back(seg(w, 0.1 + i * 0.12, 0.45 + i * 0.12)), o: seg(w, 0.1 + i * 0.12, 0.2 + i * 0.12) * sO }));
+  };
+};
+
+CLIPS.yq = () => {
+  const win0 = inG(0, codeWin(480, 210));
+  const raw = [[0, tok.k("services") + tok.p(":")], [1, tok.k("web") + tok.p(":")], [2, tok.k("image") + tok.p(": ") + tok.s("nginx:1.27")], [2, tok.k("port") + tok.p(": ") + tok.n("8080")], [1, tok.k("db") + tok.p(":")]];
+  const L0 = raw.map(([ind, h], i) => codeLine(0, ind, h, i));
+  const win1 = inG(1, codeWin(480, 210));
+  const messy = [0, 3, 1, 5, 2];
+  const L1 = raw.map(([ind, h], i) => codeLine(1, ind, h, i));
+  const pads = L1.map((el) => el.querySelector(".pad"));
+  const tidy = inG(1, `<div class="pill" style="display:flex;gap:6px;align-items:center">${ic("check", 16)} tidy</div>`);
+  const q = inG(2, `<div class="card" style="width:340px;height:48px;flex-direction:row;justify-content:flex-start;padding:0 16px;gap:10px;border-radius:12px"><b class="mono" style="color:var(--soft)">yq</b><span class="mono qtxt" style="font-size:14px"></span></div>`);
+  const qtxt = q.querySelector(".qtxt");
+  const res = inG(2, `<div style="font:800 64px/1 'Inter Variable';letter-spacing:-.03em">8080</div>`);
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    put(win0, { y: -20, sx: lerp(0.94, 1, E.out(seg(s, 0, 0.4))), o: seg(s, 0, 0.2) * (1 - xo) });
+    L0.forEach((l, i) => put(l, { x: -10, y: -64 + i * 24 + lerp(-8, 0, E.out(seg(s, 0.3 + i * 0.12, 0.6 + i * 0.12))), o: seg(s, 0.3 + i * 0.12, 0.45 + i * 0.12) * (1 - xo) }));
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95), k = E.inout(seg(u, 0.5, 1.2));
+    put(win1, { y: -20, o: seg(u, 0, 0.15) * (1 - xo2) });
+    L1.forEach((l, i) => put(l, { x: -10, y: -64 + i * 24, o: seg(u, 0.05, 0.2) * (1 - xo2) }));
+    pads.forEach((p, i) => (p.style.paddingLeft = lerp(messy[i] * 7, raw[i][0] * 16, k) + "px"));
+    put(tidy, { x: 160, y: 56, s: E.back(seg(u, 1.2, 1.5)), o: seg(u, 1.2, 1.35) * (1 - xo2) });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    qtxt.textContent = typed(".services.web.port", w, 0.2, 0.9);
+    put(q, { y: -50, s: E.back(seg(w, 0.05, 0.4)), o: seg(w, 0.05, 0.2) * sO });
+    put(res, { y: 30, s: lerp(0.7, 1, E.back(seg(w, 1.0, 1.35))), o: seg(w, 1.0, 1.15) * sO });
+  };
+};
+
+CLIPS.miller = () => {
+  const rows = [["city", "sales"], ["Recife", "1,240"], ["Porto", "980"], ["Lima", "1,610"]];
+  const table = (g) => rows.map((r, i) => inG(g, `<div style="width:260px;display:flex;font-size:15px;${i === 0 ? "font-weight:700;color:var(--acc)" : ""}"><span style="flex:1">${r[0]}</span><span class="mono" style="font-weight:500">${r[1]}</span></div>`));
+  const box0 = inG(0, `<div style="width:300px;height:170px;border-radius:14px;background:rgb(255 255 255/.06);border:1px solid rgb(255 255 255/.12)"></div>`);
+  const T0 = table(0);
+  const T1 = table(1);
+  const win1 = inG(1, codeWin(510, 180));
+  const json = [[0, tok.p("[")], [1, tok.p("{ ") + tok.k('"city"') + tok.p(": ") + tok.s('"Recife"') + tok.p(", ") + tok.k('"sales"') + tok.p(": ") + tok.n("1240") + tok.p(" },")], [1, tok.p("{ ") + tok.k('"city"') + tok.p(": ") + tok.s('"Porto"') + tok.p(", ") + tok.k('"sales"') + tok.p(": ") + tok.n("980") + tok.p(" },")], [0, tok.p("]")]];
+  const J = json.map(([ind, h], i) => codeLine(1, ind, h, i, 470, 13));
+  const stats = [["count", "3"], ["mean", "1,277"], ["min", "980"], ["max", "1,610"]].map(([k, v]) => inG(2, `<div class="card" style="width:112px;height:76px;border-radius:12px;gap:2px"><small>${k.toUpperCase()}</small><b style="font:800 24px 'Inter Variable'">${v}</b></div>`));
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    put(box0, { y: -20, o: seg(s, 0, 0.2) * (1 - xo) });
+    T0.forEach((r, i) => put(r, { y: -68 + i * 32, o: seg(s, 0.2 + i * 0.15, 0.35 + i * 0.15) * (1 - xo) }));
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95), k = E.inout(seg(u, 0.4, 0.8));
+    T1.forEach((r, i) => put(r, { x: lerp(0, -40, k), y: -68 + i * 32, o: seg(u, 0, 0.12) * (1 - k) * (1 - xo2) }));
+    put(win1, { y: -20, o: seg(u, 0.55, 0.7) * (1 - xo2) });
+    J.forEach((l, i) => put(l, { x: 10, y: -56 + i * 26, o: seg(u, 0.7 + i * 0.12, 0.85 + i * 0.12) * (1 - xo2) }));
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    stats.forEach((c, i) => put(c, { x: -183 + i * 122, y: -20, s: E.back(seg(w, 0.1 + i * 0.15, 0.45 + i * 0.15)), o: seg(w, 0.1 + i * 0.15, 0.22 + i * 0.15) * sO }));
+  };
+};
+
+CLIPS.ripgrep = () => {
+  const field = inG(0, `<div class="card" style="width:380px;height:52px;flex-direction:row;justify-content:flex-start;padding:0 18px;gap:10px;border-radius:14px"><span style="color:var(--soft)">${ic("text-search", 18)}</span><span class="mono qtxt" style="font-size:14px"></span></div>`);
+  const qtxt = field.querySelector(".qtxt");
+  const hits = [["src/api/auth.ts", "42", "const token = " + tok.add("refreshToken") + "(user)"], ["src/api/session.ts", "17", "export function " + tok.add("refreshToken") + "()"], ["test/auth.test.ts", "88", "expect(" + tok.add("refreshToken") + ").toBeCalled()"]].map(([f, n, code]) =>
+    inG(1, `<div style="width:470px;display:grid;gap:2px"><span class="mono" style="font-size:12px;color:var(--acc)">${f}<span style="opacity:.6">:${n}</span></span><span class="mono" style="font-size:13px;color:#fff;white-space:nowrap">${code}</span></div>`));
+  const files = inG(2, `<div style="font:800 64px/1 'Inter Variable';letter-spacing:-.03em">0</div>`);
+  const sub = inG(2, `<div class="mono" style="font-size:15px;opacity:.8">files searched</div>`);
+  const time = inG(2, `<div class="pill">0.08 s</div>`);
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    qtxt.textContent = typed("refreshToken", s, 0.2, 0.9);
+    const k0 = E.out(seg(s, 0, 0.4));
+    put(field, { y: -24, sx: lerp(0.92, 1, k0), sy: lerp(0.92, 1, k0), o: seg(s, 0, 0.2) * (1 - xo) });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95);
+    hits.forEach((h, i) => put(h, { x: lerp(20, 0, E.out(seg(u, 0.1 + i * 0.25, 0.5 + i * 0.25))), y: -76 + i * 54, o: seg(u, 0.1 + i * 0.25, 0.25 + i * 0.25) * (1 - xo2) }));
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    files.firstChild.textContent = Math.round(1240 * E.out(seg(w, 0.1, 0.8))).toLocaleString("en-US");
+    put(files, { y: -50, o: seg(w, 0.05, 0.2) * sO });
+    put(sub, { y: 0, o: seg(w, 0.2, 0.35) * sO });
+    put(time, { y: 50, s: E.back(seg(w, 0.85, 1.2)), o: seg(w, 0.85, 1.0) * sO });
+  };
+};
+
+CLIPS.fd = () => {
+  const field = inG(0, `<div class="card" style="width:340px;height:52px;flex-direction:row;justify-content:flex-start;padding:0 18px;gap:10px;border-radius:14px"><span style="color:var(--soft)">${ic("folder-search", 18)}</span><span class="mono qtxt" style="font-size:14px"></span></div>`);
+  const qtxt = field.querySelector(".qtxt");
+  const tree = [[0, "assets/", false], [1, "logo.png", true], [1, "notes.txt", false], [1, "icons/", false], [2, "home.png", true], [2, "menu.svg", false], [0, "README.md", false]];
+  const T = tree.map(([d, name]) => inG(1, `<div class="mono" style="font-size:14px;width:240px;white-space:nowrap;padding-left:${d * 22}px">${name.endsWith("/") ? ic("folder", 14, "vertical-align:-2px;margin-right:6px") : ""}${name}</div>`));
+  const found = ["assets/logo.png", "assets/icons/home.png"].map((p) => inG(2, `<div class="card" style="width:320px;height:48px;flex-direction:row;justify-content:flex-start;padding:0 16px;gap:10px;border-radius:12px">${ic("image", 18, "color:var(--soft)")}<b class="mono" style="font-size:13px;font-weight:500">${p}</b></div>`));
+  const count = inG(2, `<div class="pill">2 files</div>`);
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    qtxt.textContent = typed("-e png", s, 0.25, 0.8);
+    const k0 = E.out(seg(s, 0, 0.4));
+    put(field, { y: -24, sx: lerp(0.92, 1, k0), sy: lerp(0.92, 1, k0), o: seg(s, 0, 0.2) * (1 - xo) });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95), dim = seg(u, 0.8, 1.2);
+    T.forEach((el, i) => { const hit = tree[i][2]; el.firstChild.style.color = hit ? `color-mix(in oklab, #fff, var(--acc) ${dim * 100}%)` : "#fff"; put(el, { y: -94 + i * 26, o: seg(u, 0.05 + i * 0.06, 0.2 + i * 0.06) * (hit ? 1 : 1 - dim * 0.7) * (1 - xo2) }); });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    found.forEach((f, i) => put(f, { y: -50 + i * 58, s: E.back(seg(w, 0.1 + i * 0.2, 0.45 + i * 0.2)), o: seg(w, 0.1 + i * 0.2, 0.22 + i * 0.2) * sO }));
+    put(count, { y: 66, s: E.back(seg(w, 0.7, 1.05)), o: seg(w, 0.7, 0.85) * sO });
+  };
+};
+
+CLIPS.difftastic = () => {
+  const pane = (g, x) => inG(g, `<div style="width:250px;height:190px;border-radius:14px;background:oklch(0.19 0.05 ${HUE});box-shadow:0 22px 50px -14px rgb(0 0 0/.55)"></div>`);
+  const left = ["fn total(xs) {", "  let s = 0;", "  for x in xs {", "    s += x;", "  }", "  s", "}"];
+  const right = ["fn total(xs) {", "  xs.iter()", "    .sum()", "}"];
+  const code = (g, lines) => lines.map((l) => inG(g, `<div class="mono" style="font-size:12px;color:#fff;width:220px;white-space:pre">${l}</div>`));
+  const PL0 = pane(0), PR0 = pane(0), A0 = code(0, left), B0 = code(0, right);
+  const PL1 = pane(1), PR1 = pane(1), A1 = code(1, left), B1 = code(1, right);
+  const removed = [1, 2, 3, 4, 5], added = [1, 2];
+  const tree = inG(2, `<div style="width:440px;height:170px;border-radius:14px;background:oklch(0.19 0.05 ${HUE})"></div>`);
+  const nodes = [["fn total", 0, 0], ["body", 1, 0], ["for loop", 2, -1], ["iter().sum()", 2, 1]].map(([label, d, side]) =>
+    inG(2, `<div class="pill" style="${side < 0 ? "background:oklch(0.6 0.18 25);color:#fff" : side > 0 ? "background:oklch(0.62 0.15 150);color:#fff" : ""}">${label}</div>`));
+  const lay = (P, lines, x, base, t0, o) => { put(P, { x, y: -20, o }); lines.forEach((l, i) => put(l, { x: x + 2, y: -96 + i * 22, o: o * seg(t0, 0.15 + i * 0.04, 0.3 + i * 0.04) })); };
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    lay(PL0, A0, lerp(-200, -134, E.out(seg(s, 0, 0.5))), 0, s, seg(s, 0, 0.2) * (1 - xo));
+    lay(PR0, B0, lerp(200, 134, E.out(seg(s, 0.1, 0.6))), 0, s, seg(s, 0.1, 0.3) * (1 - xo));
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95), mark = seg(u, 0.5, 0.9);
+    lay(PL1, A1, -134, 0, 1, seg(u, 0, 0.12) * (1 - xo2));
+    lay(PR1, B1, 134, 0, 1, seg(u, 0, 0.12) * (1 - xo2));
+    A1.forEach((l, i) => (l.firstChild.style.background = removed.includes(i) ? `oklch(0.6 0.18 25/${0.4 * mark})` : "none"));
+    B1.forEach((l, i) => (l.firstChild.style.background = added.includes(i) ? `oklch(0.62 0.15 150/${0.4 * mark})` : "none"));
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    put(tree, { y: -20, o: seg(w, 0, 0.15) * sO });
+    const at = [[0, -80], [0, -30], [-100, 26], [100, 26]];
+    nodes.forEach((n, i) => put(n, { x: at[i][0], y: at[i][1], s: E.back(seg(w, 0.15 + i * 0.2, 0.5 + i * 0.2)), o: seg(w, 0.15 + i * 0.2, 0.27 + i * 0.2) * sO }));
   };
 };
 
