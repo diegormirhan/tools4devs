@@ -210,7 +210,10 @@ async function capture(lang: Lang) {
   await settle();
   T.pages["hash-typed"] = await html(PAGE, true);
 
-  // Merge PDFs.
+  // Merge PDFs. A fresh start first: the app keeps the last dropped file, and the
+  // video from the first walkthrough would greet this page with an error.
+  await page.goto(URL);
+  await settle();
   await page.keyboard.press("Control+k");
   await page.getByRole("combobox").fill(c.merge);
   await page.waitForTimeout(250);
