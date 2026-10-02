@@ -29,21 +29,24 @@ export function CommandPalette({
   const t = useT();
   const { go } = useNavigation();
   const [query, setQuery] = useState("");
+  // Cleared as the palette opens, not as it closes: clearing on close swapped the
+  // results for the full list while the dialog was still fading out.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setQuery("");
+  }
   const { actions, tools } = searchCatalog(rows, query, t);
 
   function choose(destination: Location) {
     onOpenChange(false);
-    setQuery("");
     go(destination);
   }
 
   return (
     <Dialog
       open={open}
-      onOpenChange={(next) => {
-        onOpenChange(next);
-        if (!next) setQuery("");
-      }}
+      onOpenChange={onOpenChange}
     >
       <DialogContent showCloseButton={false} className="top-[130px] translate-y-0 overflow-hidden p-0 sm:max-w-[580px]">
         <DialogTitle className="sr-only">{t("Search tools")}</DialogTitle>
