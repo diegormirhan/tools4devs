@@ -215,9 +215,13 @@ async function record(lang: Lang) {
   writeFileSync(concat, list.join("\n"));
 
   const scale = "scale=1920:-2:flags=lanczos";
-  const input = ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", concat, "-vf", `${scale},fps=${FPS}`];
-  execFileSync(FFMPEG, [...input, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "38", "-row-mt", "1", "-deadline", "good", "-pix_fmt", "yuv420p", "-an", join(OUT, `hero-${lang}.webm`)]);
-  execFileSync(FFMPEG, [...input, "-c:v", "libx264", "-preset", "slow", "-crf", "26", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", join(OUT, `hero-${lang}.mp4`)]);
+  // The JPEG frames are full range. Video must be limited-range BT.709: GPU
+  // decoders (Chromium's included) reject full-range VP9 with a decode error.
+  const tv = "scale=out_range=tv:out_color_matrix=bt709,format=yuv420p";
+  const colour = ["-color_range", "tv", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709"];
+  const input = ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", concat, "-vf", `${scale},fps=${FPS},${tv}`, ...colour];
+  execFileSync(FFMPEG, [...input, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "38", "-row-mt", "1", "-deadline", "good", "-an", join(OUT, `hero-${lang}.webm`)]);
+  execFileSync(FFMPEG, [...input, "-c:v", "libx264", "-preset", "slow", "-crf", "26", "-movflags", "+faststart", "-an", join(OUT, `hero-${lang}.mp4`)]);
   execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", used[0].file, "-vf", scale, "-quality", "88", join(OUT, `hero-${lang}.webp`)]);
   writeFileSync(join(OUT, `hero-${lang}.json`), JSON.stringify({ duration: +(end - t0).toFixed(2), marks }, null, 2));
   rmSync(frames, { recursive: true, force: true });
