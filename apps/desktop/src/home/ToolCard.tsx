@@ -134,7 +134,6 @@ export function ToolCard({ tool, row, installation, onOpen, onInstall, previewin
           </span>
           <Progress
             value={progress}
-            className={progress == null ? "animate-pulse" : undefined}
             aria-label={t("Progress of {name}", { name: tool.integrationName })}
           />
         </div>

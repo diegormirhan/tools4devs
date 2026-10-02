@@ -128,6 +128,18 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* A bar with no value (the tool reports no percentage) sweeps, so the wait reads
+   as work rather than a stall. Radix marks it data-state="indeterminate". */
+[data-slot="progress-indicator"][data-state="indeterminate"] {
+  width: 40%;
+  border-radius: inherit;
+  animation: progress-sweep 1.25s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+@keyframes progress-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
 /* The listening button breathes while it records, so a wait reads as work. */
 @keyframes listen-pulse {
   0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 45%, transparent); }
@@ -214,6 +226,13 @@
   animation: sidebar-reveal 200ms ease-out 180ms both;
 }
 @media (prefers-reduced-motion: reduce) {
+  /* Still marked as working, without the motion. */
+  [data-slot="progress-indicator"][data-state="indeterminate"] {
+    width: 100%;
+    transform: none;
+    animation: none;
+    opacity: 0.45;
+  }
   [data-sidebar="menu-button"] > :not(:first-child) {
     transition: none;
   }

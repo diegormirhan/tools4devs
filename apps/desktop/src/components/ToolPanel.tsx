@@ -351,7 +351,6 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
                 </div>
                 <Progress
                   value={currentJob.progress == null ? null : Math.round(currentJob.progress * 100)}
-                  className={currentJob.progress == null ? "animate-pulse" : undefined}
                   aria-label={t("Operation progress")}
                 />
                 <p className="text-xs text-muted-foreground">

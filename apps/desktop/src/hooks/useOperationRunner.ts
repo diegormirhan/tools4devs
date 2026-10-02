@@ -58,7 +58,10 @@ export function useOperationRunner({
     void listen<OperationProgressEvent>("operation-progress", (event) => {
       const progress = event.payload;
       if (!active || !progress.jobId || progress.phase === "completed" || progress.phase === "error") return;
-      reportProgress(progress.jobId, { progress: progress.progress, message: progress.message });
+      // "starting" carries a 0 that only means "begun": most tools (FFmpeg, qpdf) never
+      // report a percentage, and a bar parked at 0% reads as stuck. Unknown, it sweeps.
+      const known = progress.phase === "starting" ? null : progress.progress;
+      reportProgress(progress.jobId, { progress: known, message: progress.message });
     })
       .then((cleanup) => {
         if (active) unlisten = cleanup;

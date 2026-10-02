@@ -7,7 +7,6 @@ import { useT } from "../i18n/language";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/cn";
 
 type InstallDialogProps = {
   tool: CatalogTool;
@@ -98,7 +97,7 @@ export function InstallDialog({
                 {state && state.phase !== "idle" && !ready && (
                   <Progress
                     value={progress}
-                    className={cn("w-36", progress == null && "animate-pulse")}
+                    className="w-36"
                     aria-label={t("Progress of {name}", { name })}
                   />
                 )}

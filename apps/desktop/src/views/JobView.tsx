@@ -169,7 +169,7 @@ function JobRow({ job, icon, onCancel }: { job: ToolJob; icon?: LucideIcon; onCa
         {job.status === "running" && (
           <Progress
             value={percentage}
-            className={percentage == null ? "w-36 animate-pulse" : "w-36"}
+            className="w-36"
             aria-label={t("Progress of {name}", { name: job.operationLabel })}
           />
         )}
