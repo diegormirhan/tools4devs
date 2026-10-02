@@ -55,3 +55,4 @@ updater.key*
 
 # End-to-end test artifacts
 /e2e-report/
+docs/landing/out/
