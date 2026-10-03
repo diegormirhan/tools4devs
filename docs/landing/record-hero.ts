@@ -4,7 +4,7 @@
 //   npx vite --config apps/desktop/vite.config.ts --port 5199 --strictPort --host 127.0.0.1
 //   node docs/landing/record-hero.ts [pt|en ...]
 //
-// Writes docs/landing/out/hero-<lang>.{webm,mp4,webp} and hero-<lang>.json, the
+// Writes docs/landing/out/hero-<lang>.{webm,mp4}, the posters (hero-<lang>[-w].webp) and hero-<lang>.json, the
 // moments the landing page's callouts key on. Needs ffmpeg with libvpx-vp9 and
 // libx264 on PATH (or FFMPEG=...).
 //
@@ -22,7 +22,11 @@ const here = dirname(fileURLToPath(import.meta.url));
 const OUT = join(here, "out");
 const FFMPEG = process.env.FFMPEG ?? "ffmpeg";
 const URL = process.env.APP_URL ?? "http://127.0.0.1:5199/";
-const FPS = 30;
+const FPS = 60;
+// The screencast delivers far fewer than 60 frames a second at this size, so the
+// page runs SLOW times slower (CSS animations, timers, clocks) and the frames are
+// stamped back to real time: SLOW x the capture rate, comfortably over 60.
+const SLOW = 4;
 const VIEW = { width: 1280, height: 860 };
 
 const COPY = {
@@ -60,6 +64,22 @@ function cursorScript() {
   addEventListener("mouseup", () => setTimeout(() => cursor.classList.remove("is-down"), 140), true);
 }
 
+/** Slows the page's clocks and timers by `s`; CSS animations are slowed over CDP. */
+function slowTime(s: number) {
+  const now = performance.now.bind(performance);
+  const date = Date.now;
+  const p0 = now();
+  const d0 = date();
+  performance.now = () => p0 + (now() - p0) / s;
+  Date.now = () => d0 + (date() - d0) / s;
+  const timeout = window.setTimeout.bind(window);
+  const interval = window.setInterval.bind(window);
+  const frame = window.requestAnimationFrame.bind(window);
+  (window as any).setTimeout = (f: TimerHandler, ms = 0, ...a: unknown[]) => timeout(f, ms * s, ...a);
+  (window as any).setInterval = (f: TimerHandler, ms = 0, ...a: unknown[]) => interval(f, ms * s, ...a);
+  window.requestAnimationFrame = (cb) => frame((t) => cb(p0 + (t - p0) / s));
+}
+
 /** Answers execute_operation as the Rust host does for FFmpeg, and reports 5.0.0. */
 function hostScript() {
   const w = window as unknown as { __TAURI_INTERNALS__: { invoke: (cmd: string, args?: any) => Promise<unknown> }; __host: any };
@@ -80,8 +100,10 @@ function hostScript() {
 // Pointer moves follow an ease-in-out over real time, so hover states in the app
 // fire exactly as they would under a hand.
 let pointer = { x: VIEW.width + 40, y: VIEW.height - 120 };
+const wait = (page: Page, ms: number) => page.waitForTimeout(ms * SLOW);
 async function glide(page: Page, x: number, y: number, ms = 650) {
   // Paced by the clock, not by step count: each move costs a round trip.
+  ms *= SLOW;
   const from = { ...pointer };
   const start = Date.now();
   for (;;) {
@@ -100,9 +122,9 @@ async function center(page: Page, locator: ReturnType<Page["locator"]>) {
 async function clickOn(page: Page, locator: ReturnType<Page["locator"]>, ms?: number) {
   const p = await center(page, locator);
   await glide(page, p.x, p.y, ms);
-  await page.waitForTimeout(140);
+  await wait(page, 140);
   await page.mouse.down();
-  await page.waitForTimeout(90);
+  await wait(page, 90);
   await page.mouse.up();
 }
 
@@ -116,6 +138,7 @@ async function record(lang: Lang) {
   });
   await page.addInitScript(hostScript);
   await page.addInitScript(cursorScript);
+  await page.addInitScript(slowTime, SLOW);
   await page.addInitScript((l) => localStorage.setItem("tools4devs.language", l), lang);
   await page.goto(URL);
   await page.evaluate(() => document.fonts.ready);
@@ -127,6 +150,8 @@ async function record(lang: Lang) {
   mkdirSync(frames, { recursive: true });
   const shots: Array<{ t: number; file: string }> = [];
   const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Animation.enable");
+  await cdp.send("Animation.setPlaybackRate", { playbackRate: 1 / SLOW });
   cdp.on("Page.screencastFrame", async ({ data, sessionId }) => {
     const file = join(frames, `f${String(shots.length).padStart(5, "0")}.jpg`);
     writeFileSync(file, Buffer.from(data, "base64"));
@@ -137,23 +162,23 @@ async function record(lang: Lang) {
 
   const marks: Record<string, number> = {};
   let t0 = 0;
-  const mark = (name: string) => { marks[name] = +(Date.now() / 1000 - t0).toFixed(2); };
+  const mark = (name: string) => { marks[name] = +((Date.now() / 1000 - t0) / SLOW).toFixed(2); };
   // A one-pixel nudge forces a first frame at t0, since frames only come on change.
   const nudge = () => page.evaluate(() => { document.body.style.outline = document.body.style.outline ? "" : "0 solid transparent"; });
 
   await cdp.send("Page.startScreencast", { format: "jpeg", quality: 95, maxWidth: VIEW.width * 2, maxHeight: VIEW.height * 2, everyNthFrame: 1 });
   await nudge();
   t0 = Date.now() / 1000;
-  await page.waitForTimeout(1300);
+  await wait(page, 1300);
 
   // 1. Search by what you want done.
   mark("search");
   await clickOn(page, page.getByRole("button", { name: /Buscar|Search/ }).first(), 800);
-  await page.waitForTimeout(250);
-  await page.getByRole("combobox").pressSequentially(copy.query, { delay: 75 });
-  await page.waitForTimeout(450);
+  await wait(page, 250);
+  await page.getByRole("combobox").pressSequentially(copy.query, { delay: 75 * SLOW });
+  await wait(page, 450);
   await clickOn(page, page.getByRole("option").first(), 500);
-  await page.waitForTimeout(700);
+  await wait(page, 700);
 
   // 2. Bring the file in from outside the window.
   mark("drop");
@@ -164,38 +189,38 @@ async function record(lang: Lang) {
     chip.innerHTML = `<b>${file}</b><span>${size}</span>`;
     document.getElementById("demo-cursor")!.classList.add("is-dragging");
   }, copy);
-  await page.waitForTimeout(150);
+  await wait(page, 150);
   await glide(page, VIEW.width - 160, zone.y + 30, 350);
   await page.evaluate(() => (window as any).__host.emit("tauri://drag-enter", { paths: ["x"], position: { x: 0, y: 0 } }));
   await glide(page, zone.x - 120, zone.y, 750);
-  await page.waitForTimeout(250);
+  await wait(page, 250);
   const path = lang === "pt" ? "C:/Vídeos/aula.mov" : "C:/Videos/lecture.mov";
   await page.evaluate((p) => {
     document.getElementById("demo-cursor")!.classList.remove("is-dragging");
     (window as any).__host.drop([p]);
   }, path);
-  await page.waitForTimeout(700);
+  await wait(page, 700);
 
   // 3. Run it. It runs here, on this machine.
   mark("run");
   await clickOn(page, page.getByRole("button", { name: copy.run }), 700);
   await glide(page, pointer.x - 140, pointer.y + 170, 900);
-  await page.getByRole("button", { name: copy.run }).waitFor({ state: "visible", timeout: 10_000 });
+  await page.getByRole("button", { name: copy.run }).waitFor({ state: "visible", timeout: 10_000 * SLOW });
   mark("done");
-  await page.waitForTimeout(1100);
+  await wait(page, 1100);
 
   // 4. The result waits in the history.
   await clickOn(page, page.getByRole("button", { name: copy.history, exact: true }), 800);
-  await page.waitForTimeout(500);
+  await wait(page, 500);
   await glide(page, ...(Object.values(await center(page, page.getByRole("button", { name: /Abrir na pasta|Show in folder|Open/ }).first())) as [number, number]), 700);
-  await page.waitForTimeout(1200);
+  await wait(page, 1200);
 
   // 5. Back home and out of frame, so the loop closes on its first frame.
   await clickOn(page, page.getByRole("navigation", { name: /Onde você está|Where you are/ }).getByText(copy.home, { exact: true }), 700);
   await glide(page, VIEW.width + 40, VIEW.height - 120, 800);
-  await page.waitForTimeout(900);
+  await wait(page, 900);
   await nudge();
-  await page.waitForTimeout(100);
+  await wait(page, 100);
   const end = Date.now() / 1000;
   await cdp.send("Page.stopScreencast");
   await browser.close();
@@ -205,8 +230,11 @@ async function record(lang: Lang) {
   const entry = (file: string) => `file '${file.replace(/\\/g, "/")}'`;
   const list: string[] = [];
   let k = 0;
-  for (let i = 0; i / FPS <= end - t0; i++) {
-    while (k + 1 < shots.length && shots[k + 1].t <= t0 + i / FPS) k++;
+  // Capture times are page-slowed; dividing by SLOW puts them back in real time.
+  const at = (t: number) => (t - t0) / SLOW;
+  const length = at(end);
+  for (let i = 0; i / FPS <= length; i++) {
+    while (k + 1 < shots.length && at(shots[k + 1].t) <= i / FPS) k++;
     list.push(entry(shots[k].file), `duration ${(1 / FPS).toFixed(6)}`);
   }
   list.push(entry(shots[k].file));
@@ -220,12 +248,15 @@ async function record(lang: Lang) {
   const tv = "scale=out_range=tv:out_color_matrix=bt709,format=yuv420p";
   const colour = ["-color_range", "tv", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709"];
   const input = ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", concat, "-vf", `${scale},fps=${FPS},${tv}`, ...colour];
-  execFileSync(FFMPEG, [...input, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "38", "-row-mt", "1", "-deadline", "good", "-an", join(OUT, `hero-${lang}.webm`)]);
-  execFileSync(FFMPEG, [...input, "-c:v", "libx264", "-preset", "slow", "-crf", "26", "-movflags", "+faststart", "-an", join(OUT, `hero-${lang}.mp4`)]);
-  execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", used[0].file, "-vf", scale, "-quality", "88", join(OUT, `hero-${lang}.webp`)]);
-  writeFileSync(join(OUT, `hero-${lang}.json`), JSON.stringify({ duration: +(end - t0).toFixed(2), marks }, null, 2));
+  execFileSync(FFMPEG, [...input, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "24", "-row-mt", "1", "-deadline", "good", "-cpu-used", "1", "-an", join(OUT, `hero-${lang}.webm`)]);
+  execFileSync(FFMPEG, [...input, "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-movflags", "+faststart", "-an", join(OUT, `hero-${lang}.mp4`)]);
+  // The poster, and smaller copies for the landing page's srcset.
+  for (const [w, name] of [[1920, `hero-${lang}`], [1280, `hero-${lang}-1280`], [960, `hero-${lang}-960`], [640, `hero-${lang}-640`]] as const) {
+    execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", used[0].file, "-vf", `scale=${w}:-2:flags=lanczos`, "-quality", "88", join(OUT, `${name}.webp`)]);
+  }
+  writeFileSync(join(OUT, `hero-${lang}.json`), JSON.stringify({ duration: +length.toFixed(2), marks }, null, 2));
   rmSync(frames, { recursive: true, force: true });
-  console.log(lang, `${used.length} frames over ${(end - t0).toFixed(1)}s`, marks);
+  console.log(lang, `${used.length} frames over ${length.toFixed(1)}s (${(used.length / length).toFixed(0)} captured per second)`, marks);
 }
 
 mkdirSync(OUT, { recursive: true });
