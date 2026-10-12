@@ -434,6 +434,25 @@
       ]
     },
     {
+      "id": "gifsicle",
+      "displayName": "Gifsicle",
+      "status": "downloadable",
+      "delivery": "on-demand",
+      "sourceRepository": "https://github.com/kohler/gifsicle",
+      "licenseExpression": "GPL-2.0-only",
+      "capabilities": [
+        "image.compress_gif"
+      ],
+      "version": "1.95",
+      "artifacts": [
+        {
+          "url": "https://eternallybored.org/misc/gifsicle/releases/gifsicle-1.95-win64.zip",
+          "sha256": "7e47dd0bfd5ee47f911464c57faeed89a8709a7625dd1c449b16579889539ee8",
+          "sizeBytes": 230072
+        }
+      ]
+    },
+    {
       "id": "mkvtoolnix",
       "displayName": "MKVToolNix",
       "status": "downloadable",

@@ -151,7 +151,14 @@ test("About lists every component with its version, licence and hash, and opens 
   await expect(page.getByRole("heading", { level: 1, name: "About Tools4Devs" })).toBeVisible();
   await expect(page.getByText("MIT", { exact: true }).first()).toBeVisible();
   const components = page.getByRole("list", { name: "Components" }).getByRole("listitem");
-  await expect(components).toHaveCount(26);
+  await expect(components).toHaveCount(27);
+
+  // A copyleft build that stays out of the installer: it is named, licensed and pinned here instead.
+  const gifsicle = components.filter({ hasText: "Gifsicle" }).first();
+  await expect(gifsicle).toContainText("1.95");
+  await expect(gifsicle).toContainText("GPL-2.0-only");
+  await expect(gifsicle).toContainText("Downloaded when you ask");
+  await expect(gifsicle).toContainText("7e47dd0bfd5e");
 
   const ffmpeg = components.filter({ hasText: "FFmpeg" }).first();
   await expect(ffmpeg).toContainText("9.0.1");

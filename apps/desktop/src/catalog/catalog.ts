@@ -23,6 +23,7 @@ import {
   ScanSearch,
   ScanText,
   Search,
+  Shrink,
   Sparkles,
   Table,
   Tag,
@@ -252,6 +253,28 @@ const presentationById: Record<string, ToolPresentation> = {
       { id: "optimize", label: "Lossless optimise", description: "Recompress the PNG, pixel for pixel identical." },
     ],
     keywords: ["png", "optimise", "optimize", "compress", "image", "lossless"],
+  },
+  gifsicle: {
+    id: "gifsicle",
+    icon: Shrink,
+    preview: { src: "/previews/gifsicle.webm", poster: "/previews/gifsicle.jpg" },
+    title: "Compress GIFs",
+    description: "Make animated GIFs much smaller, with the loss dialled in.",
+    category: "images",
+    accent: "cool",
+    size: "standard",
+    operations: [
+      {
+        id: "compress",
+        label: "Compress GIF",
+        description: "Rewrite the animation with fewer colours, a little loss, or a smaller size.",
+      },
+    ],
+    keywords: [
+      "gif", "animated", "animation", "compress", "shrink", "smaller", "reduce", "size",
+      "optimise", "optimize", "lossy", "colors", "colours", "meme", "sticker",
+    ],
+    downloadLabel: "In-app download",
   },
   exiftool: {
     id: "exiftool",
@@ -588,7 +611,7 @@ const rowDefinitions = [
     hue: 78,
     title: "Images",
     description: "Resize, crop, convert, shrink, and read or strip metadata.",
-    toolIds: ["libvips", "image-search", "imagemagick", "oxipng", "exiftool"],
+    toolIds: ["libvips", "image-search", "imagemagick", "oxipng", "gifsicle", "exiftool"],
   },
   {
     id: "documents",

@@ -460,6 +460,7 @@ fn detect_available_tools() -> Vec<String> {
         "exiftool",
         "poppler",
         "oxipng",
+        "gifsicle",
         "mkvtoolnix",
         "imagemagick",
         "miller",
@@ -935,6 +936,34 @@ fn validate_options(request: &OperationRequest) -> Result<(), String> {
             return Err("The optimisation level runs from 0 to 6, or \"max\".".into());
         }
     }
+    if request.tool_id == "gifsicle" && request.operation_id == "compress" {
+        // Parsed here as well as in the panel's choices: the host never trusts the panel,
+        // and a stray value would otherwise reach gifsicle's command line unchecked.
+        let lossy = request
+            .options
+            .get("lossy")
+            .map(String::as_str)
+            .unwrap_or("80");
+        if !matches!(lossy.parse::<u8>(), Ok(0..=200)) {
+            return Err("The loss level runs from 0 to 200.".into());
+        }
+        let colors = request
+            .options
+            .get("colors")
+            .map(String::as_str)
+            .unwrap_or("256");
+        if !matches!(colors.parse::<u16>(), Ok(2..=256)) {
+            return Err("The number of colours runs from 2 to 256.".into());
+        }
+        let width = request
+            .options
+            .get("width")
+            .map(|value| value.trim())
+            .unwrap_or("");
+        if !width.is_empty() && !matches!(width.parse::<u32>(), Ok(1..=20000)) {
+            return Err("The width must be a whole number of pixels, or empty to keep it.".into());
+        }
+    }
     if request.tool_id == "libvips" && matches!(request.operation_id.as_str(), "resize" | "upscale")
     {
         let default_scale = if request.operation_id == "upscale" {
@@ -982,6 +1011,7 @@ fn executable_name(tool_id: &str) -> Result<String, String> {
         "exiftool" => "exiftool.exe",
         "poppler" => "pdftoppm.exe",
         "oxipng" => "oxipng.exe",
+        "gifsicle" => "gifsicle.exe",
         "mkvtoolnix" => "mkvmerge.exe",
         "imagemagick" => "magick.exe",
         "miller" => "mlr.exe",
@@ -1782,6 +1812,22 @@ fn resolve_args(request: &OperationRequest) -> Result<Vec<String>, String> {
             output,
             input,
         ]),
+        ("gifsicle", "compress") => {
+            let mut args = vec![
+                "--optimize=3".into(),
+                format!("--lossy={}", option("lossy", "80")),
+            ];
+            let colors = option("colors", "256");
+            if colors != "256" {
+                args.push(format!("--colors={colors}"));
+            }
+            let width = option("width", "");
+            if !width.trim().is_empty() {
+                args.push(format!("--resize-width={}", width.trim()));
+            }
+            args.extend(["-o".into(), output, input]);
+            Ok(args)
+        }
         ("mkvtoolnix", "remux") => Ok(vec!["-o".into(), output, input]),
         ("mkvtoolnix", "inspect") => Ok(vec![
             "--identify".into(),
@@ -2118,6 +2164,51 @@ mod tests {
 
         std::fs::remove_file(&shipped).ok();
         assert_eq!(resolved, shipped, "the installed copy must win over PATH");
+    }
+
+    #[test]
+    fn compresses_a_gif_only_with_values_gifsicle_can_take() {
+        // Ways this can fail: a loss level or colour count outside gifsicle's range, a value
+        // that is not a number, a width of zero or with trailing text, and the defaults
+        // leaving a flag out that changes the picture (--colors=256 is a no-op, so it is
+        // not sent) or putting one in the wrong place (the output must come before the input).
+        let compress = |options: &[(&str, &str)]| request_for("gifsicle", "compress", options);
+
+        for (key, value) in [
+            ("lossy", "201"),
+            ("lossy", "-1"),
+            ("lossy", "high"),
+            ("colors", "1"),
+            ("colors", "257"),
+            ("colors", "many"),
+            ("width", "0"),
+            ("width", "12 --crop=0,0+1x1"),
+            ("width", "wide"),
+        ] {
+            assert!(validate_options(&compress(&[(key, value)])).is_err(), "{key}={value}");
+        }
+        assert!(validate_options(&compress(&[("width", "")])).is_ok());
+        assert!(
+            validate_options(&compress(&[("lossy", "0"), ("colors", "2"), ("width", "640")])).is_ok()
+        );
+
+        assert_eq!(
+            resolve_args(&compress(&[])).unwrap(),
+            vec!["--optimize=3", "--lossy=80", "-o", "output.fixture", "input.fixture"]
+        );
+        assert_eq!(
+            resolve_args(&compress(&[("lossy", "0"), ("colors", "64"), ("width", " 480 ")])).unwrap(),
+            vec![
+                "--optimize=3",
+                "--lossy=0",
+                "--colors=64",
+                "--resize-width=480",
+                "-o",
+                "output.fixture",
+                "input.fixture",
+            ]
+        );
+        assert_eq!(executable_name("gifsicle").unwrap(), "gifsicle.exe");
     }
 
     #[test]
@@ -2609,6 +2700,7 @@ mod tests {
             ("poppler", "extract-text"),
             ("poppler", "rasterize"),
             ("oxipng", "optimize"),
+            ("gifsicle", "compress"),
             ("mkvtoolnix", "remux"),
             ("mkvtoolnix", "inspect"),
             ("imagemagick", "convert"),

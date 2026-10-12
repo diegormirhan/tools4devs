@@ -23,7 +23,7 @@ svg.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-
 const ID = new URLSearchParams(location.search).get("id");
 // The group hue of each tool (catalog.ts rowDefinitions).
 const HUE = { ffmpeg: 255, qpdf: 285, jq: 322, qr: 215, "yt-dlp": 165, tesseract: 285, imagemagick: 78, "text-tools": 215, "code-formatting": 215,
-  "ffprobe": 255, "songrec": 255, "mkvtoolnix": 255, "gallery-dl": 165, "libvips": 78, "image-search": 78, "oxipng": 78, "exiftool": 78,
+  "ffprobe": 255, "songrec": 255, "mkvtoolnix": 255, "gallery-dl": 165, "libvips": 78, "image-search": 78, "oxipng": 78, "gifsicle": 78, "exiftool": 78,
   "poppler": 285, "pandoc": 285, "yq": 322, "miller": 322, "ripgrep": 322, "fd": 322, "difftastic": 322,
   "codes-hashes": 215, "test-data": 215, "css-tools": 215, "dates-time": 12, "math-finance": 12, "colors": 12, "everyday": 12, "network": 12, "random-picks": 12,
   "7zip": 195, "dust": 195, "tokei": 195, "hexyl": 195, "chat-mockup": 135, "post-mockup": 135 }[ID];
@@ -46,12 +46,12 @@ function put(el, { x = 0, y = 0, r = 0, s = 1, sx = s, sy = s, o = 1 } = {}) {
 const CAPS = { ffmpeg: ["Convert.", "Compress.", "Trim."], qpdf: ["Merge.", "Split.", "Rotate."], jq: ["Format.", "Query.", "Validate."], qr: ["Encode.", "Style.", "Save."],
   "yt-dlp": ["Paste.", "Download.", "Extract."], tesseract: ["Scan.", "Read.", "Search."], imagemagick: ["Convert.", "Grey.", "Inspect."],
   "text-tools": ["Case.", "Sort.", "Count."], "code-formatting": ["Minify.", "Format.", "Indent."],
-  "ffprobe": ["Open.", "Codecs.", "Tracks."], "songrec": ["Listen.", "Match.", "Named."], "mkvtoolnix": ["Convert.", "Merge.", "Inspect."], "gallery-dl": ["Paste.", "Collect.", "Save."], "libvips": ["Resize.", "Crop.", "Enlarge."], "image-search": ["Pick.", "Search.", "Found."], "oxipng": ["Load.", "Shrink.", "Lossless."], "exiftool": ["Read.", "Remove.", "Title."],
+  "ffprobe": ["Open.", "Codecs.", "Tracks."], "songrec": ["Listen.", "Match.", "Named."], "mkvtoolnix": ["Convert.", "Merge.", "Inspect."], "gallery-dl": ["Paste.", "Collect.", "Save."], "libvips": ["Resize.", "Crop.", "Enlarge."], "image-search": ["Pick.", "Search.", "Found."], "oxipng": ["Load.", "Shrink.", "Lossless."], "gifsicle": ["Load.", "Shrink.", "Same loop."], "exiftool": ["Read.", "Remove.", "Title."],
   "poppler": ["Open.", "Text.", "Images."], "pandoc": ["Markdown.", "Convert.", "Formats."], "yq": ["Read.", "Format.", "Query."], "miller": ["CSV.", "JSON.", "Summarise."], "ripgrep": ["Search.", "Matches.", "Fast."], "fd": ["Find.", "Filter.", "Done."], "difftastic": ["Compare.", "Changes.", "Structure."],
   "codes-hashes": ["Encode.", "Hash.", "Decode."], "test-data": ["CPF.", "CNPJ.", "Card."], "css-tools": ["Radius.", "Shadow.", "Gradient."], "dates-time": ["Count.", "Workdays.", "Age."], "math-finance": ["Percent.", "Save.", "Convert."], "colors": ["HEX.", "Shades.", "Mix."], "everyday": ["Fuel.", "Barbecue.", "Million."], "network": ["My IP.", "Locate.", "DNS."], "random-picks": ["Dice.", "Draw.", "Numbers."],
   "7zip": ["Pack.", "Shrink.", "Extract."], "dust": ["Scan.", "Weigh.", "Find."], "tokei": ["Count.", "Languages.", "Lines."], "hexyl": ["Open.", "Bytes.", "ASCII."], "chat-mockup": ["Write.", "Style.", "Save."], "post-mockup": ["Write.", "Like.", "Save."] }[ID];
 const TAG = { ffmpeg: "FFMPEG", qpdf: "QPDF", jq: "JQ", qr: "QR CODES", "yt-dlp": "YT-DLP", tesseract: "TESSERACT", imagemagick: "IMAGEMAGICK", "text-tools": "TEXT", "code-formatting": "CODE",
-  "ffprobe": "FFPROBE", "songrec": "SONGREC", "mkvtoolnix": "MKVTOOLNIX", "gallery-dl": "GALLERY-DL", "libvips": "LIBVIPS", "image-search": "REVERSE SEARCH", "oxipng": "OXIPNG", "exiftool": "EXIFTOOL",
+  "ffprobe": "FFPROBE", "songrec": "SONGREC", "mkvtoolnix": "MKVTOOLNIX", "gallery-dl": "GALLERY-DL", "libvips": "LIBVIPS", "image-search": "REVERSE SEARCH", "oxipng": "OXIPNG", "gifsicle": "GIFSICLE", "exiftool": "EXIFTOOL",
   "poppler": "POPPLER", "pandoc": "PANDOC", "yq": "YQ", "miller": "MILLER", "ripgrep": "RIPGREP", "fd": "FD", "difftastic": "DIFFTASTIC",
   "codes-hashes": "CODES", "test-data": "TEST DATA", "css-tools": "CSS", "dates-time": "DATES", "math-finance": "MATH", "colors": "COLOUR", "everyday": "EVERYDAY", "network": "NETWORK", "random-picks": "RANDOM",
   "7zip": "7-ZIP", "dust": "DUST", "tokei": "TOKEI", "hexyl": "HEXYL", "chat-mockup": "CHAT MOCKUP", "post-mockup": "POST MOCKUP" }[ID];
@@ -561,6 +561,37 @@ CLIPS.oxipng = () => {
     put(track, { y: 30, o: seg(u, 0.1, 0.3) * (1 - xo2) });
     put(off, { x: 150, y: -96, r: -6, s: E.back(seg(u, 1.25, 1.6)), o: seg(u, 1.25, 1.4) * (1 - xo2) });
     const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    put(L, { x: lerp(-200, -120, E.out(seg(w, 0.05, 0.5))), y: -30, o: seg(w, 0.05, 0.2) * sO });
+    put(R, { x: lerp(200, 120, E.out(seg(w, 0.15, 0.6))), y: -30, o: seg(w, 0.15, 0.3) * sO });
+    put(eq, { y: -30, s: E.back(seg(w, 0.6, 0.9)), o: seg(w, 0.6, 0.75) * sO });
+    put(same, { y: 52, s: E.back(seg(w, 0.95, 1.3)), o: seg(w, 0.95, 1.1) * sO });
+  };
+};
+
+CLIPS.gifsicle = () => {
+  // A GIF is a loop, so the picture in each scene keeps moving: a slow hue drift stands in for the animation.
+  const loop = (el, t) => { el.style.filter = `hue-rotate(${Math.sin(t * 3.2) * 24}deg)`; };
+  const file = inG(0, `<div class="card" style="width:200px;height:170px;padding:10px"><div class="gif" style="border-radius:8px;overflow:hidden">${photo(180, 104)}</div><b style="font-size:13px">party.gif · 8.4 MB</b></div>`);
+  const num = inG(1, `<div style="font:800 72px/1 'Inter Variable';letter-spacing:-.04em">8.4 MB</div>`);
+  const track = inG(1, `<div class="track" style="width:300px;height:12px"><div class="fill" style="width:100%"></div></div>`);
+  const fill = track.querySelector(".fill");
+  const off = inG(1, `<div class="pill">−75%</div>`);
+  const L = inG(2, `<div class="gif" style="border-radius:10px;overflow:hidden">${photo(170, 112)}</div>`);
+  const R = inG(2, `<div class="gif" style="border-radius:10px;overflow:hidden">${photo(170, 112)}</div>`);
+  const eq = inG(2, `<div style="font:800 40px 'Inter Variable'">≈</div>`);
+  const same = inG(2, `<div class="pill" style="display:flex;gap:6px;align-items:center">${ic("film", 16)} plays the same</div>`);
+  return (t) => {
+    const s = t, xo = exit(s, 1.72, 2.0);
+    loop(file.querySelector(".gif"), t);
+    put(file, { y: -20, s: lerp(0.8, 1, E.back(seg(s, 0.1, 0.6))), o: seg(s, 0.1, 0.25) * (1 - xo) });
+    const u = t - 2.1, xo2 = exit(u, 1.68, 1.95), k = E.inout(seg(u, 0.5, 1.3)), mb = lerp(8.4, 2.1, k);
+    num.firstChild.textContent = mb.toFixed(1) + " MB";
+    put(num, { y: -40, s: lerp(0.8, 1, E.back(seg(u, 0, 0.5))), o: seg(u, 0, 0.2) * (1 - xo2) });
+    fill.style.width = (mb / 8.4) * 100 + "%";
+    put(track, { y: 30, o: seg(u, 0.1, 0.3) * (1 - xo2) });
+    put(off, { x: 150, y: -96, r: -6, s: E.back(seg(u, 1.25, 1.6)), o: seg(u, 1.25, 1.4) * (1 - xo2) });
+    const w = t - 4.2, sO = 1 - exit(w, 1.62, 1.85);
+    loop(L.querySelector(".gif"), t); loop(R.querySelector(".gif"), t);
     put(L, { x: lerp(-200, -120, E.out(seg(w, 0.05, 0.5))), y: -30, o: seg(w, 0.05, 0.2) * sO });
     put(R, { x: lerp(200, 120, E.out(seg(w, 0.15, 0.6))), y: -30, o: seg(w, 0.15, 0.3) * sO });
     put(eq, { y: -30, s: E.back(seg(w, 0.6, 0.9)), o: seg(w, 0.6, 0.75) * sO });

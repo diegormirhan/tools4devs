@@ -419,6 +419,31 @@ fn every_catalog_operation_executes_on_generated_fixtures() {
         skipped.push("oxipng");
     }
 
+    if tool_available("gifsicle") {
+        // Two frames of one pixel each: the smallest animation gifsicle will still rewrite.
+        let frame = "21f9040a00000000 2c000000000100010000 0202440100"
+            .replace(' ', "");
+        let hex = format!("47494638396101000100800000000000ffffff{frame}{frame}3b");
+        let bytes: Vec<u8> = (0..hex.len())
+            .step_by(2)
+            .map(|index| u8::from_str_radix(&hex[index..index + 2], 16).unwrap())
+            .collect();
+        let animated = root.join("animated.gif");
+        std::fs::write(&animated, bytes).unwrap();
+        let compressed = root.join("animated-compressed.gif");
+        run(request(
+            "gifsicle",
+            "compress",
+            &[animated.clone()],
+            Some(compressed.clone()),
+            &[("lossy", "60"), ("colors", "16")],
+        ));
+        assert!(std::fs::read(&compressed).unwrap().starts_with(b"GIF89a"));
+        println!("PASS gifsicle/compress");
+    } else {
+        skipped.push("gifsicle");
+    }
+
     if tool_available("poppler") {
         let text = root.join("sample.txt");
         run(request(

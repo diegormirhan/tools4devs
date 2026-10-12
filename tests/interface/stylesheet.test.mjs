@@ -30,7 +30,9 @@ test("never hardcodes a colour outside a mockup", () => {
   // exemption has to track which rule a line is *inside*, not just whether
   // the selector's own text sits on the same line — a multi-line rule's
   // declarations do not repeat it.
-  const body = stylesheet;
+  // A hex written in a comment (a note on where a mockup colour came from) colours nothing; the
+  // comments go, and the newlines stay so the lines still count the same.
+  const body = stylesheet.replace(/\/\*[\s\S]*?\*\//g, (comment) => comment.replace(/[^\n]/g, ""));
   let insideMockupPhone = false;
   let depth = 0;
   const literals = [];

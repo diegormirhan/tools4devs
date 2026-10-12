@@ -9,11 +9,14 @@
 
 import { utilityGroupIds } from "../utilities/registry";
 
-export type FormatFamily = "image" | "video" | "audio" | "pdf" | "document" | "archive" | "data" | "any";
+export type FormatFamily = "image" | "gif" | "video" | "audio" | "pdf" | "document" | "archive" | "data" | "any";
 
 /** Extensions per family, lowercase and without the dot. */
 export const familyExtensions: Record<Exclude<FormatFamily, "any">, string[]> = {
   image: ["png", "jpg", "jpeg", "webp", "avif", "gif", "tif", "tiff", "bmp", "heic", "heif", "ico", "svg"],
+  // Only animated-GIF tools ask for this one: gifsicle reads nothing else, and "image" would
+  // let a PNG through to fail inside the binary.
+  gif: ["gif"],
   video: ["mp4", "mkv", "webm", "mov", "avi", "m4v", "wmv", "flv", "mpg", "mpeg", "ts", "3gp"],
   audio: ["mp3", "wav", "flac", "m4a", "aac", "ogg", "oga", "opus", "wma", "aiff"],
   pdf: ["pdf"],
@@ -40,6 +43,7 @@ export const toolAccepts: Record<string, FormatFamily[]> = {
   songrec: ["audio", "video"],
   imagemagick: ["image", "pdf"],
   oxipng: ["image"],
+  gifsicle: ["gif"],
   exiftool: ["image", "video", "audio", "pdf", "document"],
   qpdf: ["pdf"],
   poppler: ["pdf"],

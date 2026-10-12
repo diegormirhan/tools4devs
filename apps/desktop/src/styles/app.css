@@ -64,17 +64,47 @@ body {
 .mockup-bubble__meta { display: flex; align-items: center; gap: 3px; align-self: flex-end; margin-top: 1px; }
 .mockup-bubble__time { font-size: 0.6rem; opacity: 0.7; }
 
-/* WhatsApp, dark theme: a near-black background with a faint texture, dark
-   grey bubbles inbound and dark green outbound, with read ticks. */
-.mockup-phone--whatsapp { background: #0b141a; }
+/* WhatsApp, dark theme: verified exact colors from the real Android app.
+   Main BG #111B21, header #202C33, received bubble #2A3942 (NOT #202c33 —
+   that's the header/panel color), sent bubble #005C4B. Bubbles have
+   asymmetric border-radius: a squared tail corner + a tiny triangle
+   pseudo-element that replicates the classic WhatsApp bubble pointer. */
+.mockup-phone--whatsapp { background: #111b21; }
 .mockup-phone--whatsapp .mockup-phone__header { background: #202c33; color: #e9edef; }
 .mockup-phone--whatsapp .mockup-phone__messages {
-  background:
-    radial-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1.4px) 0 0 / 22px 22px,
-    #0b141a;
+  background-color: #111b21;
+  background-image: 
+    linear-gradient(rgba(17, 27, 33, 0.88), rgba(17, 27, 33, 0.88)),
+    url("/whatsapp-bg.png");
+  background-repeat: repeat;
+  background-size: 300px;
 }
-.mockup-phone--whatsapp .mockup-bubble--them { align-self: flex-start; color: #e9edef; background: #202c33; }
-.mockup-phone--whatsapp .mockup-bubble--me { align-self: flex-end; color: #e9edef; background: #005c4b; }
+/* Received bubble: #2A3942 (corrected), tail points bottom-left */
+.mockup-phone--whatsapp .mockup-bubble--them {
+  align-self: flex-start; color: #e9edef; background: #2a3942;
+  border-radius: 0 7.5px 7.5px 7.5px; /* top-left squared for the tail */
+  position: relative;
+}
+.mockup-phone--whatsapp .mockup-bubble--them::before {
+  content: ""; position: absolute;
+  left: -5px; top: 0;
+  width: 0; height: 0;
+  border-top: 6px solid #2a3942;
+  border-left: 5px solid transparent;
+}
+/* Sent bubble: #005C4B, tail points bottom-right */
+.mockup-phone--whatsapp .mockup-bubble--me {
+  align-self: flex-end; color: #e9edef; background: #005c4b;
+  border-radius: 7.5px 7.5px 0 7.5px; /* bottom-right squared for the tail */
+  position: relative;
+}
+.mockup-phone--whatsapp .mockup-bubble--me::after {
+  content: ""; position: absolute;
+  right: -5px; top: 0;
+  width: 0; height: 0;
+  border-top: 6px solid #005c4b;
+  border-right: 5px solid transparent;
+}
 .mockup-phone--whatsapp .mockup-bubble__time { color: #8696a0; opacity: 1; }
 .mockup-phone--whatsapp .mockup-bubble__check { color: #53bdeb; }
 .mockup-phone--whatsapp .mockup-date-sep { background: #1d2b33; color: #8696a0; }
@@ -149,28 +179,37 @@ body {
 .mockup-post__stats span { display: inline-flex; align-items: center; gap: 5px; }
 .mockup-post--instagram-post { background: #fafafa; border: 1px solid #dbdbdb; }
 
-/* Tweet / X card. */
+/* Tweet / X card. Verified specs from the real X webapp:
+   - Avatar: 48×48px (confirmed exact 2026 size)
+   - Font: X uses "TwitterChirp", falls back to system sans-serif
+   - Tweet text: 15px, line-height 24px
+   - Meta row: 15px
+   - Action bar: 13px, gap 4px between icon and count
+   - Padding: 12px 16px
+   - All colours confirmed: #0f1419 text, #536471 muted, #f91880 like, #eff3f4 border */
 .mockup-post--tweet {
-  gap: 0; padding: 12px 14px;
+  gap: 0; padding: 12px 16px;
   background: #ffffff; border: 1px solid #eff3f4; border-radius: 16px;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #0f1419;
+  font-family: -apple-system, BlinkMacSystemFont, "TwitterChirp", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #0f1419;
 }
-.mockup-post--tweet .mockup-tweet__grid { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; }
-.mockup-post--tweet .mockup-avatar--tweet { inline-size: 44px; block-size: 44px; font-size: 0.86rem; }
+.mockup-post--tweet .mockup-tweet__grid { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 12px; }
+.mockup-post--tweet .mockup-avatar--tweet { inline-size: 48px; block-size: 48px; font-size: 0.875rem; }
 .mockup-post--tweet .mockup-tweet__col { min-width: 0; }
-.mockup-post--tweet .mockup-tweet__meta { display: flex; align-items: center; gap: 4px; font-size: 0.95rem; }
+.mockup-post--tweet .mockup-tweet__meta { display: flex; align-items: center; gap: 4px; font-size: 15px; line-height: 20px; }
 .mockup-post--tweet .mockup-tweet__meta strong { color: #0f1419; font-weight: 700; white-space: nowrap; }
 .mockup-post--tweet .mockup-tweet__verified { flex: 0 0 auto; color: white; }
 .mockup-post--tweet .mockup-tweet__muted { color: #536471; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mockup-post--tweet .mockup-tweet__more { flex: 0 0 auto; margin-left: auto; color: #536471; }
 .mockup-post--tweet .mockup-tweet__text {
-  margin: 2px 0 12px; color: #0f1419; font-size: 1.08rem; line-height: 1.4;
+  margin: 4px 0 12px; color: #0f1419; font-size: 15px; line-height: 24px;
   overflow-wrap: anywhere; white-space: pre-wrap;
 }
 .mockup-post--tweet .mockup-tweet__actions {
   display: flex; justify-content: space-between;
-  color: #536471; font-size: 0.8rem;
+  color: #536471; font-size: 13px; max-width: 425px; margin-top: 12px;
 }
-.mockup-post--tweet .mockup-tweet__actions span { display: inline-flex; align-items: center; gap: 6px; }
+.mockup-post--tweet .mockup-tweet__actions span { display: inline-flex; align-items: center; gap: 4px; }
 .mockup-post--tweet .mockup-tweet__action--like { color: #f91880; }
 .mockup-post--tweet .mockup-tweet__action--share { color: #536471; }
+

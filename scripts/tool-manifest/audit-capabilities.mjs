@@ -12,7 +12,7 @@ const requiredCapabilities = [
   "archive.compress", "archive.extract", "documents.convert",
   "metadata.read", "metadata.write",
   "pdf.extract_text", "pdf.rasterize",
-  "image.optimize_png", "image.convert_extended", "image.grayscale", "image.inspect",
+  "image.optimize_png", "image.compress_gif", "image.convert_extended", "image.grayscale", "image.inspect",
   "media.remux", "media.inspect_matroska",
   "dev.tabular.convert", "dev.tabular.summary", "dev.bytes.preview",
   "dev.code.count", "dev.diff.structural", "dev.disk.usage",

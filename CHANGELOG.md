@@ -2,6 +2,16 @@
 
 All notable changes to tools4devs. Versions follow [semantic versioning](https://semver.org/).
 
+## 5.0.1 (2026-10-12)
+
+### Added
+
+- Compress GIFs: pick how much loss to accept, how many colours to keep and, optionally, a smaller width. Gifsicle does the work and downloads the first time you use it (225 kB).
+
+### Changed
+
+- The WhatsApp chat mockup uses the real app's dark colours, chat wallpaper and bubble tails.
+
 ## 5.0.0 (2026-10-01)
 
 A new interface. Every tool is one click or one search away, opens as a page instead of a dialog, and shows what it does before you open it.

@@ -621,7 +621,7 @@ function OperationOptions({
               <NumberField
                 label={t(field.label)}
                 value={value}
-                placeholder={field.placeholder}
+                placeholder={field.placeholder && t(field.placeholder)}
                 min={field.min}
                 max={field.max}
                 step={field.step}
@@ -890,6 +890,45 @@ function operationFields(toolId: string, operationId: string): OperationField[] 
         hint: "Higher settings search harder for a smaller file. The picture is identical either way; only the time changes.",
       },
     ];
+  if (toolId === "gifsicle" && operationId === "compress")
+    return [
+      {
+        key: "lossy",
+        label: "Loss",
+        type: "select",
+        defaultValue: "80",
+        choices: [
+          { value: "0", label: "None — same pixels, rewritten smarter" },
+          { value: "30", label: "Light — hard to spot" },
+          { value: "80", label: "Balanced — default" },
+          { value: "150", label: "Strong — visible grain" },
+        ],
+        hint: "A little loss lets runs of similar colour compress together, which is where most of the saving comes from.",
+      },
+      {
+        key: "colors",
+        label: "Colours",
+        type: "select",
+        defaultValue: "256",
+        choices: [
+          { value: "256", label: "256 — keep all" },
+          { value: "128", label: "128" },
+          { value: "64", label: "64" },
+          { value: "32", label: "32" },
+          { value: "16", label: "16 — flat, poster-like" },
+        ],
+        hint: "Fewer colours shrink the file but can band smooth gradients and skin tones.",
+      },
+      {
+        key: "width",
+        label: "Width (pixels)",
+        type: "number",
+        placeholder: "Keep original",
+        min: 1,
+        step: 10,
+        hint: "Optional. A GIF half as wide is about a quarter of the size.",
+      },
+    ];
   if (toolId === "exiftool" && operationId === "set-title")
     return [{ key: "title", label: "Title", type: "text", placeholder: "e.g. Signed contract" }];
   if (toolId === "hexyl" && operationId === "preview")
@@ -960,6 +999,7 @@ function outputExtension(toolId: string, operationId: string, originalExtension:
     "poppler/extract-text": ".txt",
     "poppler/rasterize": ".png",
     "oxipng/optimize": ".png",
+    "gifsicle/compress": ".gif",
     "mkvtoolnix/remux": ".mkv",
     "imagemagick/convert": ".png",
     "libvips/upscale-model": ".png",

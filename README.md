@@ -16,7 +16,7 @@
 
 ![The Tools4Devs catalog in its dark theme](docs/screenshots/catalog-dark.png)
 
-Tools4Devs puts twenty-five open-source tools (FFmpeg, yt-dlp, qpdf, ImageMagick, Tesseract and others) in one window with one queue. Nine of them ship inside the installer. The app downloads, verifies and installs the rest on its own, and shows the download size before it starts.
+Tools4Devs puts twenty-six open-source tools (FFmpeg, yt-dlp, qpdf, ImageMagick, Tesseract and others) in one window with one queue. Nine of them ship inside the installer. The app downloads, verifies and installs the rest on its own, and shows the download size before it starts.
 
 It also has about ninety small tools built in: text, hashes, dates, calculators, colours, CSS generators, QR codes, test data and chat or post mockups. These run inside the app and need nothing installed.
 
@@ -56,7 +56,7 @@ Download the installer from the [latest release](https://github.com/diegormirhan
 | --- | --- | --- |
 | **Video and audio** | FFmpeg, ffprobe, SongRec, MKVToolNix | transcode, compress, trim, make GIFs and contact sheets, inspect codecs, remux to MKV, identify the song that is playing |
 | **Downloads** | yt-dlp, gallery-dl | download video and audio from a link, and image galleries |
-| **Images** | libvips, Nomos8kSC, reverse image search, ImageMagick, Oxipng, ExifTool | resize, crop, convert, upscale with a model, find where a picture came from, optimise PNG, read and remove metadata |
+| **Images** | libvips, Nomos8kSC, reverse image search, ImageMagick, Oxipng, Gifsicle, ExifTool | resize, crop, convert, upscale with a model, find where a picture came from, optimise PNG, compress GIFs, read and remove metadata |
 | **PDFs and documents** | qpdf, Poppler, Tesseract, Pandoc | merge, split, rotate, protect, extract text, render a page, OCR into a searchable PDF, convert between formats |
 | **Text and data** | jq, yq, Miller, ripgrep, fd, Difftastic | JSON and YAML, CSV to JSON, search, find files, structural diff |
 | **Quick tools** | built in | text, codes and hashes, test data, CSS generators, minify and format, QR codes and barcodes |

@@ -30,7 +30,7 @@ describe("tool catalog", () => {
     // A tool in two categories, or in none, is a navigation bug.
     const placed = rows.flatMap((row) => row.tools.map((tool) => tool.id));
     expect(new Set(placed).size).toBe(placed.length);
-    expect(placed).toHaveLength(39);
+    expect(placed).toHaveLength(40);
 
     // No category should be big enough to need scrolling to take in.
     for (const row of rows) expect(row.tools.length).toBeLessThanOrEqual(6);
@@ -44,7 +44,7 @@ describe("the command palette's search", () => {
     const result = searchCatalog(rows, "  ");
 
     expect(result.actions).toEqual([]);
-    expect(result.tools).toHaveLength(39);
+    expect(result.tools).toHaveLength(40);
   });
 });
 
