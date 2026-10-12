@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { searchCatalog, type CatalogRow, type CatalogTool } from "../catalog/catalog";
 import { useT } from "../i18n/language";
@@ -58,12 +58,29 @@ export function CommandPalette({
   const t = useT();
   const { go } = useNavigation();
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState("");
+  const list = useRef<HTMLDivElement>(null);
+  // The catalog does the matching, so cmdk never re-selects on its own: without this the
+  // highlight stayed on whatever row the arrow keys had reached, and the list scrolled
+  // down to it as the results changed under it.
+  function firstResult(text: string): string {
+    if (file && !text.trim() && suggestedTools.length > 0) return `file/${suggestedTools[0].id}`;
+    const found = searchCatalog(rows, text, t);
+    const action = found.actions[0];
+    return action ? `${action.tool.id}/${action.operation.id}` : (found.tools[0]?.tool.id ?? "");
+  }
+  function search(text: string) {
+    setQuery(text);
+    setSelected(firstResult(text));
+    // New results start at the top; cmdk does not move the scroll when the selection resets.
+    if (list.current) list.current.scrollTop = 0;
+  }
   // Cleared as the palette opens, not as it closes: clearing on close swapped the
   // results for the full list while the dialog was still fading out.
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
-    if (open) setQuery("");
+    if (open) search("");
   }
   const { actions, tools } = searchCatalog(rows, query, t);
 
@@ -86,16 +103,18 @@ export function CommandPalette({
         {/* The catalog does its own matching, accent-blind and in both languages. */}
         <Command
           shouldFilter={false}
+          value={selected}
+          onValueChange={setSelected}
           className="rounded-none bg-transparent **:data-[slot=command-input-wrapper]:h-16 **:data-[slot=command-input-wrapper]:gap-3 **:data-[slot=command-input-wrapper]:px-6 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pt-3 [&_[cmdk-group-heading]]:pb-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-muted-foreground [&_[data-slot=command-input-wrapper]_svg]:size-5 [&_[data-slot=command-input-wrapper]_svg]:opacity-70"
         >
           <CommandInput
             value={query}
-            onValueChange={setQuery}
+            onValueChange={search}
             placeholder={t("Search an action, a format or a tool")}
             aria-label={t("Search tools")}
             className="h-12 text-base"
           />
-          <CommandList className="max-h-[420px] px-3 py-3 [&_[cmdk-group]]:p-0 [&_[cmdk-group]:not(:first-child)]:mt-2">
+          <CommandList ref={list} className="max-h-[420px] px-3 py-3 [&_[cmdk-group]]:p-0 [&_[cmdk-group]:not(:first-child)]:mt-2">
             <CommandEmpty>{t("No tool matches that")}</CommandEmpty>
             {file && !query.trim() && suggestedTools.length > 0 && (
               <CommandGroup heading={t("For {name}", { name: file.split(/[\\/]/).pop() ?? file })}>
