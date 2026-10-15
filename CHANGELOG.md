@@ -2,6 +2,16 @@
 
 All notable changes to tools4devs. Versions follow [semantic versioning](https://semver.org/).
 
+## 5.0.2 (2026-10-14)
+
+### Changed
+
+- Update checks read one address, `latest.json`, instead of three. 5.0.0 and 5.0.1 find this release under their old name one last time; copies older than 5.0.0 do not read `latest.json` and need the installer once, as they did for 5.0.0.
+
+### Fixed
+
+- A tool opened from the sidebar or the search without being installed now offers its download in place of a Run button that could only fail. Compress GIFs did nothing when Gifsicle was not on the machine.
+
 ## 5.0.1 (2026-10-12)
 
 ### Added
@@ -10,8 +20,6 @@ All notable changes to tools4devs. Versions follow [semantic versioning](https:/
 
 ### Changed
 
-- Update checks read one address, `latest.json`, instead of three. Copies older than 5.0.0 do not read it and need the installer once, as they did for 5.0.0.
-- A tool opened from the sidebar or the search without being installed now offers its download in place of a Run button that could only fail.
 - The WhatsApp chat mockup uses the real app's dark colours, chat wallpaper and bubble tails.
 
 ## 5.0.0 (2026-10-01)

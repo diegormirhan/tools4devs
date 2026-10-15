@@ -1,7 +1,7 @@
 /**
- * Writes the update manifests. From 5.0.1 that is latest.json alone: the manifest of the
- * release being built, which 5.0.1 and every later version read. The release that bridges
- * to it, 5.0.1, also writes tools4devs-updates.json, the name 5.0.0 reads, so 5.0.0 can find it.
+ * Writes the update manifests. From 5.0.2 that is latest.json alone: the manifest of the
+ * release being built, which 5.0.2 and every later version read. The release that bridges
+ * to it, 5.0.2, also writes tools4devs-updates.json, the name 5.0.0 and 5.0.1 read, so they can find it.
  *
  * Before that: tools4devs-updates.json for clients of the current signing key,
  * tools4devs.json frozen at 4.0.0 for clients of the lost original key, and latest.json frozen

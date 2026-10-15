@@ -122,12 +122,12 @@ cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib -- --ignored 
 
 ## Upgrade compatibility
 
-Each installed version reads one manifest from the latest GitHub release. From 5.0.1 that is `latest.json` alone, and each release publishes only that file. 5.0.1 also publishes `tools4devs-updates.json` once, the name 5.0.0 reads, so that 5.0.0 can find it; the release after 5.0.1 does not.
+Each installed version reads one manifest from the latest GitHub release. From 5.0.2 that is `latest.json` alone, and each release publishes only that file. 5.0.2 also publishes `tools4devs-updates.json` once, the name 5.0.0 and 5.0.1 read, so that they can find it; the release after 5.0.2 does not.
 
 | Installed version | Reads | Status |
 | --- | --- | --- |
-| 5.0.1 and later | `latest.json` | updates itself |
-| 5.0.0 | `tools4devs-updates.json` | updates itself to 5.0.1, which is the last release to publish that file |
+| 5.0.2 and later | `latest.json` | updates itself |
+| 5.0.0 and 5.0.1 | `tools4devs-updates.json` | update themselves to 5.0.2, which is the last release to publish that file |
 | 3.4.0 to 4.0.0 | `tools4devs.json` | no longer published; install the current version once by hand |
 | ToolHaven 2.1.0 to 3.3.0 | `latest.json` | reads a manifest it cannot verify; install the current version once by hand |
 

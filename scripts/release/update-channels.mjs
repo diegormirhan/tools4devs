@@ -4,11 +4,11 @@ const bridgeVersion = "3.4.0";
 // not trust, so their channel is frozen here and the new key gets a channel of its own.
 const lastOldKeyVersion = "4.0.0";
 const firstNewKeyVersion = "5.0.0";
-// From here the one channel is latest.json, read by 5.0.1 and every later version. 5.0.0 still
-// reads tools4devs-updates.json, so that file is published once more, by this release, to carry
-// 5.0.0 over to a client that reads latest.json; the release after it publishes latest.json alone.
-const unifiedFrom = "5.0.1";
-const updatesChannelEnds = "5.0.2";
+// From here the one channel is latest.json, read by 5.0.2 and every later version. 5.0.0 and 5.0.1
+// still read tools4devs-updates.json, so that file is published once more, by this release, to carry
+// them over to a client that reads latest.json; the release after it publishes latest.json alone.
+const unifiedFrom = "5.0.2";
+const updatesChannelEnds = "5.0.3";
 
 const installerUrl = (version) =>
   `https://github.com/diegormirhan/tools4devs/releases/download/v${version}/tools4devs_${version}_x64-setup.exe`;
@@ -22,7 +22,7 @@ const isAtLeast = (version, floor) =>
  *   oldKey   → tools4devs.json from 5.0.0, frozen at 4.0.0
  *   legacy   → latest.json, frozen at the 3.4.0 bridge
  *
- * From 5.0.1 there is one channel and none of the frozen ones: `latest` is the manifest of this
+ * From 5.0.2 there is one channel and none of the frozen ones: `latest` is the manifest of this
  * release, to be written as latest.json, and `updates` is the same manifest for the one release
  * that still has to be found by 5.0.0 under its old name.
  */
