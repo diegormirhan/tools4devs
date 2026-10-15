@@ -741,6 +741,49 @@ mod tests {
         assert!(failures.is_empty(), "\n{}", failures.join("\n"));
     }
 
+    /// The whole path a user takes with Compress GIFs, on an empty machine: download the pinned
+    /// build, unpack it into the store, and compress a GIF with what was unpacked. It exists
+    /// because the card once opened from the search with nothing installed, and Run only failed.
+    ///
+    /// `cargo test --lib -- --ignored --nocapture installs_gifsicle_and_compresses_with_it`
+    #[test]
+    #[ignore = "downloads Gifsicle from the internet"]
+    fn installs_gifsicle_and_compresses_with_it() {
+        let store = std::env::temp_dir().join("tools4devs-fresh-gifsicle");
+        let _ = std::fs::remove_dir_all(&store);
+        std::fs::create_dir_all(&store).unwrap();
+        std::env::set_var("LOCALAPPDATA", &store);
+        assert!(installed_binary_directory("gifsicle").is_none(), "a fresh store has no Gifsicle");
+
+        install("gifsicle", &|_| {}).expect("the pinned build should download, verify and unpack");
+        let directory = installed_binary_directory("gifsicle").expect("installed after install");
+        assert!(directory.join("gifsicle.exe").is_file(), "gifsicle.exe sits in {}", directory.display());
+
+        // Two one-pixel frames: the smallest animation Gifsicle will still rewrite.
+        let frame = "21f9040a000000002c000000000100010000".to_string() + "0202440100";
+        let hex = format!("47494638396101000100800000000000ffffff{frame}{frame}3b");
+        let bytes: Vec<u8> = (0..hex.len())
+            .step_by(2)
+            .map(|index| u8::from_str_radix(&hex[index..index + 2], 16).unwrap())
+            .collect();
+        let input = store.join("in.gif");
+        let output = store.join("out.gif");
+        std::fs::write(&input, bytes).unwrap();
+        let result = crate::execute_operation_inner(crate::OperationRequest {
+            tool_id: "gifsicle".into(),
+            operation_id: "compress".into(),
+            input_paths: vec![input.to_string_lossy().into_owned()],
+            output_path: Some(output.to_string_lossy().into_owned()),
+            options: std::collections::HashMap::new(),
+            source_url: None,
+            conflict_policy: None,
+            job_id: None,
+        })
+        .expect("compressing with the installed Gifsicle should work");
+        assert!(result.output_path.is_some());
+        assert!(std::fs::read(&output).unwrap().starts_with(b"GIF89a"));
+    }
+
     /// Runs a real installer into a temporary directory, with this app's own
     /// token and nothing else.
     ///

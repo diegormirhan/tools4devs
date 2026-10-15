@@ -236,6 +236,8 @@ function Shell() {
             defaultFolder={defaultFolder}
             onRun={runToolOperation}
             onCancel={runner.cancelOperation}
+            installation={installations.states[openedTool.id]}
+            onInstall={pinnedToolIds.has(openedTool.id) ? () => requestInstallation(openedTool) : undefined}
           />
         )
       ) : location.view === "catalog" ? (

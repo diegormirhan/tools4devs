@@ -40,3 +40,40 @@ test("a release on the new key cannot ship without the frozen 4.0.0 manifest", (
     /4\.0\.0/,
   );
 });
+
+// From 5.0.1 there is one channel, latest.json. Who reads what, and what each release must publish:
+//   5.0.0 reads tools4devs-updates.json, so the first unified release still writes it;
+//   5.0.1 and later read latest.json, so 5.0.2 can drop the old name.
+test("5.0.1 writes latest.json, and tools4devs-updates.json once more so that 5.0.0 can find it", () => {
+  const manifests = releaseManifests("5.0.1", "signed-new-key", "2026-10-14T00:00:00Z");
+  assert.equal(manifests.latest.version, "5.0.1");
+  assert.deepEqual(manifests.updates, manifests.latest);
+  // None of the frozen channels survives: they are not given, and not needed.
+  assert.equal(manifests.oldKey, undefined);
+  assert.equal(manifests.legacy, undefined);
+});
+
+test("from 5.0.2 a release publishes latest.json and nothing else", () => {
+  for (const version of ["5.0.2", "5.1.0", "6.0.0"]) {
+    const manifests = releaseManifests(version, "signed-new-key", "2026-10-20T00:00:00Z");
+    assert.equal(manifests.latest.version, version);
+    assert.match(manifests.latest.platforms["windows-x86_64"].url, new RegExp(`v${version}/tools4devs_${version}_x64-setup\.exe$`));
+    assert.deepEqual(Object.keys(manifests).sort(), ["current", "latest"], version);
+  }
+});
+
+test("5.0.0 keeps the frozen channels it already had", () => {
+  const bridge = releaseManifests("3.4.0", "signed-bridge", "2026-09-27T00:00:00Z").current;
+  const lastOldKey = releaseManifests("4.0.0", "signed-old-key", "2026-09-28T00:00:00Z", bridge).current;
+  const manifests = releaseManifests("5.0.0", "signed-new-key", "2026-10-01T00:00:00Z", bridge, lastOldKey);
+  assert.equal(manifests.latest, undefined);
+  assert.deepEqual(manifests.legacy, bridge);
+});
+
+test("the app reads latest.json from 5.0.1 on, and no other address", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const config = JSON.parse(await readFile(new URL("../../apps/desktop/src-tauri/tauri.conf.json", import.meta.url), "utf8"));
+  assert.deepEqual(config.plugins.updater.endpoints, [
+    "https://github.com/diegormirhan/tools4devs/releases/latest/download/latest.json",
+  ]);
+});

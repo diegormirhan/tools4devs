@@ -1,6 +1,6 @@
 # Release compatibility checks
 
-The normal Node tests use frozen 3.3.0 and bridge 3.4.0 configuration fixtures, so a shallow checkout does not need historical Git tags. The fixtures record the original data identity, signing trust and the bridge's new channel. Channel tests keep latest.json pinned to 3.4.0 while tools4devs.json advertises the current release.
+The normal Node tests use frozen 3.3.0 and bridge 3.4.0 configuration fixtures, so a shallow checkout does not need historical Git tags. The fixtures record the original data identity, signing trust and the bridge's new channel. Channel tests cover the frozen channels of the releases up to 5.0.0, and the single latest.json channel from 5.0.1.
 
 After building a signed release, run the opt-in native artifact verification from the repository root:
 

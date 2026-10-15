@@ -75,3 +75,29 @@ test.describe("before Gifsicle is installed", () => {
     expect(install?.args).toMatchObject({ toolId: "gifsicle" });
   });
 });
+
+test.describe("opening the tool from the search before Gifsicle is installed", () => {
+  test.use({
+    host: { available: installed.filter((id) => id !== "gifsicle"), openDialog: "C:/memes/party.gif", stepMs: 100 },
+  });
+
+  test("offers the download in place of a Run that could only fail, and runs once it is installed", async ({ page }) => {
+    await page.goto("/");
+    await search(page, "compress gif");
+    const tool = page.getByRole("region", { name: "Compress GIFs" });
+    await tool.getByRole("button", { name: /choose files/i }).click();
+
+    // Nothing to run yet: the panel says why and offers the fix.
+    await expect(tool.getByText(/Gifsicle downloads once, the first time you use it \(225 kB\)/)).toBeVisible();
+    await expect(tool.getByRole("button", { name: "Run" })).toHaveCount(0);
+    expect(await hostCalls(page, "execute_operation")).toHaveLength(0);
+
+    await tool.getByRole("button", { name: "Get Gifsicle" }).click();
+    const dialog = page.getByRole("dialog", { name: /Install Gifsicle/ });
+    await dialog.getByRole("button", { name: "Download and install" }).click();
+    await dialog.getByRole("button", { name: /Open Gifsicle/ }).click();
+
+    await expect(tool.getByRole("button", { name: "Run" })).toBeEnabled();
+    await expect(tool.getByRole("button", { name: "Get Gifsicle" })).toHaveCount(0);
+  });
+});

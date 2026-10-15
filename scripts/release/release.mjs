@@ -99,6 +99,15 @@ const newKeyNote = Number(version.split(".")[0]) >= 5
   ? "Updates are signed with a new key from 5.0.0, because the original one was lost. If you are on 4.0.0 or older, download and run the installer once; your preferences, history and installed tools are kept. Automatic updates work again from this version on."
   : "If you are on ToolHaven 2.1.0 or later, open the app and use the Restart button after the signed update has downloaded. The update keeps your preferences, history and installed tools.";
 
+const [major, minor, patch] = version.split(".").map(Number);
+// From 5.0.1 the only channel is latest.json; 5.0.1 also writes tools4devs-updates.json, for 5.0.0.
+const unified = major > 5 || (major === 5 && (minor > 0 || patch >= 1));
+const updateFiles = !unified
+  ? "`tools4devs-updates.json`, `tools4devs.json`, `latest.json`, `*.sig`"
+  : version === "5.0.1"
+    ? "`latest.json`, `tools4devs-updates.json`, `*.sig`"
+    : "`latest.json`, `*.sig`";
+
 // ── 4. Stage ────────────────────────────────────────────────────────────
 step(`Staging Releases/${version}`);
 const out = at("Releases", version);
@@ -143,13 +152,13 @@ ${notes}
 | \`${setup}\` | Installer (recommended) |
 | \`${msi}\` | MSI, for managed deployment |
 | \`${portable}\` | Portable, unzip and run |
-| \`tools4devs-updates.json\`, \`tools4devs.json\`, \`latest.json\`, \`*.sig\` | Needed for automatic updates |
+| ${updateFiles} | Needed for automatic updates |
 
 Windows x64 only. SHA-256 checksums are in \`checksums.txt\`. The portable build doesn't update itself. SmartScreen warns on first run because the installer isn't code-signed.
 
 ${newKeyNote}
 
-${version === "3.4.0" ? "This is the required bridge to the new update channel. Older installed versions update to 3.4.0 first; after a restart, 3.4.0 checks tools4devs.json and can offer 4.0.0 or newer. The user restarts again to finish that update. Version 4.0.0 migrates the active identity and saved data. The old profile remains for recovery; downloaded components are copied to the new store, and the old component directory may be removed with the previous installation. Keep these exact signed v3.4.0 assets available." : Number(version.split(".")[0]) >= 5 ? "Upload all three manifests. tools4devs-updates.json advertises this release to clients of the new key; tools4devs.json stays at 4.0.0 and latest.json at the 3.4.0 bridge, for clients that can only verify the original key. Keep the v3.4.0 and v4.0.0 assets available." : "Older clients first install the signed 3.4.0 bridge, then check the tools4devs channel for this version. latest.json intentionally stays at 3.4.0; tools4devs.json advertises this release. Keep every v3.4.0 asset available and upload both manifests here."}
+${unified ? (version === "5.0.1" ? "Upload latest.json and tools4devs-updates.json. From this version the app reads latest.json alone; tools4devs-updates.json is here once more so that 5.0.0 can find this release, and the next release publishes latest.json only. Installations older than 5.0.0 do not read either file and need the installer once." : "Upload latest.json: it is the only update manifest. Installations older than 5.0.1 do not read it and need the installer once.") : version === "3.4.0" ? "This is the required bridge to the new update channel. Older installed versions update to 3.4.0 first; after a restart, 3.4.0 checks tools4devs.json and can offer 4.0.0 or newer. The user restarts again to finish that update. Version 4.0.0 migrates the active identity and saved data. The old profile remains for recovery; downloaded components are copied to the new store, and the old component directory may be removed with the previous installation. Keep these exact signed v3.4.0 assets available." : Number(version.split(".")[0]) >= 5 ? "Upload all three manifests. tools4devs-updates.json advertises this release to clients of the new key; tools4devs.json stays at 4.0.0 and latest.json at the 3.4.0 bridge, for clients that can only verify the original key. Keep the v3.4.0 and v4.0.0 assets available." : "Older clients first install the signed 3.4.0 bridge, then check the tools4devs channel for this version. latest.json intentionally stays at 3.4.0; tools4devs.json advertises this release. Keep every v3.4.0 asset available and upload both manifests here."}
 `,
 );
 

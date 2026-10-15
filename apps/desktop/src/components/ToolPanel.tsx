@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Check, CircleSlash, FilePlus2, FolderOpen, Play } from "lucide-react";
+import { AlertTriangle, Check, CircleSlash, Download, FilePlus2, FolderOpen, Play } from "lucide-react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import type { CatalogTool } from "../catalog/catalog";
+import { downloadSize, formatBytes } from "../catalog/sizes";
+import type { InstallationState } from "../../../../scripts/component-installation/installation-state.mjs";
 import { findJob, type ToolJob } from "../domain/job-queue";
 import { isNativeHost, type OperationRequest } from "../hooks/useOperationRunner";
 import { FilePreview, previewKind } from "./FilePreview";
@@ -38,12 +40,20 @@ type ToolPanelProps = {
   onRun?: (input: RunOperationInput) => string;
   /** Stops the job this panel started, without leaving the panel. */
   onCancel?: (jobId: string) => void;
+  /** Whether the tool is on this machine. A tool opened from the sidebar or the search can be one that is not. */
+  installation?: InstallationState;
+  /** Opens the download for a tool that is not installed; absent for tools that cannot be fetched. */
+  onInstall?: () => void;
 };
 
 type SelectedFile = { name: string; path: string };
 
-export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths, jobs = [], defaultFolder = "", onRun, onCancel, onDirtyChange }: ToolPanelProps) {
+export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths, jobs = [], defaultFolder = "", onRun, onCancel, onDirtyChange, installation, onInstall }: ToolPanelProps) {
   const t = useT();
+  // Running a tool that is not installed only fails, with the cause buried in the history,
+  // so the panel offers the download instead of a button that cannot work.
+  const needsInstall = Boolean(onInstall) && installation !== undefined && installation.availability !== "ready";
+  const downloadBytes = downloadSize(tool.id);
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>(() =>
     initialPath && ![...urlTools, ...folderTools].includes(tool.id)
       ? [{ path: initialPath, name: fileNameOnly(initialPath) }]
@@ -369,6 +379,14 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
                     <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden="true" />{" "}
                     {t("The job failed. Your original file was left untouched.")}
                   </>
+                ) : needsInstall ? (
+                  <>
+                    <Download className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />{" "}
+                    {t("{name} downloads once, the first time you use it ({size}).", {
+                      name: tool.integrationName,
+                      size: downloadBytes ? formatBytes(downloadBytes) : "",
+                    })}
+                  </>
                 ) : canRun ? (
                   readyHint(tool.id, selectedOperationId, t)
                 ) : (
@@ -380,6 +398,10 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
           {isRunning && onCancel && currentJobId ? (
             <Button variant="outline" className="w-full" onClick={() => onCancel(currentJobId)}>
               <CircleSlash aria-hidden="true" /> {t("Stop")}
+            </Button>
+          ) : needsInstall ? (
+            <Button className="w-full" onClick={onInstall}>
+              <Download aria-hidden="true" /> {t("Get {name}", { name: tool.integrationName })}
             </Button>
           ) : (
             <Button className="w-full" disabled={!canRun || isRunning} onClick={() => void startOperation()}>

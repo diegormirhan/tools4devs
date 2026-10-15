@@ -1,7 +1,11 @@
 /**
- * Writes the update manifests: tools4devs-updates.json for clients of the current
- * signing key, tools4devs.json frozen at 4.0.0 for clients of the lost original key,
- * and latest.json frozen at the 3.4.0 bridge for the oldest clients.
+ * Writes the update manifests. From 5.0.1 that is latest.json alone: the manifest of the
+ * release being built, which 5.0.1 and every later version read. The release that bridges
+ * to it, 5.0.1, also writes tools4devs-updates.json, the name 5.0.0 reads, so 5.0.0 can find it.
+ *
+ * Before that: tools4devs-updates.json for clients of the current signing key,
+ * tools4devs.json frozen at 4.0.0 for clients of the lost original key, and latest.json frozen
+ * at the 3.4.0 bridge for the oldest clients.
  *
  * The updater asks one address for a small document naming the newest version
  * and where to get it, and refuses anything whose signature does not match the
@@ -16,7 +20,7 @@
  * Every file belongs in every GitHub release: each installed version reads one of
  * them from the latest release, and must keep finding it there.
  */
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { releaseManifests } from "./update-channels.mjs";
@@ -53,6 +57,19 @@ const manifests = releaseManifests(
   lastOldKey,
 );
 const serialize = (manifest) => `${JSON.stringify(manifest, null, 2)}\n`;
+if (manifests.latest) {
+  writeFileSync(path.join(directory, "latest.json"), serialize(manifests.latest), "utf8");
+  // A folder staged by an earlier build of this version may still hold the retired channels;
+  // uploading one of them would put a manifest back that nothing reads.
+  rmSync(path.join(directory, "tools4devs.json"), { force: true });
+  if (!manifests.updates) rmSync(path.join(directory, "tools4devs-updates.json"), { force: true });
+  if (manifests.updates) {
+    writeFileSync(path.join(directory, "tools4devs-updates.json"), serialize(manifests.updates), "utf8");
+  }
+  console.log(`latest.json: ${manifests.latest.version}${manifests.updates ? "; tools4devs-updates.json: " + manifests.updates.version : ""}`);
+  console.log(`  url: ${manifests.current.platforms["windows-x86_64"].url}`);
+  process.exit(0);
+}
 writeFileSync(path.join(directory, "latest.json"), serialize(manifests.legacy), "utf8");
 if (manifests.oldKey) {
   writeFileSync(path.join(directory, "tools4devs.json"), serialize(manifests.oldKey), "utf8");

@@ -122,15 +122,16 @@ cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --lib -- --ignored 
 
 ## Upgrade compatibility
 
-Each installed version reads one manifest from the latest GitHub release, so every release carries all three:
+Each installed version reads one manifest from the latest GitHub release. From 5.0.1 that is `latest.json` alone, and each release publishes only that file. 5.0.1 also publishes `tools4devs-updates.json` once, the name 5.0.0 reads, so that 5.0.0 can find it; the release after 5.0.1 does not.
 
-| Manifest | Advertises | Read by |
+| Installed version | Reads | Status |
 | --- | --- | --- |
-| `tools4devs-updates.json` | the current release | 5.0.0 and later, signed with the current key |
-| `tools4devs.json` | 4.0.0, frozen | 3.4.0 to 4.0.0, which trust only the original key |
-| `latest.json` | 3.4.0, frozen | ToolHaven 2.1.0 to 3.3.0, which stop at the 3.4.0 bridge |
+| 5.0.1 and later | `latest.json` | updates itself |
+| 5.0.0 | `tools4devs-updates.json` | updates itself to 5.0.1, which is the last release to publish that file |
+| 3.4.0 to 4.0.0 | `tools4devs.json` | no longer published; install the current version once by hand |
+| ToolHaven 2.1.0 to 3.3.0 | `latest.json` | reads a manifest it cannot verify; install the current version once by hand |
 
-The original signing key was lost after 4.0.0, so 5.0.0 starts a new key and channel; older versions keep seeing the last release they can verify instead of an update they would reject. See [the Windows upgrade contract](apps/desktop/src-tauri/installer/README.md) before changing the channels or data identities.
+The original signing key was lost after 4.0.0, so installed versions up to 4.0.0 could not update to 5.x through the updater anyway. See [the Windows upgrade contract](apps/desktop/src-tauri/installer/README.md) before changing the channels or data identities.
 
 ## Screenshots
 

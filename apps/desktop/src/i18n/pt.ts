@@ -782,6 +782,7 @@ export const portuguese: Record<string, string> = {
   "Drag the rectangle to choose what survives.": "Arraste o retângulo para escolher o que fica.",
   "Edge": "Edge",
   "Effort": "Esforço",
+  "{name} downloads once, the first time you use it ({size}).": "O {name} é baixado uma vez, na primeira vez que você usa ({size}).",
   "Loss": "Perda",
   "None — same pixels, rewritten smarter": "Nenhuma — mesmos pixels, regravado de forma mais eficiente",
   "Light — hard to spot": "Leve — difícil de notar",

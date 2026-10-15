@@ -57,7 +57,7 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/diegormirhan/tools4devs/releases/latest/download/tools4devs-updates.json"
+        "https://github.com/diegormirhan/tools4devs/releases/latest/download/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk1MDdDQjgxMDlCQzkyMDEKUldRQmtyd0pnY3NIbGZmMUYxWHdVdzVBZEYxU2MxWUdnR2RWTXBpNFVQUEZjdG9KQnVKZ3JwNUsK",
       "windows": {
