@@ -354,13 +354,13 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
 
         <section
           aria-labelledby="tool-summary-title"
-          className="grid min-w-0 gap-4 rounded-xl border bg-card p-6 text-card-foreground shadow-xs lg:sticky lg:top-4"
+          className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4 rounded-xl border bg-card p-6 text-card-foreground shadow-xs lg:sticky lg:top-4"
         >
           <div className="grid gap-1">
             <h2 id="tool-summary-title" className="font-heading text-lg font-semibold">{t("Summary")}</h2>
             <p className="text-sm text-muted-foreground">{t("Nothing leaves your computer.")}</p>
           </div>
-          <div className="grid gap-2 text-sm" aria-live="polite">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-2 text-sm" aria-live="polite">
             {isRunning ? (
               <>
                 <div className="flex justify-between gap-3">

@@ -2,6 +2,12 @@
 
 All notable changes to tools4devs. Versions follow [semantic versioning](https://semver.org/).
 
+## 5.0.5 (2026-10-16)
+
+### Fixed
+
+- The progress bar and the progress line of a download no longer run past the edge of the Summary card: a long line made the card's contents wider than the card.
+
 ## 5.0.4 (2026-10-16)
 
 ### Changed

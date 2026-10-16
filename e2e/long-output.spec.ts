@@ -52,3 +52,46 @@ test.describe("a download that leaves a long log", () => {
     expect(logBox!.x + logBox!.width).toBeLessThanOrEqual(summaryBox!.x);
   });
 });
+
+// The Summary card is a fixed 320 px column in a wide window; what it holds must stay inside it.
+test.describe("a long progress line in a wide window", () => {
+  test.use({ host: { available: bundled, ...files, progressMessage: progressLine, stepMs: 600 }, viewport: { width: 1280, height: 900 } });
+
+  test("keeps the progress line and the bar inside the Summary card", async ({ page }) => {
+    const tool = await startJob(page);
+    const summary = tool.getByRole("region", { name: "Summary" });
+    await expect(summary.getByText(/87\.5% of/)).toBeVisible();
+
+    const card = (await summary.boundingBox())!;
+    for (const part of [summary.getByRole("progressbar"), summary.getByText(/87\.5% of/), summary.getByRole("button", { name: "Stop" })]) {
+      const box = (await part.boundingBox())!;
+      expect(box.x + box.width, "right edge").toBeLessThanOrEqual(card.x + card.width);
+      expect(box.x, "left edge").toBeGreaterThanOrEqual(card.x);
+    }
+  });
+});
+
+test.describe("the same long lines in the Queue and the History", () => {
+  test.use({ host: { available: bundled, ...files, progressMessage: progressLine, stdout: log, stepMs: 700 }, viewport: { width: 900, height: 900 } });
+
+  test("stay inside their cards and never widen the page", async ({ page }) => {
+    await startJob(page);
+    const noSideScroll = () =>
+      page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+
+    await page.getByRole("button", { name: /^Queue/ }).click();
+    const job = page.getByRole("article", { name: "Rotate pages — Organise PDFs" });
+    await expect(job.getByText(/87\.5% of/)).toBeVisible();
+    const card = (await job.boundingBox())!;
+    const line = (await job.getByText(/87\.5% of/).boundingBox())!;
+    expect(line.x + line.width).toBeLessThanOrEqual(card.x + card.width);
+    expect(await noSideScroll()).toBeLessThanOrEqual(0);
+
+    await page.getByRole("button", { name: "History", exact: true }).click();
+    const entry = page.getByRole("article", { name: "Rotate pages — Organise PDFs" });
+    await expect(entry).toContainText("Done");
+    const entryBox = (await entry.boundingBox())!;
+    expect(entryBox.x + entryBox.width).toBeLessThanOrEqual(900);
+    expect(await noSideScroll()).toBeLessThanOrEqual(0);
+  });
+});
