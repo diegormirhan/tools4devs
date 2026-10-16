@@ -55,6 +55,8 @@ function Shell() {
   );
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [pendingTool, setPendingTool] = useState<CatalogTool | null>(null);
+  // Whether the download was asked for from inside a tool's page, which then stays where it is.
+  const [installReturns, setInstallReturns] = useState(false);
   const [pendingFile, setPendingFile] = useState<string | null>(null);
   const [fileMessage, setFileMessage] = useState("");
   const installations = useInstallationState();
@@ -97,7 +99,7 @@ function Shell() {
   const sidebarCollapsed = sidebarChoice ? sidebarChoice === "collapsed" : narrowWindow;
   const setSidebarCollapsed = (collapsed: boolean) => setSidebarChoice(collapsed ? "collapsed" : "expanded");
 
-  const installationPlan = pendingTool ? installations.planInstallation(pendingTool.id) : [];
+  const installationPlan = pendingTool ? installations.planInstallation(pendingTool.engine ?? pendingTool.id) : [];
   const pinnedToolIds = useMemo(
     () => new Set(toolManifest.tools.filter((tool) => tool.status === "downloadable").map((tool) => tool.id)),
     [],
@@ -153,8 +155,9 @@ function Shell() {
     }
   }
 
-  function requestInstallation(tool: CatalogTool) {
+  function requestInstallation(tool: CatalogTool, returns = false) {
     setPendingTool(tool);
+    setInstallReturns(returns);
   }
 
   function runToolOperation(input: RunOperationInput): string {
@@ -187,11 +190,12 @@ function Shell() {
               plan={installationPlan}
               labelsById={labelsById}
               states={installations.states}
-              canInstall={pinnedToolIds.has(pendingTool.id)}
-              onInstall={() => void installations.installTool(pendingTool.id)}
+              canInstall={pinnedToolIds.has(pendingTool.engine ?? pendingTool.id)}
+              onInstall={() => void installations.installTool(pendingTool.engine ?? pendingTool.id)}
+              returning={installReturns}
               onOpen={() => {
                 setPendingTool(null);
-                openTool(pendingTool);
+                if (!installReturns) openTool(pendingTool);
               }}
               onClose={() => setPendingTool(null)}
             />
@@ -236,8 +240,14 @@ function Shell() {
             defaultFolder={defaultFolder}
             onRun={runToolOperation}
             onCancel={runner.cancelOperation}
-            installation={installations.states[openedTool.id]}
-            onInstall={pinnedToolIds.has(openedTool.id) ? () => requestInstallation(openedTool) : undefined}
+            installations={Object.fromEntries(
+              Object.entries(installations.states).filter(([toolId]) => pinnedToolIds.has(toolId)),
+            )}
+            labels={labelsById}
+            onInstall={(toolId) => {
+              const target = toolsById.get(toolId);
+              if (target) requestInstallation(target, true);
+            }}
           />
         )
       ) : location.view === "catalog" ? (

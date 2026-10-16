@@ -32,6 +32,8 @@ export const toolAccepts: Record<string, FormatFamily[]> = {
   // rather than letting them claim a file they cannot read.
   ...Object.fromEntries(utilityGroupIds.map((id) => [id, ["any"] as FormatFamily[]])),
   ffmpeg: ["video", "audio"],
+  // The same program, under the name of what it works on.
+  audio: ["audio", "video"],
   ffprobe: ["video", "audio"],
   mkvtoolnix: ["video"],
   libvips: ["image"],
@@ -43,7 +45,8 @@ export const toolAccepts: Record<string, FormatFamily[]> = {
   songrec: ["audio", "video"],
   imagemagick: ["image", "pdf"],
   oxipng: ["image"],
-  gifsicle: ["gif"],
+  // The GIF card starts from a video as often as from a GIF; each of its operations says which.
+  gifsicle: ["gif", "video"],
   exiftool: ["image", "video", "audio", "pdf", "document"],
   qpdf: ["pdf"],
   poppler: ["pdf"],
@@ -76,6 +79,7 @@ export const operationExtensions: Record<string, string[]> = {
   "libvips/upscale-model": ["jpg", "jpeg", "png", "webp"],
   // A GIF is an image to the catalog, and the video tools read video: only this operation takes one.
   "ffmpeg/gif-to-video": ["gif"],
+  "gifsicle/compress": ["gif"],
   // The card reads video and audio; converting audio is for audio files only.
   "ffmpeg/convert-audio": familyExtensions.audio,
 };
@@ -87,11 +91,6 @@ export const operationExtensions: Record<string, string[]> = {
  * optimising a PNG, has nothing to choose.
  */
 export const operationFormats: Record<string, { label: string; formats: string[]; default: string }> = {
-  "ffmpeg/convert": {
-    label: "Convert to",
-    formats: ["mp4", "mkv", "webm", "mov", "avi"],
-    default: "mp4",
-  },
   "ffmpeg/extract-audio": {
     label: "Audio format",
     formats: ["mp3", "m4a", "wav", "flac", "opus", "ogg"],

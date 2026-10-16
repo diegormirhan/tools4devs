@@ -112,7 +112,9 @@ test.describe("a job that fails", () => {
 });
 
 test.describe("installing a tool", () => {
-  test.use({ host: { available: bundled, stepMs: 400 } });
+  // Each phase lasts long enough for the check below to land inside the one it looks for: the
+  // 50% shows for a single step, and a check that polls every few hundred milliseconds can step over it.
+  test.use({ host: { available: bundled, stepMs: 1000 } });
 
   test("UC-04: the plan shows its size first, nothing downloads before the click, and the tool opens after", async ({ page }) => {
     await page.goto("/");

@@ -40,20 +40,21 @@ type ToolPanelProps = {
   onRun?: (input: RunOperationInput) => string;
   /** Stops the job this panel started, without leaving the panel. */
   onCancel?: (jobId: string) => void;
-  /** Whether the tool is on this machine. A tool opened from the sidebar or the search can be one that is not. */
-  installation?: InstallationState;
-  /** Opens the download for a tool that is not installed; absent for tools that cannot be fetched. */
-  onInstall?: () => void;
+  /**
+   * Which downloadable tools are on this machine. A tool opened from the sidebar or the search can be
+   * one that is not, and a card can hold operations that run on another tool than its own.
+   */
+  installations?: Record<string, InstallationState>;
+  /** Display names by tool id, for naming the tool a download is for. */
+  labels?: Record<string, string>;
+  /** Opens the download of a tool that is not installed. */
+  onInstall?: (toolId: string) => void;
 };
 
 type SelectedFile = { name: string; path: string };
 
-export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths, jobs = [], defaultFolder = "", onRun, onCancel, onDirtyChange, installation, onInstall }: ToolPanelProps) {
+export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths, jobs = [], defaultFolder = "", onRun, onCancel, onDirtyChange, installations, labels, onInstall }: ToolPanelProps) {
   const t = useT();
-  // Running a tool that is not installed only fails, with the cause buried in the history,
-  // so the panel offers the download instead of a button that cannot work.
-  const needsInstall = Boolean(onInstall) && installation !== undefined && installation.availability !== "ready";
-  const downloadBytes = downloadSize(tool.id);
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>(() =>
     initialPath && ![...urlTools, ...folderTools].includes(tool.id)
       ? [{ path: initialPath, name: fileNameOnly(initialPath) }]
@@ -70,6 +71,15 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
 
   const selectedOperation = tool.operations.find((operation) => operation.id === selectedOperationId);
+  // The program that runs the chosen operation. Everything about the operation (what it reads,
+  // what it writes, its options) is known under that program's name, and so is the request.
+  const engine = selectedOperation?.runsOn ?? tool.engine ?? tool.id;
+  // Running a tool that is not installed only fails, with the cause buried in the history,
+  // so the panel offers the download instead of a button that cannot work.
+  const engineState = installations?.[engine];
+  const needsInstall = Boolean(onInstall) && engineState !== undefined && engineState.availability !== "ready";
+  const engineName = labels?.[engine] ?? tool.integrationName;
+  const downloadBytes = downloadSize(engine);
   /**
    * Where this will be saved without asking, when a default folder is set.
    *
@@ -83,8 +93,8 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
   // extension.
   const hasSource = selectedFiles.length > 0 || sourceUrl.trim().length > 0;
   const automaticOutput =
-    defaultFolder && hasSource && requiresOutput(tool.id, selectedOperationId)
-      ? writesToDirectory(tool.id, selectedOperationId)
+    defaultFolder && hasSource && requiresOutput(engine, selectedOperationId)
+      ? writesToDirectory(engine, selectedOperationId)
         ? defaultFolder
         : startingPath()
       : "";
@@ -99,7 +109,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
   // The crop rectangle is not separate state: it is the same four options the
   // fields write, read back. Two sources would drift the moment one is edited.
   const cropsVisually =
-    selectedOperationId === "crop" && (tool.id === "libvips" || tool.id === "ffmpeg");
+    selectedOperationId === "crop" && (engine === "libvips" || engine === "ffmpeg");
   const crop: CropRect | null = cropsVisually
     ? {
         left: Number(operationOptions.left ?? 0),
@@ -113,7 +123,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
   function admitFiles(paths: string[]): SelectedFile[] {
     const rejected: string[] = [];
     const admitted = paths.filter((path) => {
-      const verdict = acceptsFile(tool.id, path, selectedOperationId);
+      const verdict = acceptsFile(engine, path, selectedOperationId);
       if (!verdict.ok) rejected.push(verdict.reason);
       return verdict.ok;
     });
@@ -150,7 +160,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
 
   // A conversion should say what it produces, instead of leaving it to whatever
   // extension the user types into the save dialog.
-  const formatChoice = operationFormats[`${tool.id}/${selectedOperationId}`];
+  const formatChoice = operationFormats[`${engine}/${selectedOperationId}`];
   const targetFormat = operationOptions.format || formatChoice?.default || "";
 
   const previewable = previewKind(selectedFiles[0]?.path) !== "none";
@@ -288,7 +298,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
                   })
                   .catch(handleFormError);
               }}
-              toolId={tool.id}
+              toolId={engine}
               operationId={selectedOperationId}
               values={operationOptions}
               onChange={(key, value) => {
@@ -307,7 +317,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
               }}
             />
 
-            {requiresOutput(tool.id, selectedOperationId) && (
+            {requiresOutput(engine, selectedOperationId) && (
               <div className="flex items-center justify-between gap-4">
                 <span className="grid min-w-0 gap-0.5">
                   <strong className="text-sm font-medium">{t("Destination")}</strong>
@@ -383,7 +393,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
                   <>
                     <Download className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />{" "}
                     {t("{name} downloads once, the first time you use it ({size}).", {
-                      name: tool.integrationName,
+                      name: engineName,
                       size: downloadBytes ? formatBytes(downloadBytes) : "",
                     })}
                   </>
@@ -400,8 +410,8 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
               <CircleSlash aria-hidden="true" /> {t("Stop")}
             </Button>
           ) : needsInstall ? (
-            <Button className="w-full" onClick={onInstall}>
-              <Download aria-hidden="true" /> {t("Get {name}", { name: tool.integrationName })}
+            <Button className="w-full" onClick={() => onInstall?.(engine)}>
+              <Download aria-hidden="true" /> {t("Get {name}", { name: engineName })}
             </Button>
           ) : (
             <Button className="w-full" disabled={!canRun || isRunning} onClick={() => void startOperation()}>
@@ -494,7 +504,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
     const suggested = suggestedOutputName(
       selectedFiles[0]?.path,
       selectedOperationId,
-      tool.id,
+      engine,
       operationOptions,
     );
     if (!defaultFolder) return suggested;
@@ -504,7 +514,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
 
   async function chooseNativeOutput() {
     if (!isNativeHost()) return;
-    if (writesToDirectory(tool.id, selectedOperationId)) {
+    if (writesToDirectory(engine, selectedOperationId)) {
       const selected = await open({ directory: true, multiple: false });
       if (typeof selected === "string") setOutputPath(selected);
       return;
@@ -521,10 +531,10 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
     try {
       const resolvedOutput =
         effectiveOutput ||
-        (isNativeHost() && requiresOutput(tool.id, selectedOperationId) ? await pickOutputForOperation() : "");
+        (isNativeHost() && requiresOutput(engine, selectedOperationId) ? await pickOutputForOperation() : "");
       const jobId = onRun?.({
         request: {
-          toolId: tool.id,
+          toolId: engine,
           operationId: selectedOperationId,
           inputPaths: selectedFiles.map((file) => file.path),
           outputPath: resolvedOutput || null,
@@ -542,7 +552,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
   }
 
   async function pickOutputForOperation() {
-    if (writesToDirectory(tool.id, selectedOperationId)) {
+    if (writesToDirectory(engine, selectedOperationId)) {
       const selected = await open({ directory: true, multiple: false });
       if (typeof selected !== "string") throw new Error(t("Choose a destination folder to continue."));
       setOutputPath(selected);
@@ -1027,7 +1037,6 @@ function outputExtension(toolId: string, operationId: string, originalExtension:
     "7zip/compress": ".zip",
     "pandoc/convert": ".html",
     "ffmpeg/extract-audio": ".mp3",
-    "ffmpeg/convert": ".mp4",
     "ffmpeg/compress": ".mp4",
     "ffmpeg/trim": ".mp4",
     "ffmpeg/resize": ".mp4",

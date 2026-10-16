@@ -68,7 +68,7 @@ describe("finding a tool in the sidebar and the search", () => {
     await user.keyboard("{Control>}k{/Control}");
     await user.keyboard("extract au{Enter}");
 
-    const panel = screen.getByRole("region", { name: "Convert media" });
+    const panel = screen.getByRole("region", { name: "Audio" });
     expect(within(panel).getByRole("combobox", { name: "Operation" })).toHaveTextContent("Extract audio");
     expect(item(/^Video and audio/)).toHaveAttribute("aria-expanded", "true");
     expect(item("Extract audio")).toHaveAttribute("aria-current", "page");
@@ -84,15 +84,15 @@ describe("finding a tool in the sidebar and the search", () => {
     expect(item(/^Video and audio/)).toHaveAttribute("aria-expanded", "true");
 
     await user.keyboard("{ArrowDown}");
-    expect(item("Convert media")).toHaveFocus();
+    expect(item("Video")).toHaveFocus();
     await user.keyboard("{ArrowRight}");
     await user.keyboard("{ArrowDown}");
-    expect(item("Convert format")).toHaveFocus();
+    expect(item("Compress video")).toHaveFocus();
     await user.keyboard("{ArrowLeft}");
-    expect(item("Convert media")).toHaveFocus();
+    expect(item("Video")).toHaveFocus();
 
     await user.keyboard("{Enter}");
-    expect(screen.getByRole("region", { name: "Convert media" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "Video" })).toBeVisible();
   });
 
   it("lists five sub-tools of a long tool and the rest on request", async () => {
@@ -100,12 +100,12 @@ describe("finding a tool in the sidebar and the search", () => {
     const user = userEvent.setup();
 
     await user.click(item(/^Video and audio/));
-    await user.click(item("Convert media"));
+    await user.click(item("Video"));
     await user.keyboard("{Escape}");
 
-    expect(within(tree()).queryByRole("treeitem", { name: "Extract audio" })).not.toBeInTheDocument();
-    await user.click(item("11 more…"));
-    expect(item("Extract audio")).toBeVisible();
+    expect(within(tree()).queryByRole("treeitem", { name: "Remove audio" })).not.toBeInTheDocument();
+    await user.click(item("5 more…"));
+    expect(item("Remove audio")).toBeVisible();
   });
 
   it("pins a tool to the top of the sidebar, across restarts", async () => {

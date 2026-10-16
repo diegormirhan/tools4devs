@@ -116,7 +116,7 @@ export function CatalogView({
                 key={tool.id}
                 tool={tool}
                 row={row}
-                installation={installations[tool.id] ?? builtIn}
+                installation={installations[tool.engine ?? tool.id] ?? builtIn}
                 onOpen={onOpen}
                 onInstall={onInstall}
                 previewing={previewingId === tool.id}

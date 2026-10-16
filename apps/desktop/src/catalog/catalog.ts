@@ -4,9 +4,11 @@ import {
   Braces,
   Calculator,
   ChartColumn,
+  AudioLines,
   Clapperboard,
   Download,
   FileJson,
+  FileImage,
   FileOutput,
   FileText,
   FileType,
@@ -23,7 +25,6 @@ import {
   ScanSearch,
   ScanText,
   Search,
-  Shrink,
   Sparkles,
   Table,
   Tag,
@@ -37,10 +38,25 @@ import type { InstallationState } from "../../../../scripts/component-installati
 
 export type ToolAccent = "action" | "cool" | "amber" | "neutral";
 
-export type ToolOperation = { id: string; label: string; description: string };
+export type ToolOperation = {
+  id: string;
+  label: string;
+  description: string;
+  /**
+   * The tool that does this one, when it is not the card's own. A card is organised by what the
+   * person wants done, so the GIF card holds the jobs that start from a video and the one that
+   * starts from a GIF, and each runs on the program that can do it.
+   */
+  runsOn?: string;
+};
 
 export type CatalogTool = {
   id: string;
+  /**
+   * The downloadable tool this card runs on, when the card is named for what you work on and not
+   * for a program: the Audio card is FFmpeg, like the Video card, and is ready when FFmpeg is.
+   */
+  engine?: string;
   integrationName: string;
   title: string;
   description: string;
@@ -256,14 +272,26 @@ const presentationById: Record<string, ToolPresentation> = {
   },
   gifsicle: {
     id: "gifsicle",
-    icon: Shrink,
+    icon: FileImage,
     preview: { src: "/previews/gifsicle.webm", poster: "/previews/gifsicle.jpg" },
-    title: "Compress GIFs",
-    description: "Make animated GIFs much smaller, with the loss dialled in.",
+    title: "GIFs",
+    description: "Make a GIF from a video, turn one back into a video, or make it smaller.",
     category: "images",
     accent: "cool",
     size: "standard",
     operations: [
+      {
+        id: "to-gif",
+        label: "Video to GIF",
+        description: "Turn an MP4, MOV or any video clip into an animated GIF or WebP: pick the start, length, size and speed.",
+        runsOn: "ffmpeg",
+      },
+      {
+        id: "gif-to-video",
+        label: "GIF to video",
+        description: "Turn an animated GIF into a small MP4 or WebM.",
+        runsOn: "ffmpeg",
+      },
       {
         id: "compress",
         label: "Compress GIF",
@@ -273,6 +301,7 @@ const presentationById: Record<string, ToolPresentation> = {
     keywords: [
       "gif", "animated", "animation", "compress", "shrink", "smaller", "reduce", "size",
       "optimise", "optimize", "lossy", "colors", "colours", "meme", "sticker",
+      "mp4", "mov", "video", "webp", "convert", "mp4 to gif", "gif to mp4",
     ],
     downloadLabel: "In-app download",
   },
@@ -339,34 +368,50 @@ const presentationById: Record<string, ToolPresentation> = {
     id: "ffmpeg",
     icon: Clapperboard,
     preview: { src: "/previews/ffmpeg.webm", poster: "/previews/ffmpeg.jpg" },
-    title: "Convert media",
-    description: "Convert video, audio and GIFs, compress, resize, trim, and more.",
+    title: "Video",
+    description: "Compress, trim, resize, crop and rotate video clips, or change their speed.",
     category: "downloads",
     accent: "cool",
     size: "standard",
     operations: [
-      { id: "convert", label: "Convert format", description: "Re-encode into another container." },
-      { id: "compress", label: "Compress media", description: "Shrink it, choosing compatibility or size." },
+      { id: "compress", label: "Compress video", description: "Shrink it, choosing compatibility or size." },
       { id: "trim", label: "Trim a section", description: "Set start and end, avoiding a re-encode where possible." },
       { id: "resize", label: "Resize video", description: "Scale to a width, keeping the aspect ratio." },
       { id: "crop", label: "Crop video", description: "Keep a rectangle of the frame." },
       { id: "rotate", label: "Rotate video", description: "Turn by a quarter, half or three quarters." },
       { id: "change-speed", label: "Change speed", description: "Speed up or slow down, audio included." },
       { id: "fps", label: "Change frame rate", description: "Re-time to a different frame rate." },
-      { id: "extract-audio", label: "Extract audio", description: "Write an audio file from the video." },
-      { id: "convert-audio", label: "Convert audio", description: "Change an audio file to MP3, WAV, FLAC and the like." },
       { id: "remove-audio", label: "Remove audio", description: "Drop the sound without touching the picture." },
-      { id: "normalize-audio", label: "Normalise loudness", description: "Even out the volume to broadcast levels." },
-      { id: "to-gif", label: "Video to GIF", description: "Turn an MP4, MOV or any video clip into an animated GIF or WebP: pick the start, length, size and speed." },
-      { id: "gif-to-video", label: "GIF to video", description: "Turn an animated GIF into a small MP4 or WebM." },
       { id: "thumbnail", label: "Grab a frame", description: "Save a single frame as an image." },
       { id: "contact-sheet", label: "Contact sheet", description: "A grid of frames in one image." },
     ],
     keywords: [
-      "video", "audio", "convert", "compress", "trim", "transcode", "resize",
-      "crop", "rotate", "speed", "fps", "gif", "thumbnail", "frame", "mute",
-      "loudness", "normalise", "normalize", "mp4", "mkv", "webm", "mp3",
-      "mov", "avi", "webp", "wav", "flac", "ogg", "aac", "m4a", "opus", "audio converter", "video converter",
+      "video", "compress", "trim", "resize",
+      "crop", "rotate", "speed", "fps", "thumbnail", "frame", "mute",
+      "mp4", "mkv", "webm", "mov", "avi",
+    ],
+    downloadLabel: "In-app download",
+  },
+  audio: {
+    id: "audio",
+    // The same program as the video card: it is the card's work, not its name.
+    engine: "ffmpeg",
+    icon: AudioLines,
+    preview: { src: "/previews/audio.webm", poster: "/previews/audio.jpg" },
+    title: "Audio",
+    description: "Convert a song to another format, trim it, or pull the sound out of a video.",
+    category: "downloads",
+    accent: "cool",
+    size: "standard",
+    operations: [
+      { id: "convert-audio", label: "Convert audio", description: "Change an audio file to MP3, WAV, FLAC and the like." },
+      { id: "extract-audio", label: "Extract audio", description: "Write an audio file from the video." },
+      { id: "trim", label: "Trim audio", description: "Keep a section of the song, from a start to an end." },
+      { id: "normalize-audio", label: "Normalise loudness", description: "Even out the volume to broadcast levels." },
+    ],
+    keywords: [
+      "audio", "music", "song", "sound", "convert", "trim", "cut", "extract", "loudness", "normalise",
+      "normalize", "mp3", "wav", "flac", "ogg", "aac", "m4a", "opus", "audio converter",
     ],
     downloadLabel: "In-app download",
   },
@@ -598,7 +643,7 @@ const rowDefinitions = [
     hue: 255,
     title: "Video and audio",
     description: "Convert, compress, trim, inspect — and name what is playing.",
-    toolIds: ["ffmpeg", "ffprobe", "songrec", "mkvtoolnix"],
+    toolIds: ["ffmpeg", "audio", "ffprobe", "songrec", "mkvtoolnix"],
   },
   {
     id: "downloads",
@@ -676,8 +721,8 @@ export function createCatalogRows(): CatalogRow[] {
     icon: row.icon,
     hue: row.hue,
     tools: row.toolIds.map((toolId) => {
-      const manifestTool = manifestTools.get(toolId);
       const presentation = presentationById[toolId];
+      const manifestTool = manifestTools.get(presentation?.engine ?? toolId);
 
       if (!presentation) {
         throw new Error(`Missing catalog presentation for ${toolId}`);

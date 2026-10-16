@@ -183,7 +183,7 @@ const chapter = (label, caption) => timeline.chapters.push({ t: Date.now() / 100
 // - A dropdown near the bottom of a modal is clipped; scroll before opening.
 async function scene() {
   chapter("catalog", "25 ferramentas open source, <b>organizadas pelo que você quer fazer</b>");
-  await hover(cardArt("Converter mídia")); await sleep(700);
+  await hover(cardArt("Vídeo")); await sleep(700);
   await hover(cardArt("Identificar a música")); await sleep(600);
   await scroll(520); await sleep(500); await scroll(-520); await sleep(300);
 

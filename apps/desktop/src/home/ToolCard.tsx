@@ -48,7 +48,7 @@ export function ToolCard({ tool, row, installation, onOpen, onInstall, previewin
   const isReady = installation.availability === "ready";
   const isBusy = installation.phase !== "idle";
   const progress = installation.progress == null ? null : Math.round(installation.progress * 100);
-  const size = downloadSize(tool.id);
+  const size = downloadSize(tool.engine ?? tool.id);
   const act = () => (isReady ? onOpen(tool) : onInstall(tool));
   const hue = { "--hue": row.hue } as CSSProperties;
 
@@ -91,7 +91,14 @@ export function ToolCard({ tool, row, installation, onOpen, onInstall, previewin
       <button
         type="button"
         className="absolute inset-0 rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        aria-label={t(isReady ? "Open {name}" : "Get {name}", { name: tool.integrationName })}
+        aria-label={
+          // Two cards can run on the same program, so the program's name alone would not tell them apart.
+          tool.engine
+            ? isReady
+              ? t("Open {name}", { name: t(tool.title) })
+              : t("Get {name} for {tool}", { name: tool.integrationName, tool: t(tool.title) })
+            : t(isReady ? "Open {name}" : "Get {name}", { name: tool.integrationName })
+        }
         onClick={act}
         // Only focus from the keyboard opens it at once. A mouse click focuses the
         // button too, and a preview opening between press and release covered

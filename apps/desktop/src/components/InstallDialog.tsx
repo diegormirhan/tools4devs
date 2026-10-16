@@ -17,6 +17,8 @@ type InstallDialogProps = {
   onInstall: () => void;
   /** Goes to the tool once everything it needs is in place. */
   onOpen: () => void;
+  /** The download was asked for from inside a page, which stays where it is: the button then only continues. */
+  returning?: boolean;
   onClose: () => void;
 };
 
@@ -37,9 +39,10 @@ export function InstallDialog({
   canInstall,
   onInstall,
   onOpen,
+  returning = false,
   onClose,
 }: InstallDialogProps) {
-  const steps = plan.length > 0 ? plan : [{ toolId: tool.id, reason: "requested" as const }];
+  const steps = plan.length > 0 ? plan : [{ toolId: tool.engine ?? tool.id, reason: "requested" as const }];
   const busy = steps.some((step) => states[step.toolId]?.phase !== "idle");
   const failure = steps.map((step) => states[step.toolId]?.lastError).find(Boolean);
   const done = steps.every((step) => states[step.toolId]?.availability === "ready");
@@ -128,7 +131,7 @@ export function InstallDialog({
             {t("Close")}
           </Button>
           {done ? (
-            <Button onClick={onOpen}>{t("Open {name}", { name: tool.integrationName })}</Button>
+            <Button onClick={onOpen}>{returning ? t("Continue") : t("Open {name}", { name: tool.integrationName })}</Button>
           ) : (
             canInstall && (
               <Button onClick={onInstall} disabled={busy}>

@@ -10,7 +10,7 @@
 [![Tauri](https://img.shields.io/badge/Tauri-2-24C8DB?logo=tauri&logoColor=white)](apps/desktop/src-tauri/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](apps/desktop/src/)
 
-> Convert video, download from YouTube, edit PDFs, enlarge photos and read text from scans on Windows, without typing a command.
+> Compress video, make GIFs, download from YouTube, edit PDFs, enlarge photos and read text from scans on Windows, without typing a command.
 
 </div>
 
@@ -56,7 +56,7 @@ Download the installer from the [latest release](https://github.com/diegormirhan
 | --- | --- | --- |
 | **Video and audio** | FFmpeg, ffprobe, SongRec, MKVToolNix | transcode, compress, trim, make GIFs and contact sheets, inspect codecs, remux to MKV, identify the song that is playing |
 | **Downloads** | yt-dlp, gallery-dl | download video and audio from a link, and image galleries |
-| **Images** | libvips, Nomos8kSC, reverse image search, ImageMagick, Oxipng, Gifsicle, ExifTool | resize, crop, convert, upscale with a model, find where a picture came from, optimise PNG, compress GIFs, read and remove metadata |
+| **Images** | libvips, Nomos8kSC, reverse image search, ImageMagick, Oxipng, Gifsicle, ExifTool | resize, crop, convert, upscale with a model, find where a picture came from, optimise PNG, make, convert and compress GIFs, read and remove metadata |
 | **PDFs and documents** | qpdf, Poppler, Tesseract, Pandoc | merge, split, rotate, protect, extract text, render a page, OCR into a searchable PDF, convert between formats |
 | **Text and data** | jq, yq, Miller, ripgrep, fd, Difftastic | JSON and YAML, CSV to JSON, search, find files, structural diff |
 | **Quick tools** | built in | text, codes and hashes, test data, CSS generators, minify and format, QR codes and barcodes |

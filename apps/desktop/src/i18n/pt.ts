@@ -764,6 +764,8 @@ export const portuguese: Record<string, string> = {
   "Chrome": "Chrome",
   "Chromium": "Chromium",
   "Close": "Fechar",
+  "Get {name} for {tool}": "Baixar {name} para {tool}",
+  "Continue": "Continuar",
   "Codec": "Codec",
   "Columns": "Colunas",
   "Compatible — mp4, plays anywhere": "Compatível — mp4, toca em qualquer lugar",

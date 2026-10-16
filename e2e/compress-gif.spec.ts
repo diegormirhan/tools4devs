@@ -11,7 +11,7 @@ test.describe("compressing a GIF", () => {
   test("the loss, colours and width chosen on the card reach the host as written", async ({ page }) => {
     await page.goto("/");
     await search(page, "compress gif");
-    const tool = page.getByRole("region", { name: "Compress GIFs" });
+    const tool = page.getByRole("region", { name: "GIFs" });
     await expect(tool.getByRole("combobox", { name: "Operation" })).toHaveText(/Compress GIF/);
     // The defaults are the middle of the road: some loss, every colour, the original width.
     await expect(tool.getByRole("combobox", { name: "Loss" })).toHaveText(/Balanced/);
@@ -39,7 +39,7 @@ test.describe("compressing a GIF", () => {
     });
 
     await page.getByRole("button", { name: "History", exact: true }).click();
-    await expect(page.getByRole("article", { name: "Compress GIF — Compress GIFs" })).toContainText("party.gif");
+    await expect(page.getByRole("article", { name: "Compress GIF — GIFs" })).toContainText("party.gif");
   });
 });
 
@@ -49,10 +49,10 @@ test.describe("a file that is not a GIF", () => {
   test("is refused before anything runs, and says what the tool does read", async ({ page }) => {
     await page.goto("/");
     await search(page, "compress gif");
-    const tool = page.getByRole("region", { name: "Compress GIFs" });
+    const tool = page.getByRole("region", { name: "GIFs" });
     await tool.getByRole("button", { name: /choose files/i }).click();
 
-    await expect(tool.getByText(/A \.png file is not something this tool reads\. It takes gif files\./)).toBeVisible();
+    await expect(tool.getByText(/A \.png file is not something this operation reads\. It takes \.gif\./)).toBeVisible();
     await expect(tool.getByRole("button", { name: "Run" })).toBeDisabled();
     expect(await hostCalls(page, "execute_operation")).toHaveLength(0);
   });
@@ -84,7 +84,7 @@ test.describe("opening the tool from the search before Gifsicle is installed", (
   test("offers the download in place of a Run that could only fail, and runs once it is installed", async ({ page }) => {
     await page.goto("/");
     await search(page, "compress gif");
-    const tool = page.getByRole("region", { name: "Compress GIFs" });
+    const tool = page.getByRole("region", { name: "GIFs" });
     await tool.getByRole("button", { name: /choose files/i }).click();
 
     // Nothing to run yet: the panel says why and offers the fix.
@@ -95,8 +95,10 @@ test.describe("opening the tool from the search before Gifsicle is installed", (
     await tool.getByRole("button", { name: "Get Gifsicle" }).click();
     const dialog = page.getByRole("dialog", { name: /Install Gifsicle/ });
     await dialog.getByRole("button", { name: "Download and install" }).click();
-    await dialog.getByRole("button", { name: /Open Gifsicle/ }).click();
+    // Asked for from inside the page, so the page stays and its file is still chosen.
+    await dialog.getByRole("button", { name: "Continue" }).click();
 
+    await expect(tool.getByRole("button", { name: "party.gif 1 file selected" })).toBeVisible();
     await expect(tool.getByRole("button", { name: "Run" })).toBeEnabled();
     await expect(tool.getByRole("button", { name: "Get Gifsicle" })).toHaveCount(0);
   });

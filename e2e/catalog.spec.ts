@@ -4,7 +4,7 @@ test("UC-02: hovering a card plays its clip after a pause, one at a time", async
   // A controlled clock, so "not before the pause" is checked, not raced.
   await page.clock.install();
   await page.goto("/");
-  await page.getByRole("button", { name: "Get FFmpeg" }).hover();
+  await page.getByRole("button", { name: "Get FFmpeg", exact: true }).hover();
   await page.clock.runFor(200);
   // Not at once: a pointer crossing the grid should not set off every card.
   await expect(page.locator("video")).toHaveCount(0);
@@ -25,7 +25,7 @@ test("UC-02: hovering a card plays its clip after a pause, one at a time", async
 
 test("UC-02: the open preview reads and acts as the card it covers", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Get FFmpeg" }).hover();
+  await page.getByRole("button", { name: "Get FFmpeg", exact: true }).hover();
   const clip = page.locator("video");
   await expect(clip).toHaveCount(1);
   expect(await clip.evaluate((video) => getComputedStyle(video).cursor)).toBe("pointer");
@@ -36,7 +36,7 @@ test("UC-02: the open preview reads and acts as the card it covers", async ({ pa
 
 test("UC-02: keyboard focus opens the preview too", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Get FFmpeg" }).focus();
+  await page.getByRole("button", { name: "Get FFmpeg", exact: true }).focus();
   await expect(page.locator("video")).toHaveCount(1);
 });
 
@@ -45,7 +45,7 @@ test.describe("UC-02 with reduced motion", () => {
 
   test("shows the still and plays nothing", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: "Get FFmpeg" }).hover();
+    await page.getByRole("button", { name: "Get FFmpeg", exact: true }).hover();
     await expect(page.locator('img[src$="ffmpeg.jpg"]')).toBeVisible();
     await expect(page.locator("video")).toHaveCount(0);
   });

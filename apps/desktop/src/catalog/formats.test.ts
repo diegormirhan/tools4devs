@@ -50,7 +50,7 @@ describe("file types", () => {
   it("offers only formats the operation can actually write", () => {
     // WebM cannot hold H.264, and the host switches codec for it; the list
     // must not offer a container the operation has no path to.
-    expect(operationFormats["ffmpeg/convert"]?.formats).toContain("webm");
+    expect(operationFormats["ffmpeg/gif-to-video"]?.formats).toContain("webm");
     expect(operationFormats["ffmpeg/extract-audio"]?.formats).not.toContain("mp4");
     for (const entry of Object.values(operationFormats)) {
       expect(entry.formats).toContain(entry.default);

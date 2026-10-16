@@ -69,6 +69,9 @@ export function CommandPalette({
     const action = found.actions[0];
     return action ? `${action.tool.id}/${action.operation.id}` : (found.tools[0]?.tool.id ?? "");
   }
+  // An action can run on another tool than its card's; the line under it names the one that does.
+  const engineName = (toolId?: string) =>
+    toolId ? rows.flatMap((row) => row.tools).find((candidate) => candidate.id === toolId)?.integrationName : undefined;
   function search(text: string) {
     setQuery(text);
     setSelected(firstResult(text));
@@ -147,7 +150,7 @@ export function CommandPalette({
                         hue={row.hue}
                         icon={tool.icon}
                         title={t(operation.label)}
-                        detail={`${t(tool.title)} · ${tool.integrationName}`}
+                        detail={`${t(tool.title)} · ${engineName(operation.runsOn) ?? tool.integrationName}`}
                         group={t(row.title)}
                       />
                     </CommandItem>

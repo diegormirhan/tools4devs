@@ -2,6 +2,14 @@
 
 All notable changes to tools4devs. Versions follow [semantic versioning](https://semver.org/).
 
+## 5.0.4 (2026-10-16)
+
+### Changed
+
+- No card is named after a verb any more. Convert media is split by what you work on: Video (compress, trim, resize, crop, rotate, speed, frame rate, remove audio, grab a frame, contact sheet) and Audio (convert, extract from a video, trim, normalise loudness). Both run on FFmpeg, which downloads once for the two.
+- Everything about GIFs is one card, GIFs, in the Images group: Video to GIF, GIF to video and Compress GIF. A GIF job asks only for the program it needs: Video to GIF and GIF to video use FFmpeg, Compress GIF uses Gifsicle.
+- A download asked for from inside a page now leaves you on that page, with its file still chosen, instead of taking you to the downloaded tool's own card.
+
 ## 5.0.3 (2026-10-16)
 
 ### Added
