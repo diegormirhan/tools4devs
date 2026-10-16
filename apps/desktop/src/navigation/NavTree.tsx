@@ -16,7 +16,7 @@ import { cn } from "@/lib/cn";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { useNavigation } from "./navigation";
 
-/** Sub-tools shown before "N more…"; FFmpeg alone has fourteen. */
+/** Sub-tools shown before "N more…"; FFmpeg alone has sixteen. */
 const visibleSubTools = 5;
 
 type TreeProps = {

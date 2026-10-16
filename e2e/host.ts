@@ -19,6 +19,9 @@ export type HostOptions = {
   saveDialog?: string | null;
   /** How execute_operation ends: "succeed" after progress, "fail", or "hold" until cancelled. */
   operation?: "succeed" | "fail" | "hold";
+  /** What a running job reports as its progress line, and what a finished one leaves as its log. */
+  progressMessage?: string;
+  stdout?: string;
   /** Milliseconds each progress step takes, so a test can watch a job running. */
   stepMs?: number;
   /** How install_component ends. */
@@ -51,7 +54,7 @@ export async function installHost(page: Page, options: HostOptions = {}) {
       }
       for (const progress of [0.25, 0.5, 0.75]) {
         await wait(step);
-        emit("operation-progress", { ...base, phase: "downloading", progress, message: "Working" });
+        emit("operation-progress", { ...base, phase: "downloading", progress, message: opts.progressMessage ?? "Working" });
       }
       await wait(step);
       if (opts.operation === "fail") {
@@ -59,7 +62,7 @@ export async function installHost(page: Page, options: HostOptions = {}) {
         throw "The input is not a valid file for this operation.";
       }
       emit("operation-progress", { ...base, phase: "completed", progress: 1, message: "Done" });
-      return { stdout: "Finished.", outputPath: request.outputPath ?? "C:/out/result.bin" };
+      return { stdout: opts.stdout ?? "Finished.", outputPath: request.outputPath ?? "C:/out/result.bin" };
     }
 
     async function installComponent(toolId: string) {

@@ -340,7 +340,7 @@ const presentationById: Record<string, ToolPresentation> = {
     icon: Clapperboard,
     preview: { src: "/previews/ffmpeg.webm", poster: "/previews/ffmpeg.jpg" },
     title: "Convert media",
-    description: "Convert, compress, resize, trim, and fourteen other jobs on video and audio.",
+    description: "Convert video, audio and GIFs, compress, resize, trim, and more.",
     category: "downloads",
     accent: "cool",
     size: "standard",
@@ -354,9 +354,11 @@ const presentationById: Record<string, ToolPresentation> = {
       { id: "change-speed", label: "Change speed", description: "Speed up or slow down, audio included." },
       { id: "fps", label: "Change frame rate", description: "Re-time to a different frame rate." },
       { id: "extract-audio", label: "Extract audio", description: "Write an audio file from the video." },
+      { id: "convert-audio", label: "Convert audio", description: "Change an audio file to MP3, WAV, FLAC and the like." },
       { id: "remove-audio", label: "Remove audio", description: "Drop the sound without touching the picture." },
       { id: "normalize-audio", label: "Normalise loudness", description: "Even out the volume to broadcast levels." },
-      { id: "to-gif", label: "Make a GIF", description: "Animated GIF with a palette built from the clip." },
+      { id: "to-gif", label: "Video to GIF", description: "Turn an MP4, MOV or any video clip into an animated GIF or WebP: pick the start, length, size and speed." },
+      { id: "gif-to-video", label: "GIF to video", description: "Turn an animated GIF into a small MP4 or WebM." },
       { id: "thumbnail", label: "Grab a frame", description: "Save a single frame as an image." },
       { id: "contact-sheet", label: "Contact sheet", description: "A grid of frames in one image." },
     ],
@@ -364,6 +366,7 @@ const presentationById: Record<string, ToolPresentation> = {
       "video", "audio", "convert", "compress", "trim", "transcode", "resize",
       "crop", "rotate", "speed", "fps", "gif", "thumbnail", "frame", "mute",
       "loudness", "normalise", "normalize", "mp4", "mkv", "webm", "mp3",
+      "mov", "avi", "webp", "wav", "flac", "ogg", "aac", "m4a", "opus", "audio converter", "video converter",
     ],
     downloadLabel: "In-app download",
   },
@@ -737,9 +740,24 @@ export function searchCatalog(
   const pairs = rows.flatMap((row) => row.tools.map((tool) => ({ row, tool })));
   if (words.length === 0) return { actions: [], tools: pairs };
 
+  // The text once when it is not translated, so the same words are not counted twice.
+  const haystackOf = (texts: string[]) =>
+    normalizeSearch(texts.flatMap((text) => (translate(text) === text ? [text] : [text, translate(text)])).join(" "));
   const matches = (...texts: string[]) => {
-    const haystack = normalizeSearch(texts.flatMap((text) => [text, translate(text)]).join(" "));
+    const haystack = haystackOf(texts);
     return words.every((word) => haystack.includes(word));
+  };
+  // "mp4 to gif" and "gif to mp4" are different jobs made of the same words: the one that says
+  // them in the order they were typed is the one meant.
+  const inOrder = (...texts: string[]) => {
+    const haystack = haystackOf(texts);
+    let from = 0;
+    for (const word of words) {
+      const at = haystack.indexOf(word, from);
+      if (at < 0) return false;
+      from = at + word.length;
+    }
+    return true;
   };
 
   const actions = pairs
@@ -747,9 +765,11 @@ export function searchCatalog(
     .filter(({ operation }) => matches(operation.label, operation.description));
   // An action whose name says it outranks one that only mentions it.
   const named = actions.filter(({ operation }) => matches(operation.label));
+  const rest = actions.filter((action) => !named.includes(action));
+  const ordered = rest.filter(({ operation }) => inOrder(operation.label, operation.description));
 
   return {
-    actions: [...named, ...actions.filter((action) => !named.includes(action))],
+    actions: [...named, ...ordered, ...rest.filter((action) => !ordered.includes(action))],
     tools: pairs.filter(({ tool }) =>
       matches(tool.integrationName, tool.title, tool.description, ...tool.keywords, ...tool.capabilities),
     ),

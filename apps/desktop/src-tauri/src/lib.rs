@@ -936,6 +936,36 @@ fn validate_options(request: &OperationRequest) -> Result<(), String> {
             return Err("The optimisation level runs from 0 to 6, or \"max\".".into());
         }
     }
+    if request.tool_id == "ffmpeg" && request.operation_id == "to-gif" {
+        // These land inside a filter graph and a seek, so a stray value would become filter syntax.
+        let number = |key: &str, fallback: &str| {
+            request
+                .options
+                .get(key)
+                .map(|value| value.trim())
+                .filter(|value| !value.is_empty())
+                .unwrap_or(fallback)
+                .parse::<f64>()
+        };
+        let rate = number("rate", "12").map_err(|_| "The frame rate must be a number.".to_string())?;
+        if !rate.is_finite() || !(1.0..=60.0).contains(&rate) {
+            return Err("The frame rate runs from 1 to 60.".into());
+        }
+        let width = number("width", "480").map_err(|_| "The width must be a number.".to_string())?;
+        if !width.is_finite() || width.fract() != 0.0 || !(16.0..=4096.0).contains(&width) {
+            return Err("The width must be a whole number of pixels, from 16 to 4096.".into());
+        }
+        let start = number("start", "0").map_err(|_| "The start must be a number of seconds.".to_string())?;
+        if !start.is_finite() || start < 0.0 {
+            return Err("The start cannot be negative.".into());
+        }
+        if request.options.get("length").is_some_and(|value| !value.trim().is_empty()) {
+            let length = number("length", "0").map_err(|_| "The length must be a number of seconds.".to_string())?;
+            if !length.is_finite() || length <= 0.0 {
+                return Err("The length must be greater than zero.".into());
+            }
+        }
+    }
     if request.tool_id == "gifsicle" && request.operation_id == "compress" {
         // Parsed here as well as in the panel's choices: the host never trusts the panel,
         // and a stray value would otherwise reach gifsicle's command line unchecked.
@@ -1484,7 +1514,23 @@ fn resolve_args(request: &OperationRequest) -> Result<Vec<String>, String> {
             args.push(output);
             Ok(args)
         }
-        ("ffmpeg", "extract-audio") => {
+        ("ffmpeg", "gif-to-video") => {
+            let mut args = ffmpeg_base(&input);
+            // Encoders want even dimensions, and a GIF is free to have odd ones.
+            args.extend([
+                "-an".to_string(),
+                "-vf".to_string(),
+                "scale=trunc(iw/2)*2:trunc(ih/2)*2".to_string(),
+                "-pix_fmt".to_string(),
+                "yuv420p".to_string(),
+                "-movflags".to_string(),
+                "+faststart".to_string(),
+            ]);
+            args.extend(ffmpeg_video_encoder_for("h264", "balanced", &container_of(&output)));
+            args.push(output);
+            Ok(args)
+        }
+        ("ffmpeg", "extract-audio") | ("ffmpeg", "convert-audio") => {
             let mut args = ffmpeg_base(&input);
             args.extend(["-map".to_string(), "0:a:0".to_string(), "-vn".to_string()]);
             // The destination extension already names the format; naming the
@@ -1595,15 +1641,27 @@ fn resolve_args(request: &OperationRequest) -> Result<Vec<String>, String> {
             // Deriving a palette from the clip and applying it in the same
             // filter graph, because the default 256-colour quantisation
             // produces a dithered mess on real footage.
-            let mut args = ffmpeg_base(&input);
-            args.extend([
-                "-vf".to_string(),
-                format!(
-                    "fps={},scale={}:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse",
-                    option("rate", "12"),
-                    option("width", "480")
-                ),
-            ]);
+            // The seek goes before the input, so a clip is cut without decoding what comes before it.
+            let mut args = vec!["-n".to_string(), "-nostdin".to_string()];
+            let start = option("start", "0");
+            if start.trim() != "0" && !start.trim().is_empty() {
+                args.extend(["-ss".to_string(), start.trim().to_string()]);
+            }
+            let length = option("length", "");
+            if !length.trim().is_empty() {
+                args.extend(["-t".to_string(), length.trim().to_string()]);
+            }
+            args.extend(["-i".to_string(), input]);
+            let scaled = format!("fps={},scale={}:-1:flags=lanczos", option("rate", "12"), option("width", "480"));
+            if container_of(&output) == "webp" {
+                // WebP is not paletted, so the palette graph would only throw colour away.
+                args.extend(["-vf".to_string(), scaled, "-loop".to_string(), "0".to_string()]);
+            } else {
+                args.extend([
+                    "-vf".to_string(),
+                    format!("{scaled},split[a][b];[a]palettegen[p];[b][p]paletteuse"),
+                ]);
+            }
             args.push(output);
             Ok(args)
         }
@@ -2167,6 +2225,60 @@ mod tests {
     }
 
     #[test]
+    fn makes_a_gif_only_from_values_that_cannot_become_filter_syntax() {
+        // Ways this can fail: a rate or width outside what a GIF sensibly takes, a value that is
+        // not a number, text that would close the filter and start another ("12,scale=..."), a
+        // negative start or a length of zero; and the defaults changing what the clip looks like.
+        let gif = |options: &[(&str, &str)]| request_for("ffmpeg", "to-gif", options);
+        for (key, value) in [
+            ("rate", "0"),
+            ("rate", "61"),
+            ("rate", "12,scale=1:1"),
+            ("width", "8"),
+            ("width", "480.5"),
+            ("width", "480:-1;[a]"),
+            ("start", "-1"),
+            ("start", "soon"),
+            ("length", "0"),
+            ("length", "5s"),
+        ] {
+            assert!(validate_options(&gif(&[(key, value)])).is_err(), "{key}={value}");
+        }
+        assert!(validate_options(&gif(&[("length", ""), ("start", "")])).is_ok());
+        assert!(validate_options(&gif(&[("rate", "24"), ("width", "640"), ("start", "1.5"), ("length", "4")])).is_ok());
+
+        let whole = resolve_args(&gif(&[])).unwrap();
+        assert!(!whole.contains(&"-ss".to_string()) && !whole.contains(&"-t".to_string()));
+        assert!(whole.iter().any(|arg| arg.contains("palettegen")));
+        let cut = resolve_args(&gif(&[("start", "2"), ("length", "3")])).unwrap();
+        let position = |flag: &str| cut.iter().position(|arg| arg == flag).unwrap();
+        // Both seeks sit before the input: after it, the clip would be decoded from the start.
+        assert!(position("-ss") < position("-i") && position("-t") < position("-i"));
+        let mut to_webp = gif(&[]);
+        to_webp.output_path = Some("clip.webp".into());
+        let webp = resolve_args(&to_webp).unwrap();
+        assert!(!webp.iter().any(|arg| arg.contains("palettegen")));
+        assert!(webp.windows(2).any(|pair| pair == ["-loop", "0"]));
+    }
+
+    #[test]
+    fn turns_a_gif_into_a_video_with_even_dimensions_and_no_sound() {
+        let mut to_mp4 = request_for("ffmpeg", "gif-to-video", &[]);
+        to_mp4.output_path = Some("clip.mp4".into());
+        let mp4 = resolve_args(&to_mp4).unwrap();
+        assert!(mp4.contains(&"-an".to_string()) && mp4.contains(&"yuv420p".to_string()));
+        assert!(mp4.iter().any(|arg| arg == "scale=trunc(iw/2)*2:trunc(ih/2)*2"));
+        let mut to_webm = request_for("ffmpeg", "gif-to-video", &[]);
+        to_webm.output_path = Some("clip.webm".into());
+        assert!(resolve_args(&to_webm).unwrap().contains(&"libvpx-vp9".to_string()));
+        // Converting audio is extracting it: same arguments, only the input differs.
+        assert_eq!(
+            resolve_args(&request_for("ffmpeg", "convert-audio", &[])).unwrap(),
+            resolve_args(&request_for("ffmpeg", "extract-audio", &[])).unwrap()
+        );
+    }
+
+    #[test]
     fn compresses_a_gif_only_with_values_gifsicle_can_take() {
         // Ways this can fail: a loss level or colour count outside gifsicle's range, a value
         // that is not a number, a width of zero or with trailing text, and the defaults
@@ -2656,6 +2768,8 @@ mod tests {
         let cases = [
             ("ffmpeg", "convert"),
             ("ffmpeg", "extract-audio"),
+            ("ffmpeg", "convert-audio"),
+            ("ffmpeg", "gif-to-video"),
             ("ffmpeg", "compress"),
             ("ffmpeg", "trim"),
             ("ffmpeg", "resize"),

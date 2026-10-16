@@ -2,6 +2,18 @@
 
 All notable changes to tools4devs. Versions follow [semantic versioning](https://semver.org/).
 
+## 5.0.3 (2026-10-16)
+
+### Added
+
+- GIF to video: turn an animated GIF into a small MP4 or WebM.
+- Convert audio: change an audio file to MP3, M4A, WAV, FLAC, Opus or OGG.
+- Video to GIF (before, "Make a GIF") takes a start and a length, so a long video does not become a huge GIF, and writes WebP without throwing its colours away. Searching "mp4 to gif" or "gif to mp4" opens the one that does that job.
+
+### Fixed
+
+- A download no longer breaks the page: a long progress line made the Summary card wider than the window, and a long log pushed the result over it. The log of a finished download keeps its last progress line instead of hundreds.
+
 ## 5.0.2 (2026-10-14)
 
 ### Changed

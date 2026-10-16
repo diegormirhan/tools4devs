@@ -1,6 +1,6 @@
 [package]
 name = "tools4devs"
-version = "5.0.2"
+version = "5.0.3"
 description = "Desktop toolkit for local media, image, PDF and developer workflows"
 authors = ["Mirha"]
 license = "MIT"

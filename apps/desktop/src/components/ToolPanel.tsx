@@ -193,8 +193,8 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
 
   return (
     <ToolPage tool={tool}>
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="grid min-w-0 gap-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
           {previewable && (
             <section aria-label={t("File preview")}>
               <FilePreview
@@ -334,7 +334,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
 
           {resultMessage && (
             <pre
-              className={`rounded-xl border p-4 font-mono text-xs whitespace-pre-wrap ${resultIsError ? "border-destructive/30 bg-destructive/10 text-destructive" : "bg-muted"}`}
+              className={`rounded-xl border p-4 font-mono text-xs whitespace-pre-wrap [overflow-wrap:anywhere] ${resultIsError ? "border-destructive/30 bg-destructive/10 text-destructive" : "bg-muted"}`}
               role={resultIsError ? "alert" : "status"}
             >
               {resultMessage}
@@ -344,7 +344,7 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
 
         <section
           aria-labelledby="tool-summary-title"
-          className="grid gap-4 rounded-xl border bg-card p-6 text-card-foreground shadow-xs lg:sticky lg:top-4"
+          className="grid min-w-0 gap-4 rounded-xl border bg-card p-6 text-card-foreground shadow-xs lg:sticky lg:top-4"
         >
           <div className="grid gap-1">
             <h2 id="tool-summary-title" className="font-heading text-lg font-semibold">{t("Summary")}</h2>
@@ -354,8 +354,8 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
             {isRunning ? (
               <>
                 <div className="flex justify-between gap-3">
-                  <strong className="truncate font-medium">{currentJob.message}</strong>
-                  <span className="font-mono text-xs text-muted-foreground">
+                  <strong className="min-w-0 truncate font-medium">{currentJob.message}</strong>
+                  <span className="shrink-0 font-mono text-xs text-muted-foreground">
                     {currentJob.progress == null ? "…" : `${Math.round(currentJob.progress * 100)}%`}
                   </span>
                 </div>
@@ -567,8 +567,21 @@ export function ToolPanel({ tool, subId, onSubChange, initialPath, droppedPaths,
   }
 }
 
+/**
+ * A downloader reports its progress as a new line every moment, and the whole log is what the
+ * job leaves behind: hundreds of "[download]  6.7% of ..." lines. Only the last of them says
+ * anything once the job is over, so the rest are dropped and the log reads as what happened.
+ */
+export function tidyLog(text: string): string {
+  const lines = text.split("\n");
+  const isProgress = (line: string) => /^\[download\]\s+[\d.]+%/.test(line);
+  const lastProgress = lines.map(isProgress).lastIndexOf(true);
+  return lines.filter((line, index) => !isProgress(line) || index === lastProgress).join("\n");
+}
+
 function jobResultText(job: ToolJob): string {
-  return job.outputPath ? `${job.message}\nOutput: ${job.outputPath}` : job.message;
+  const message = tidyLog(job.message);
+  return job.outputPath ? `${message}\nOutput: ${job.outputPath}` : message;
 }
 
 function idleHint(toolId: string, t: Translate): string {
@@ -848,8 +861,18 @@ function operationFields(toolId: string, operationId: string): OperationField[] 
         ];
       case "to-gif":
         return [
-          { key: "width", label: "Width (pixels)", type: "number", defaultValue: "480" },
-          { key: "rate", label: "Frames per second", type: "number", defaultValue: "12" },
+          { key: "start", label: "Start (seconds)", type: "number", defaultValue: "0", min: 0, step: 0.5 },
+          { key: "length", label: "Length (seconds)", type: "number", placeholder: "Whole clip", min: 0.1, step: 0.5 },
+          { key: "width", label: "Width (pixels)", type: "number", defaultValue: "480", min: 16, max: 4096, step: 20 },
+          {
+            key: "rate",
+            label: "Frames per second",
+            type: "number",
+            defaultValue: "12",
+            min: 1,
+            max: 60,
+            hint: "A GIF grows fast with its length, width and frame rate. Keep it short and narrow, then shrink it with Compress GIFs.",
+          },
         ];
       case "thumbnail":
         return [{ key: "at", label: "At (seconds)", type: "number", defaultValue: "1", min: 0 }];
@@ -1015,6 +1038,8 @@ function outputExtension(toolId: string, operationId: string, originalExtension:
     "ffmpeg/remove-audio": ".mp4",
     "ffmpeg/normalize-audio": ".mp4",
     "ffmpeg/to-gif": ".gif",
+    "ffmpeg/gif-to-video": ".mp4",
+    "ffmpeg/convert-audio": ".mp3",
     "ffmpeg/thumbnail": ".png",
     "ffmpeg/contact-sheet": ".png",
     "libvips/compress": ".jpg",

@@ -306,6 +306,39 @@ fn every_catalog_operation_executes_on_generated_fixtures() {
         }
     }
 
+    if tool_available("ffmpeg") {
+        // The conversions people look for by name: MP4 to GIF and back, and one audio format to
+        // another. The width is odd on purpose: an encoder refuses odd sizes, and a GIF has them.
+        let gif = root.join("video-to.gif");
+        run(request(
+            "ffmpeg",
+            "to-gif",
+            &[video.clone()],
+            Some(gif.clone()),
+            &[("start", "0.1"), ("length", "0.3"), ("width", "63"), ("rate", "10")],
+        ));
+        assert!(std::fs::read(&gif).unwrap().starts_with(b"GIF89a"));
+        for (extension, codec) in [("mp4", "h264"), ("webm", "vp9")] {
+            let output = root.join(format!("gif-to.{extension}"));
+            run(request("ffmpeg", "gif-to-video", &[gif.clone()], Some(output.clone()), &[]));
+            let probe: serde_json::Value =
+                serde_json::from_str(&run(request("ffprobe", "inspect", &[output], None, &[])).stdout).unwrap();
+            assert_eq!(probe["streams"][0]["codec_name"], codec, "{extension}");
+        }
+        let webp = root.join("video-to.webp");
+        run(request("ffmpeg", "to-gif", &[video.clone()], Some(webp.clone()), &[("length", "0.3"), ("width", "64")]));
+        assert!(std::fs::read(&webp).unwrap().starts_with(b"RIFF"));
+        let song = root.join("extract-audio.mp3");
+        for (extension, codec) in [("wav", "pcm_s16le"), ("flac", "flac"), ("m4a", "aac"), ("ogg", "vorbis"), ("opus", "opus")] {
+            let output = root.join(format!("audio-to.{extension}"));
+            run(request("ffmpeg", "convert-audio", &[song.clone()], Some(output.clone()), &[("format", extension)]));
+            let probe: serde_json::Value =
+                serde_json::from_str(&run(request("ffprobe", "inspect", &[output], None, &[])).stdout).unwrap();
+            assert_eq!(probe["streams"][0]["codec_name"], codec, "{extension}");
+        }
+        println!("PASS ffmpeg/to-gif + gif-to-video + convert-audio");
+    }
+
     let server = FixtureServer::start(std::fs::read(&video).unwrap());
     for operation in ["inspect-url", "download-video", "download-audio"] {
         let output = match operation {

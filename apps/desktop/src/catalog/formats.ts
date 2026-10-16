@@ -74,6 +74,10 @@ export const toolAccepts: Record<string, FormatFamily[]> = {
  */
 export const operationExtensions: Record<string, string[]> = {
   "libvips/upscale-model": ["jpg", "jpeg", "png", "webp"],
+  // A GIF is an image to the catalog, and the video tools read video: only this operation takes one.
+  "ffmpeg/gif-to-video": ["gif"],
+  // The card reads video and audio; converting audio is for audio files only.
+  "ffmpeg/convert-audio": familyExtensions.audio,
 };
 
 /**
@@ -93,7 +97,13 @@ export const operationFormats: Record<string, { label: string; formats: string[]
     formats: ["mp3", "m4a", "wav", "flac", "opus", "ogg"],
     default: "mp3",
   },
+  "ffmpeg/convert-audio": {
+    label: "Audio format",
+    formats: ["mp3", "m4a", "wav", "flac", "opus", "ogg"],
+    default: "mp3",
+  },
   "ffmpeg/to-gif": { label: "Convert to", formats: ["gif", "webp"], default: "gif" },
+  "ffmpeg/gif-to-video": { label: "Convert to", formats: ["mp4", "webm"], default: "mp4" },
   "ffmpeg/thumbnail": { label: "Image format", formats: ["png", "jpg", "webp"], default: "png" },
   "ffmpeg/contact-sheet": { label: "Image format", formats: ["png", "jpg", "webp"], default: "png" },
   "libvips/convert": {

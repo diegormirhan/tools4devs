@@ -104,7 +104,7 @@ describe("finding a tool in the sidebar and the search", () => {
     await user.keyboard("{Escape}");
 
     expect(within(tree()).queryByRole("treeitem", { name: "Extract audio" })).not.toBeInTheDocument();
-    await user.click(item("9 more…"));
+    await user.click(item("11 more…"));
     expect(item("Extract audio")).toBeVisible();
   });
 
